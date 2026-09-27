@@ -1,0 +1,55 @@
+// KATEGORI: klik untuk pindah item aktif 
+const kategoriItems = document.querySelectorAll('.kategori-item');
+
+kategoriItems.forEach((item) => {
+    item.addEventListener('click', () => {
+        kategoriItems.forEach((i) => i.classList.remove('active'));
+        item.classList.add('active');
+    });
+});
+
+// NAVBAR: tandai link sesuai section yang sedang dilihat 
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+const setActiveLink = () => {
+    let currentSectionId = sections[0] ? sections[0].id : '';
+
+    sections.forEach((section) => {
+        const sectionTop = section.offsetTop - 120;
+        if (window.scrollY >= sectionTop) {
+            currentSectionId = section.id;
+        }
+    });
+
+    navLinks.forEach((link) => {
+        link.classList.remove('active-link');
+        if (link.getAttribute('href') === `#${currentSectionId}`) {
+            link.classList.add('active-link');
+        }
+    });
+};
+
+window.addEventListener('scroll', setActiveLink);
+window.addEventListener('load', setActiveLink);
+
+// NAVBAR MOBILE: buka/tutup menu hamburger 
+const navToggle = document.getElementById('navToggle');
+const navLinksList = document.querySelector('.nav-links');
+
+if (navToggle && navLinksList) {
+    navToggle.addEventListener('click', () => {
+        const isOpen = navLinksList.classList.toggle('open');
+        navToggle.classList.toggle('open', isOpen);
+        navToggle.setAttribute('aria-expanded', isOpen);
+    });
+
+    // Tutup menu otomatis saat salah satu link diklik (khusus mobile)
+    navLinksList.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => {
+            navLinksList.classList.remove('open');
+            navToggle.classList.remove('open');
+            navToggle.setAttribute('aria-expanded', 'false');
+        });
+    });
+}
