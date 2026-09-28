@@ -540,3 +540,155 @@ body {
     .menu-grid { grid-template-columns: 1fr; }
     .btn-cream { width: 100%; }
 }
+
+/* Tentang Kami */
+.tentang-section { width: 100%; background-color: var(--cream); padding: 100px 20px 120px 20px; }
+
+.tentang-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.tentang-photo { position: relative; }
+
+.tentang-arch {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    height: 560px;
+    background: var(--gray-photo);
+    border-radius: 260px 260px 24px 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.tentang-badge { width: 100px; height: 100px; font-size: 13px; }
+.tentang-badge-1 { top: 40px; right: 0; }
+.tentang-badge-2 { bottom: 60px; left: -10px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+
+.tentang-tag { color: black; font-size: 14px; margin-bottom: 8px; }
+
+.tentang-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 40px;
+    letter-spacing: 1px;
+    color: var(--maroon);
+    margin-bottom: 20px;
+}
+
+.tentang-text > p:not(.tentang-tag) { font-size: 16px; line-height: 1.7; color: #1a1a1a; }
+
+.tentang-quote {
+    border-left: 4px solid var(--maroon);
+    padding-left: 20px;
+    margin: 28px 0;
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--maroon);
+}
+
+.tentang-jam {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(0,0,0,0.15);
+}
+
+.jam-list p { font-size: 14px; line-height: 1.7; color: #1a1a1a; }
+.jam-list .jam-title { font-weight: 700; color: var(--maroon); }
+
+/* Kenapa Kami */
+.kenapa-section {
+    width: 100%;
+    background-color: var(--maroon);
+    background-image: radial-gradient(rgba(255,246,233,0.07) 2px, transparent 2px);
+    background-size: 32px 32px;
+    padding: 100px 20px;
+}
+
+.kenapa-header {
+    max-width: 1200px;
+    margin: 0 auto 60px auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 40px;
+}
+
+.kenapa-tag { color: var(--cream); font-size: 14px; margin-bottom: 8px; }
+
+.kenapa-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 1.2;
+    letter-spacing: 1px;
+    color: var(--cream);
+}
+
+.kenapa-desc { max-width: 420px; font-size: 16px; line-height: 1.6; color: var(--cream); }
+
+.kenapa-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid rgba(255,246,233,0.4);
+}
+
+.kenapa-item { padding: 40px 28px; border-left: 1px solid rgba(255,246,233,0.25); }
+.kenapa-item:first-child { border-left: none; padding-left: 0; }
+
+.kenapa-num {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 48px;
+    color: var(--yellow);
+    margin-bottom: 16px;
+}
+
+.kenapa-item-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    color: var(--cream);
+    margin-bottom: 10px;
+}
+
+.kenapa-item p { font-size: 14px; line-height: 1.6; color: var(--cream); opacity: 0.85; }
+
+/* Responsive Tentang & Kenapa Kami — TABLET */
+@media (max-width: 992px) {
+    .tentang-container { grid-template-columns: 1fr; gap: 40px; }
+    .tentang-arch { margin: 0 auto; height: 480px; }
+    .tentang-badge-1 { right: 10%; }
+    .tentang-badge-2 { left: 10%; }
+
+    .kenapa-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .kenapa-grid { grid-template-columns: repeat(2, 1fr); }
+    .kenapa-item:nth-child(3) { border-left: none; padding-left: 0; }
+    .kenapa-item:nth-child(n+3) { border-top: 1px solid rgba(255,246,233,0.25); }
+}
+
+/* Responsive Tentang & Kenapa Kami — MOBILE */
+@media (max-width: 575px) {
+    .tentang-section { padding: 60px 16px 80px 16px; }
+    .tentang-title, .kenapa-title { font-size: 28px; }
+    .tentang-arch { height: 360px; border-radius: 180px 180px 24px 24px; }
+    .tentang-jam .btn-solid-red { width: 100%; }
+
+    .kenapa-section { padding: 70px 16px; }
+    .kenapa-item { padding: 28px 16px; }
+    .kenapa-num { font-size: 36px; }
+    .kenapa-item-title { font-size: 18px; }
+}
