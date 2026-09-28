@@ -1,5 +1,6 @@
 // KATEGORI: klik untuk pindah item aktif 
 const kategoriItems = document.querySelectorAll('.kategori-item');
+document.documentElement.classList.add('js');
 
 kategoriItems.forEach((item) => {
     item.addEventListener('click', () => {
@@ -53,3 +54,17 @@ if (navToggle && navLinksList) {
         });
     });
 }
+
+// SCROLL REVEAL: munculkan elemen .reveal saat masuk layar, sembunyikan lagi saat keluar
+const revealEls = document.querySelectorAll('.reveal');
+
+const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        entry.target.classList.toggle('show', entry.isIntersecting);         // toggle('show', kondisi): tambah class kalau true, lepas kalau false
+    });
+}, {
+    threshold: 0.15,
+    rootMargin: '0px 0px -8% 0px' // picu sedikit sebelum elemen menyentuh tepi bawah layar
+});
+
+revealEls.forEach((el) => revealObserver.observe(el));

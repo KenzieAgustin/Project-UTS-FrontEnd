@@ -693,6 +693,48 @@ body {
     .kenapa-item-title { font-size: 18px; }
 }
 
+/* ANIMASI: scroll reveal */
+.js .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.js .reveal.show {
+    opacity: 1;
+    transform: none;
+}
+
+.js .kenapa-item.reveal:nth-child(2) { transition-delay: 0.15s; }
+.js .kenapa-item.reveal:nth-child(3) { transition-delay: 0.3s; }
+.js .kenapa-item.reveal:nth-child(4) { transition-delay: 0.45s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+}
+
+.tentang-badge-1 { animation: float 4s ease-in-out infinite; }
+.tentang-badge-2 { animation: float 5s ease-in-out infinite reverse; }
+
+/* Angka 01-04 naik sedikit dan berubah warna saat item di-hover */
+.kenapa-num { transition: transform 0.3s ease, color 0.3s ease; }
+.kenapa-item:hover .kenapa-num {
+    transform: translateY(-6px);
+    color: var(--cream);
+}
+
+/* Foto lengkung membesar tipis saat di-hover */
+.tentang-arch { transition: transform 0.5s ease, box-shadow 0.5s ease; }
+.tentang-arch:hover {
+    transform: scale(1.02);
+    box-shadow: 0 28px 50px rgba(0,0,0,0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .tentang-badge-1, .tentang-badge-2 { animation: none; }
+}
 /* Katering */
 .katering-section { width: 100%; background-color: #fff; padding: 100px 20px; }
 
