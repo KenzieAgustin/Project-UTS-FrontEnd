@@ -692,3 +692,78 @@ body {
     .kenapa-num { font-size: 36px; }
     .kenapa-item-title { font-size: 18px; }
 }
+
+/* Katering */
+.katering-section { width: 100%; background-color: #fff; padding: 100px 20px; }
+
+.katering-header {
+    max-width: 1200px;
+    margin: 0 auto 48px auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 40px;
+}
+
+.katering-tag { color: black; font-size: 14px; margin-bottom: 8px; }
+
+.katering-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 1.2;
+    letter-spacing: 1px;
+    color: black;
+}
+
+.katering-info { max-width: 460px; }
+.katering-desc { font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+.katering-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.katering-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.43fr 1fr 1fr;
+    gap: 20px;
+}
+
+.katering-card {
+    position: relative;
+    height: 350px;
+    background-color: var(--gray-photo);
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.katering-pill {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    padding: 8px 16px;
+    background-color: #fff;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: black;
+}
+
+/* Responsive Katering — TABLET */
+@media (max-width: 992px) {
+    .katering-section { padding: 80px 20px; }
+    .katering-header { flex-direction: column; align-items: flex-start; gap: 24px; }
+    .katering-info { max-width: 100%; }
+    .katering-grid { grid-template-columns: 1fr 1fr; }
+    .katering-card-wide { grid-column: 1 / -1; }
+    .katering-card { height: 300px; }
+}
+
+/* Responsive Katering — MOBILE */
+@media (max-width: 575px) {
+    .katering-section { padding: 70px 16px; }
+    .katering-title { font-size: 28px; }
+    .katering-grid { grid-template-columns: 1fr; }
+    .katering-card { height: 240px; }
+    .katering-actions .btn-solid-red,
+    .katering-actions .btn-cream { flex: 1; }
+}
