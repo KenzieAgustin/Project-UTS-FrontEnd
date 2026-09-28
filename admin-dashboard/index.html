@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lamak Bana — Dashboard Admin</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="u-bg-cream u-text-ink app-body">
+  <div class="position-relative d-flex u-min-h-screen w-100 align-items-start">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="app-sidebar d-flex u-w-300px flex-shrink-0 flex-column u-gap-8 align-self-stretch u-border-r u-border-solid border-soft bg-white u-px-5 u-py-6">
+      <div class="brand-lockup d-flex flex-column u-gap-0-5">
+        <p class="u-font-anton u-text-2xl u-leading-1-3 u-text-maroon">LAMAK BANA</p>
+        <p class="u-text-xs u-leading-4 ink60">Admin Panel</p>
+      </div>
+
+      <div class="admin-card d-flex w-100 align-items-center u-gap-3 u-rounded-xl u-border u-border-solid border-soft bg-white u-p-3">
+        <div class="u-grid u-size-10 flex-shrink-0 u-place-items-center rounded-pill" style="background: rgba(139,30,30,.08)">
+          <p id="sidebar-admin-initials" class="u-text-xs fw-medium u-leading-4 u-text-maroon">AU</p>
+        </div>
+        <div class="d-flex u-min-w-0 u-flex-1 flex-column u-gap-0-5">
+          <p id="sidebar-admin-name" class="text-truncate u-text-sm fw-medium u-leading-5 u-text-ink">Admin Utama</p>
+          <p id="sidebar-admin-role" class="u-text-xs u-leading-4 ink60">Super Admin</p>
+        </div>
+        <button data-nav="Pengaturan" aria-label="Pengaturan" class="u-grid u-size-6 flex-shrink-0 u-place-items-center ink60 u-transition-colors u-hover-text-ink">
+          <i data-lucide="settings" class="u-size-5"></i>
+        </button>
+      </div>
+
+      <nav id="nav-utama" class="d-flex w-100 flex-column u-gap-1"></nav>
+
+      <div class="d-flex w-100 flex-column u-gap-1">
+        <div class="d-flex align-items-center u-pb-1 u-pl-3 u-pt-2">
+          <p class="u-text-xs fw-medium u-leading-4 u-tracking-0-24px ink60">LAINNYA</p>
+        </div>
+        <div id="nav-lainnya" class="d-flex w-100 flex-column u-gap-1"></div>
+      </div>
+    </aside>
+
+    <!-- ============ RIGHT AREA ============ -->
+    <div class="position-relative d-flex u-min-w-0 u-flex-1 flex-column align-items-start">
+
+      <!-- Header -->
+      <header class="app-header d-flex u-h-72px w-100 flex-shrink-0 align-items-center justify-content-between u-border-b u-border-solid border-soft bg-white u-px-8">
+        <p id="page-title" class="u-font-anton u-text-2xl u-leading-1-3 u-text-ink">DASHBOARD</p>
+        <div class="d-flex align-items-center u-gap-4">
+          <div id="dashboard-quick-actions" class="position-relative">
+            <button data-dropdown="quick-action" class="quick-action-button press d-flex align-items-center u-gap-2 rounded-pill u-bg-maroon u-px-4 u-py-2-5 u-text-sm fw-medium text-white" aria-label="Buat transaksi baru">
+              <i data-lucide="plus" class="u-size-4"></i>
+              <span>Pesanan Baru</span>
+              <i data-lucide="chevron-down" class="u-size-4 quick-action-chevron"></i>
+            </button>
+            <div data-menu="quick-action" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 quick-action-menu u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16">
+              <button type="button" class="menu-opt quick-action-option d-flex w-100 align-items-center u-gap-3 u-rounded-lg u-px-3 u-py-2 text-start" data-quick-action="Pesanan">
+                <span class="quick-action-icon"><i data-lucide="receipt" class="u-size-4"></i></span>
+                <span><strong>Pesanan Baru</strong><small>Catat pesanan pelanggan</small></span>
+              </button>
+              <button type="button" class="menu-opt quick-action-option d-flex w-100 align-items-center u-gap-3 u-rounded-lg u-px-3 u-py-2 text-start" data-quick-action="Reservasi">
+                <span class="quick-action-icon"><i data-lucide="calendar-plus" class="u-size-4"></i></span>
+                <span><strong>Reservasi Baru</strong><small>Tambahkan booking meja</small></span>
+              </button>
+              <button type="button" class="menu-opt quick-action-option d-flex w-100 align-items-center u-gap-3 u-rounded-lg u-px-3 u-py-2 text-start" data-quick-action="Katering">
+                <span class="quick-action-icon"><i data-lucide="package-plus" class="u-size-4"></i></span>
+                <span><strong>Katering Baru</strong><small>Catat pesanan jumlah besar</small></span>
+              </button>
+            </div>
+          </div>
+          <button id="btn-notif" aria-label="Notifikasi" class="u-grid u-size-10 flex-shrink-0 u-place-items-center rounded-pill u-border u-border-solid border-soft bg-white u-text-ink u-transition-transform u-hover-scale-105 u-active-scale-95">
+            <i data-lucide="bell" class="u-size-5"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- ---------- DASHBOARD PAGE ---------- -->
+      <main id="page-dashboard" class="page-shell dashboard-unslopped d-flex w-100 flex-column">
+
+        <!-- Operational queue: primary decision surface -->
+        <section class="ops-queue reveal" style="animation-delay:20ms" aria-label="Antrean operasional hari ini">
+          <div class="ops-queue-label">
+            <span>OPERASIONAL HARI INI</span>
+            <strong>Minggu, 28 Sep 2026</strong>
+          </div>
+          <div class="ops-queue-metrics">
+            <button class="ops-metric is-alert" data-attention-nav="Pesanan" data-attention-status="Diproses">
+              <span class="ops-metric-value">3</span>
+              <span class="ops-metric-copy"><strong>Perlu dicek</strong><small>butuh tindakan</small></span>
+            </button>
+            <button class="ops-metric" data-dashboard-status="Baru">
+              <span class="ops-metric-value">12</span>
+              <span class="ops-metric-copy"><strong>Baru</strong><small>belum diproses</small></span>
+            </button>
+            <button class="ops-metric" data-dashboard-status="Diproses">
+              <span class="ops-metric-value">8</span>
+              <span class="ops-metric-copy"><strong>Diproses</strong><small>di dapur</small></span>
+            </button>
+            <button class="ops-metric" data-dashboard-status="Siap">
+              <span class="ops-metric-value">5</span>
+              <span class="ops-metric-copy"><strong>Siap</strong><small>untuk disajikan</small></span>
+            </button>
+            <button class="ops-metric is-danger" data-attention-nav="Pesanan" data-attention-status="Diproses">
+              <span class="ops-metric-value">2</span>
+              <span class="ops-metric-copy"><strong>Terlambat</strong><small>lewati estimasi</small></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Primary work surface -->
+        <div class="dashboard-work-grid">
+          <section class="work-surface recent-orders-panel reveal" style="animation-delay:60ms">
+            <div class="work-surface-head">
+              <div>
+                <h2>Pesanan Hari Ini</h2>
+                <p>128 pesanan · fokus pada antrean aktif</p>
+              </div>
+              <div class="d-flex align-items-center u-gap-2">
+                <div class="position-relative">
+                  <button data-dropdown="status" class="filter-pill d-flex flex-shrink-0 align-items-center u-gap-1 u-border u-border-solid border-soft u-px-3 u-py-1-5 u-text-sm u-text-ink">
+                    Status: <span data-label="status">Semua</span> <i data-lucide="chevron-down" class="u-size-4"></i>
+                  </button>
+                  <div data-menu="status" class="anim-pop position-absolute u-left-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16"></div>
+                </div>
+                <div class="position-relative">
+                  <button data-dropdown="waktu" class="filter-pill d-flex flex-shrink-0 align-items-center u-gap-1 u-border u-border-solid border-soft u-px-3 u-py-1-5 u-text-sm u-text-ink">
+                    <span data-label="waktu">Hari ini</span> <i data-lucide="chevron-down" class="u-size-4"></i>
+                  </button>
+                  <div data-menu="waktu" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="w-100 overflow-x-auto">
+              <div class="u-min-w-880px compact-order-table">
+                <div class="compact-table-head">
+                  <p class="u-w-120px flex-shrink-0">ID PESANAN</p>
+                  <p class="u-w-150px flex-shrink-0">PELANGGAN</p>
+                  <p class="u-min-w-0 u-flex-1">MENU</p>
+                  <p class="u-w-130px flex-shrink-0">KANAL</p>
+                  <p class="u-w-64px flex-shrink-0">WAKTU</p>
+                  <p class="u-w-120px flex-shrink-0 text-end">TOTAL</p>
+                  <p class="u-w-110px flex-shrink-0">STATUS</p>
+                </div>
+                <div id="orders"></div>
+              </div>
+            </div>
+
+            <div class="table-footer-line">
+              <span>Menampilkan 5 pesanan terbaru</span>
+              <button data-nav="Pesanan">Buka semua pesanan <i data-lucide="arrow-right" class="u-size-4"></i></button>
+            </div>
+          </section>
+
+          <aside class="dashboard-side-rail reveal" style="animation-delay:90ms">
+            <section class="side-section attention-section">
+              <div class="side-section-head">
+                <div><h2>Perlu Dicek</h2><p>3 item membutuhkan tindakan</p></div>
+                <span class="attention-count">3</span>
+              </div>
+              <div class="priority-list">
+                <button class="priority-row is-danger" data-attention-nav="Pesanan" data-attention-status="Diproses">
+                  <span class="priority-signal"></span>
+                  <span><strong>2 pesanan terlambat</strong><small>Lewati estimasi waktu</small></span>
+                  <i data-lucide="chevron-right" class="u-size-4"></i>
+                </button>
+                <button class="priority-row is-warning" data-attention-nav="Menu Makanan">
+                  <span class="priority-signal"></span>
+                  <span><strong>Rendang tinggal 12 porsi</strong><small>Stok perlu diperiksa</small></span>
+                  <i data-lucide="chevron-right" class="u-size-4"></i>
+                </button>
+                <button class="priority-row is-warning" data-attention-nav="Reservasi">
+                  <span class="priority-signal"></span>
+                  <span><strong>Reservasi 13.00 pending</strong><small>Nadia · 8 pax · Meja 12</small></span>
+                  <i data-lucide="chevron-right" class="u-size-4"></i>
+                </button>
+              </div>
+            </section>
+
+            <section class="side-section agenda-section">
+              <div class="side-section-head">
+                <div><h2>Agenda Berikutnya</h2><p>Reservasi & katering</p></div>
+              </div>
+              <div class="agenda-compact-list">
+                <button data-nav="Reservasi"><time>13:00</time><span><strong>Nadia</strong><small>Reservasi · 8 pax</small></span></button>
+                <button data-nav="Katering"><time>16:30</time><span><strong>PT Sinar Jaya</strong><small>Katering · 40 pax</small></span></button>
+                <button data-nav="Katering"><time>Besok</time><span><strong>CV Minang Makmur</strong><small>10:00 · 65 pax</small></span></button>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <!-- Secondary analytics: below operational work -->
+        <div class="dashboard-analysis-grid">
+          <section class="analytics-panel work-surface reveal" style="animation-delay:120ms">
+            <div class="work-surface-head analytics-head">
+              <div>
+                <h2>Tren Pesanan</h2>
+                <div class="analytics-inline-metrics">
+                  <strong>1.248</strong><span>pesanan bulan ini</span><em>+12% vs bulan lalu</em>
+                </div>
+              </div>
+              <div class="position-relative">
+                <button data-dropdown="tahun" class="filter-pill d-flex flex-shrink-0 align-items-center u-gap-1 u-border u-border-solid border-soft u-px-3 u-py-1-5 u-text-sm u-text-ink">
+                  <span data-label="tahun">2026</span> <i data-lucide="chevron-down" class="u-size-4"></i>
+                </button>
+                <div data-menu="tahun" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-160px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16"></div>
+              </div>
+            </div>
+            <div id="linechart-dash" class="position-relative u-min-h-0 w-100 u-flex-1"></div>
+          </section>
+
+          <section class="finance-panel work-surface reveal" style="animation-delay:150ms">
+            <div class="finance-summary">
+              <span>Pendapatan bulan ini</span>
+              <strong>Rp89,4 jt</strong>
+              <small>89% dari target Rp100 jt</small>
+            </div>
+            <div class="target-track" aria-label="89 persen target pendapatan"><span style="width:89%"></span></div>
+            <div class="channel-list">
+              <div class="channel-row"><span>Makan di Tempat</span><strong>Rp48,2 jt</strong><small>54%</small></div>
+              <div class="channel-row"><span>Ojek Online</span><strong>Rp26,7 jt</strong><small>30%</small></div>
+              <div class="channel-row"><span>Katering</span><strong>Rp14,5 jt</strong><small>16%</small></div>
+            </div>
+            <div class="performance-list">
+              <div><span>Selesai</span><strong>92%</strong></div>
+              <div><span>Tepat waktu</span><strong>85%</strong></div>
+              <div class="is-danger"><span>Dibatalkan</span><strong>4%</strong></div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- ---------- PESANAN PAGE ---------- -->
+      <main id="page-pesanan" class="page-shell hidden-page d-flex w-100 flex-column u-gap-6 u-p-8">
+        <div class="reveal d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-4" style="animation-delay:40ms">
+          <div class="d-flex flex-column u-gap-1">
+            <p class="u-text-base fw-semibold u-leading-6 u-text-ink">Kelola Pesanan</p>
+            <p class="u-text-sm ink60">Pantau, proses, dan selesaikan seluruh pesanan dari satu halaman.</p>
+          </div>
+          <button id="btn-new-order" class="press d-flex align-items-center u-gap-2 rounded-pill u-bg-maroon u-px-4 u-py-2-5 u-text-sm fw-medium text-white">
+            <i data-lucide="plus" class="u-size-4"></i>
+            Pesanan Baru
+          </button>
+        </div>
+
+        <div class="order-stat-grid">
+          <button class="order-stat-card reveal text-start" data-order-status="Baru" style="animation-delay:80ms">
+            <div class="order-stat-icon" style="background:rgba(139,30,30,.09);color:#8b1e1e"><i data-lucide="bell-ring" class="u-size-5"></i></div>
+            <div class="d-flex flex-column u-gap-1">
+              <p class="u-text-xs ink60">Pesanan Baru</p>
+              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number">12</p><span class="u-text-xs u-text-maroon">perlu tindakan</span></div>
+            </div>
+          </button>
+          <button class="order-stat-card reveal text-start" data-order-status="Diproses" style="animation-delay:120ms">
+            <div class="order-stat-icon" style="background:rgba(242,169,59,.18);color:#9a6500"><i data-lucide="chef-hat" class="u-size-5"></i></div>
+            <div class="d-flex flex-column u-gap-1">
+              <p class="u-text-xs ink60">Sedang Diproses</p>
+              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number">8</p><span class="u-text-xs ink60">di dapur</span></div>
+            </div>
+          </button>
+          <button class="order-stat-card reveal text-start" data-order-status="Siap" style="animation-delay:160ms">
+            <div class="order-stat-icon" style="background:rgba(47,93,58,.10);color:#2f5d3a"><i data-lucide="package-check" class="u-size-5"></i></div>
+            <div class="d-flex flex-column u-gap-1">
+              <p class="u-text-xs ink60">Siap Disajikan</p>
+              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number">5</p><span class="u-text-xs u-text-leaf">siap diambil</span></div>
+            </div>
+          </button>
+          <button class="order-stat-card reveal text-start" data-order-status="Selesai" style="animation-delay:200ms">
+            <div class="order-stat-icon" style="background:rgba(47,93,58,.10);color:#2f5d3a"><i data-lucide="circle-check-big" class="u-size-5"></i></div>
+            <div class="d-flex flex-column u-gap-1">
+              <p class="u-text-xs ink60">Selesai Hari Ini</p>
+              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number">103</p><span class="u-text-xs ink60">pesanan</span></div>
+            </div>
+          </button>
+        </div>
+
+        <section class="reveal d-flex w-100 flex-column u-gap-4 u-rounded-2xl u-border u-border-solid border-soft bg-white u-p-6" style="animation-delay:240ms">
+          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-3">
+            <div class="order-search-wrap">
+              <i data-lucide="search" class="u-size-4 ink60"></i>
+              <input id="order-search" class="order-search-input" type="search" placeholder="Cari ID, pelanggan, atau menu..." autocomplete="off" />
+            </div>
+            <div class="d-flex flex-wrap align-items-center u-gap-2">
+              <div class="position-relative order-filter-dropdown">
+                <button data-dropdown="order-channel" class="filter-pill d-flex flex-shrink-0 align-items-center u-gap-1 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink u-transition-colors" aria-label="Filter kanal" aria-haspopup="menu">
+                  <span data-label="order-channel">Semua Kanal</span> <i data-lucide="chevron-down" class="u-size-4"></i>
+                </button>
+                <div data-menu="order-channel" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16" role="menu"></div>
+              </div>
+              <div class="position-relative order-filter-dropdown">
+                <button data-dropdown="order-date" class="filter-pill d-flex flex-shrink-0 align-items-center u-gap-1 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink u-transition-colors" aria-label="Filter tanggal" aria-haspopup="menu">
+                  <span data-label="order-date">Hari ini</span> <i data-lucide="chevron-down" class="u-size-4"></i>
+                </button>
+                <div data-menu="order-date" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16" role="menu"></div>
+              </div>
+              <button id="order-reset" class="filter-pill d-flex align-items-center u-gap-2 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink">
+                <i data-lucide="rotate-ccw" class="u-size-4"></i> Reset
+              </button>
+            </div>
+          </div>
+
+          <div id="order-tabs" class="order-tabs" role="tablist" aria-label="Status pesanan">
+            <button class="order-tab is-active" data-status="Semua">Semua <span>128</span></button>
+            <button class="order-tab" data-status="Baru">Baru <span>12</span></button>
+            <button class="order-tab" data-status="Diproses">Diproses <span>8</span></button>
+            <button class="order-tab" data-status="Siap">Siap <span>5</span></button>
+            <button class="order-tab" data-status="Selesai">Selesai</button>
+            <button class="order-tab" data-status="Dibatalkan">Dibatalkan</button>
+          </div>
+
+          <div class="w-100 overflow-x-auto">
+            <div class="order-table-full">
+              <div class="order-table-head">
+                <p>ID PESANAN</p><p>PELANGGAN</p><p>PESANAN</p><p>KANAL</p><p>WAKTU</p><p class="text-end">TOTAL</p><p>STATUS</p><p class="text-end">AKSI</p>
+              </div>
+              <div id="orders-full"></div>
+            </div>
+          </div>
+
+          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-3">
+            <p id="orders-count" class="u-text-xs u-leading-4 ink60">Menampilkan pesanan</p>
+<span class="table-footer-note">Gunakan filter untuk mempersempit data</span>
+          </div>
+        </section>
+      </main>
+
+
+      <!-- ---------- MENU MAKANAN PAGE ---------- -->
+      <main id="page-menu" class="page-shell hidden-page d-flex w-100 flex-column u-gap-6 u-p-8">
+        <div class="reveal d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-4" style="animation-delay:40ms">
+          <div class="d-flex flex-column u-gap-1">
+            <div class="d-flex flex-wrap align-items-center u-gap-2">
+              <p class="u-text-base fw-semibold u-leading-6 u-text-ink">Kelola Menu Makanan</p>
+              <span class="website-sync-pill"><span class="website-sync-dot"></span>Terhubung ke Website</span>
+            </div>
+            <p class="u-text-sm ink60">Atur harga, stok, ketersediaan, dan menu yang tampil pada website Lamak Bana.</p>
+          </div>
+          <div class="d-flex flex-wrap align-items-center u-gap-2">
+            <button id="btn-preview-menu" class="menu-secondary-button press d-flex align-items-center u-gap-2 rounded-pill u-px-4 u-py-2-5 u-text-sm fw-medium">
+              <i data-lucide="monitor" class="u-size-4"></i> Preview Website
+            </button>
+            <button id="btn-add-menu" class="press d-flex align-items-center u-gap-2 rounded-pill u-bg-maroon u-px-4 u-py-2-5 u-text-sm fw-medium text-white">
+              <i data-lucide="plus" class="u-size-4"></i> Tambah Menu
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-stat-grid">
+          <div class="menu-stat-card reveal" style="animation-delay:80ms">
+            <span class="menu-stat-icon menu-stat-maroon"><i data-lucide="utensils" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Total Menu</p><p id="menu-stat-total" class="menu-stat-number">8</p></div>
+          </div>
+          <div class="menu-stat-card reveal" style="animation-delay:110ms">
+            <span class="menu-stat-icon menu-stat-green"><i data-lucide="globe-2" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Tampil di Website</p><p id="menu-stat-web" class="menu-stat-number">8</p></div>
+          </div>
+          <div class="menu-stat-card reveal" style="animation-delay:140ms">
+            <span class="menu-stat-icon menu-stat-amber"><i data-lucide="triangle-alert" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Stok Menipis</p><p id="menu-stat-low" class="menu-stat-number">2</p></div>
+          </div>
+          <div class="menu-stat-card reveal" style="animation-delay:170ms">
+            <span class="menu-stat-icon menu-stat-soft"><i data-lucide="star" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Menu Andalan</p><p id="menu-stat-featured" class="menu-stat-number">3</p></div>
+          </div>
+        </div>
+
+        <section class="reveal menu-manager-shell" style="animation-delay:210ms">
+          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-3">
+            <div class="menu-search-wrap">
+              <i data-lucide="search" class="u-size-4 ink60"></i>
+              <input id="menu-search" class="menu-search-input" type="search" placeholder="Cari nama menu..." autocomplete="off" />
+            </div>
+            <div class="d-flex flex-wrap align-items-center u-gap-2">
+              <div class="position-relative menu-filter-dropdown">
+                <button data-dropdown="menu-category" class="filter-pill d-flex flex-shrink-0 align-items-center u-gap-1 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink" aria-label="Filter kategori" aria-haspopup="menu">
+                  <span data-label="menu-category">Semua Kategori</span> <i data-lucide="chevron-down" class="u-size-4"></i>
+                </button>
+                <div data-menu="menu-category" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16" role="menu"></div>
+              </div>
+              <button id="menu-reset" class="filter-pill d-flex align-items-center u-gap-2 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink">
+                <i data-lucide="rotate-ccw" class="u-size-4"></i> Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="menu-page-note">
+            <i data-lucide="info" class="u-size-4"></i>
+            <div><strong>Sinkronisasi website</strong><span>Menu dengan toggle “Website” aktif akan tersedia untuk ditampilkan pada halaman Menu. Item bertanda “Andalan” mengikuti blok Menu Andalan pada landing page.</span></div>
+          </div>
+
+          <div id="menu-catalog" class="menu-card-grid"></div>
+          <div id="menu-empty" class="menu-empty hidden-page">
+            <i data-lucide="search-x" class="u-size-5"></i>
+            <p class="u-text-sm fw-medium u-text-ink">Menu tidak ditemukan</p>
+            <p class="u-text-xs ink60">Coba ubah pencarian atau kategori.</p>
+          </div>
+        </section>
+      </main>
+
+
+      <!-- ---------- RESERVASI PAGE ---------- -->
+      <main id="page-reservasi" class="page-shell hidden-page d-flex w-100 flex-column u-gap-6 u-p-8">
+        <div class="reveal d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-4" style="animation-delay:40ms">
+          <div class="d-flex flex-column u-gap-1">
+            <div class="d-flex flex-wrap align-items-center u-gap-2">
+              <p class="u-text-base fw-semibold u-leading-6 u-text-ink">Kelola Reservasi</p>
+              <span class="website-sync-pill"><span class="website-sync-dot"></span>Terhubung ke Website</span>
+            </div>
+            <p class="u-text-sm ink60">Pantau booking meja, konfirmasi kedatangan, dan catat reservasi dari website maupun admin.</p>
+          </div>
+          <button id="btn-add-reservation" class="press d-flex align-items-center u-gap-2 rounded-pill u-bg-maroon u-px-4 u-py-2-5 u-text-sm fw-medium text-white">
+            <i data-lucide="calendar-plus" class="u-size-4"></i> Reservasi Baru
+          </button>
+        </div>
+
+        <div class="reservation-stat-grid">
+          <button class="reservation-stat-card reveal text-start" data-reservation-status="Semua" style="animation-delay:80ms">
+            <span class="reservation-stat-icon reservation-icon-maroon"><i data-lucide="calendar-days" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Reservasi Hari Ini</p><p id="reservation-stat-today" class="reservation-stat-number">0</p><p class="reservation-stat-caption">booking terjadwal</p></div>
+          </button>
+          <button class="reservation-stat-card reveal text-start" data-reservation-status="Menunggu" style="animation-delay:110ms">
+            <span class="reservation-stat-icon reservation-icon-amber"><i data-lucide="clock-3" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Menunggu Konfirmasi</p><p id="reservation-stat-pending" class="reservation-stat-number">0</p><p class="reservation-stat-caption">perlu ditindaklanjuti</p></div>
+          </button>
+          <div class="reservation-stat-card reveal" style="animation-delay:140ms">
+            <span class="reservation-stat-icon reservation-icon-green"><i data-lucide="users" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Tamu Hari Ini</p><p id="reservation-stat-guests" class="reservation-stat-number">0</p><p class="reservation-stat-caption">pax terjadwal</p></div>
+          </div>
+          <div class="reservation-stat-card reveal" style="animation-delay:170ms">
+            <span class="reservation-stat-icon reservation-icon-soft"><i data-lucide="armchair" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Meja Terisi</p><p id="reservation-stat-tables" class="reservation-stat-number">0/18</p><p class="reservation-stat-caption">booking aktif hari ini</p></div>
+          </div>
+        </div>
+
+        <div class="reservation-overview-grid">
+          <section class="reveal reservation-agenda-card" style="animation-delay:200ms">
+            <div class="d-flex align-items-center justify-content-between u-gap-3">
+              <div><p class="u-text-base fw-semibold u-text-ink">Agenda Hari Ini</p><p class="u-text-xs ink60">28 September 2026</p></div>
+              <span id="reservation-agenda-count" class="reservation-agenda-pill">0 booking</span>
+            </div>
+            <div id="reservation-agenda" class="reservation-agenda-list"></div>
+          </section>
+
+          <section class="reveal reservation-hours-card" style="animation-delay:230ms">
+            <div class="reservation-hours-icon"><i data-lucide="clock" class="u-size-5"></i></div>
+            <div>
+              <p class="u-text-base fw-semibold u-text-ink">Jam Reservasi</p>
+              <p class="u-text-xs ink60">Mengikuti jam buka pada website Lamak Bana.</p>
+            </div>
+            <div class="reservation-hours-list">
+              <div><span>Senin–Jumat</span><strong>09.00–22.00</strong></div>
+              <div><span>Sabtu–Minggu</span><strong>08.00–23.00</strong></div>
+            </div>
+            <div class="reservation-source-note"><i data-lucide="globe-2" class="u-size-4"></i><span>Reservasi dari website dapat masuk ke daftar ini setelah endpoint booking dihubungkan.</span></div>
+          </section>
+        </div>
+
+        <section class="reveal reservation-manager-shell" style="animation-delay:260ms">
+          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-3">
+            <div class="reservation-search-wrap">
+              <i data-lucide="search" class="u-size-4 ink60"></i>
+              <input id="reservation-search" class="reservation-search-input" type="search" placeholder="Cari nama, ID, atau nomor telepon..." autocomplete="off" />
+            </div>
+            <div class="d-flex flex-wrap align-items-center u-gap-2">
+              <div class="position-relative reservation-filter-dropdown">
+                <button data-dropdown="reservation-source" class="filter-pill d-flex flex-shrink-0 align-items-center u-gap-1 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink" aria-label="Filter sumber" aria-haspopup="menu">
+                  <span data-label="reservation-source">Semua Sumber</span> <i data-lucide="chevron-down" class="u-size-4"></i>
+                </button>
+                <div data-menu="reservation-source" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16" role="menu"></div>
+              </div>
+              <div class="position-relative reservation-filter-dropdown">
+                <button data-dropdown="reservation-date" class="filter-pill d-flex flex-shrink-0 align-items-center u-gap-1 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink" aria-label="Filter tanggal" aria-haspopup="menu">
+                  <span data-label="reservation-date">Hari ini</span> <i data-lucide="chevron-down" class="u-size-4"></i>
+                </button>
+                <div data-menu="reservation-date" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16" role="menu"></div>
+              </div>
+              <button id="reservation-reset" class="filter-pill d-flex align-items-center u-gap-2 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink"><i data-lucide="rotate-ccw" class="u-size-4"></i> Reset</button>
+            </div>
+          </div>
+
+          <div id="reservation-tabs" class="reservation-tabs">
+            <button class="reservation-tab is-active" data-status="Semua">Semua <span data-res-count="Semua">0</span></button>
+            <button class="reservation-tab" data-status="Menunggu">Menunggu <span data-res-count="Menunggu">0</span></button>
+            <button class="reservation-tab" data-status="Dikonfirmasi">Dikonfirmasi <span data-res-count="Dikonfirmasi">0</span></button>
+            <button class="reservation-tab" data-status="Hadir">Hadir <span data-res-count="Hadir">0</span></button>
+            <button class="reservation-tab" data-status="Selesai">Selesai <span data-res-count="Selesai">0</span></button>
+            <button class="reservation-tab" data-status="Dibatalkan">Dibatalkan <span data-res-count="Dibatalkan">0</span></button>
+          </div>
+
+          <div class="w-100 overflow-auto">
+            <div class="reservation-table">
+              <div class="reservation-table-head">
+                <span>ID</span><span>PELANGGAN</span><span>JADWAL</span><span>PAX</span><span>MEJA / AREA</span><span>SUMBER</span><span>STATUS</span><span></span>
+              </div>
+              <div id="reservation-rows"></div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap align-items-center justify-content-between u-gap-3 u-pt-1">
+            <p id="reservation-count" class="u-text-xs ink60">Menampilkan 0 reservasi</p>
+            <span class="table-footer-note">Gunakan filter untuk mempersempit data</span>
+          </div>
+        </section>
+      </main>
+
+
+      <!-- ---------- KATERING PAGE ---------- -->
+      <main id="page-katering" class="page-shell hidden-page d-flex w-100 flex-column u-gap-6 u-p-8">
+        <div class="reveal d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-4" style="animation-delay:40ms">
+          <div class="d-flex flex-column u-gap-1">
+            <div class="d-flex flex-wrap align-items-center u-gap-2">
+              <p class="u-text-base fw-semibold u-leading-6 u-text-ink">Kelola Katering</p>
+              <span class="website-sync-pill"><span class="website-sync-dot"></span>Terhubung ke Website</span>
+            </div>
+            <p class="u-text-sm ink60">Kelola permintaan nasi kotak dan prasmanan untuk pernikahan, acara kantor, arisan, dan syukuran.</p>
+          </div>
+          <button id="btn-add-catering" class="press d-flex align-items-center u-gap-2 rounded-pill u-bg-maroon u-px-4 u-py-2-5 u-text-sm fw-medium text-white">
+            <i data-lucide="plus" class="u-size-4"></i> Katering Baru
+          </button>
+        </div>
+
+        <div class="catering-stat-grid">
+          <button class="catering-stat-card reveal text-start" data-catering-status="Semua" style="animation-delay:80ms">
+            <span class="catering-stat-icon catering-icon-maroon"><i data-lucide="calendar-check-2" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Katering Mendatang</p><p id="catering-stat-upcoming" class="catering-stat-number">0</p><p class="catering-stat-caption">agenda aktif</p></div>
+          </button>
+          <button class="catering-stat-card reveal text-start" data-catering-status="Menunggu" style="animation-delay:110ms">
+            <span class="catering-stat-icon catering-icon-amber"><i data-lucide="file-clock" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Perlu Tindak Lanjut</p><p id="catering-stat-pending" class="catering-stat-number">0</p><p class="catering-stat-caption">menunggu / penawaran</p></div>
+          </button>
+          <div class="catering-stat-card reveal" style="animation-delay:140ms">
+            <span class="catering-stat-icon catering-icon-green"><i data-lucide="users" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Pax 7 Hari</p><p id="catering-stat-pax" class="catering-stat-number">0</p><p class="catering-stat-caption">porsi terjadwal</p></div>
+          </div>
+          <div class="catering-stat-card reveal" style="animation-delay:170ms">
+            <span class="catering-stat-icon catering-icon-soft"><i data-lucide="wallet-cards" class="u-size-5"></i></span>
+            <div><p class="u-text-xs ink60">Nilai Pesanan Aktif</p><p id="catering-stat-value" class="catering-stat-number">Rp0</p><p class="catering-stat-caption">di luar pembatalan</p></div>
+          </div>
+        </div>
+
+        <div class="catering-overview-grid">
+          <section class="reveal catering-agenda-card" style="animation-delay:200ms">
+            <div class="d-flex align-items-center justify-content-between u-gap-3">
+              <div><p class="u-text-base fw-semibold u-text-ink">Jadwal Katering Terdekat</p><p class="u-text-xs ink60">Produksi dan pengiriman yang perlu dipantau</p></div>
+              <span id="catering-agenda-count" class="catering-agenda-pill">0 agenda</span>
+            </div>
+            <div id="catering-agenda" class="catering-agenda-list"></div>
+          </section>
+
+          <section class="reveal catering-service-card" style="animation-delay:230ms">
+            <div class="d-flex align-items-start justify-content-between u-gap-3">
+              <div><p class="u-text-base fw-semibold u-text-ink">Ringkasan Layanan</p><p class="u-text-xs ink60">Komposisi pesanan aktif</p></div>
+              <span class="catering-service-icon"><i data-lucide="utensils-crossed" class="u-size-5"></i></span>
+            </div>
+            <div class="catering-service-list">
+              <div><span><i data-lucide="package" class="u-size-4"></i>Nasi Kotak</span><strong id="catering-service-box">0</strong></div>
+              <div><span><i data-lucide="concierge-bell" class="u-size-4"></i>Prasmanan</span><strong id="catering-service-buffet">0</strong></div>
+            </div>
+            <div class="catering-payment-summary">
+              <div><span>DP diterima</span><strong id="catering-dp-received">Rp0</strong></div>
+              <div class="catering-progress"><span id="catering-payment-progress" style="width:0%"></span></div>
+              <small id="catering-payment-caption">0% dari nilai pesanan aktif</small>
+            </div>
+            <div class="reservation-source-note"><i data-lucide="globe-2" class="u-size-4"></i><span>Form “Pesan Katering” pada website nantinya dapat mengirim permintaan langsung ke halaman ini.</span></div>
+          </section>
+        </div>
+
+        <section class="reveal catering-manager-shell" style="animation-delay:260ms">
+          <div class="d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-3">
+            <div class="catering-search-wrap">
+              <i data-lucide="search" class="u-size-4 ink60"></i>
+              <input id="catering-search" class="catering-search-input" type="search" placeholder="Cari ID, pelanggan, perusahaan, atau PIC..." autocomplete="off" />
+            </div>
+            <div class="d-flex flex-wrap align-items-center u-gap-2">
+              <div class="position-relative catering-filter-dropdown">
+                <button data-dropdown="catering-service" class="filter-pill d-flex flex-shrink-0 align-items-center u-gap-1 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink" aria-label="Filter layanan" aria-haspopup="menu">
+                  <span data-label="catering-service">Semua Layanan</span> <i data-lucide="chevron-down" class="u-size-4"></i>
+                </button>
+                <div data-menu="catering-service" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16" role="menu"></div>
+              </div>
+              <div class="position-relative catering-filter-dropdown">
+                <button data-dropdown="catering-date" class="filter-pill d-flex flex-shrink-0 align-items-center u-gap-1 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink" aria-label="Filter tanggal" aria-haspopup="menu">
+                  <span data-label="catering-date">7 hari ke depan</span> <i data-lucide="chevron-down" class="u-size-4"></i>
+                </button>
+                <div data-menu="catering-date" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16" role="menu"></div>
+              </div>
+              <button id="catering-reset" class="filter-pill d-flex align-items-center u-gap-2 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink"><i data-lucide="rotate-ccw" class="u-size-4"></i> Reset</button>
+            </div>
+          </div>
+
+          <div id="catering-tabs" class="catering-tabs">
+            <button class="catering-tab is-active" data-status="Semua">Semua <span data-cat-count="Semua">0</span></button>
+            <button class="catering-tab" data-status="Menunggu">Menunggu <span data-cat-count="Menunggu">0</span></button>
+            <button class="catering-tab" data-status="Penawaran">Penawaran <span data-cat-count="Penawaran">0</span></button>
+            <button class="catering-tab" data-status="Dikonfirmasi">Dikonfirmasi <span data-cat-count="Dikonfirmasi">0</span></button>
+            <button class="catering-tab" data-status="Produksi">Produksi <span data-cat-count="Produksi">0</span></button>
+            <button class="catering-tab" data-status="Selesai">Selesai <span data-cat-count="Selesai">0</span></button>
+            <button class="catering-tab" data-status="Dibatalkan">Dibatalkan <span data-cat-count="Dibatalkan">0</span></button>
+          </div>
+
+          <div class="w-100 overflow-auto">
+            <div class="catering-table">
+              <div class="catering-table-head">
+                <span>ID</span><span>PELANGGAN</span><span>ACARA</span><span>JADWAL</span><span>PAX</span><span>LAYANAN</span><span>TOTAL / DP</span><span>STATUS</span><span></span>
+              </div>
+              <div id="catering-rows"></div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap align-items-center justify-content-between u-gap-3 u-pt-1">
+            <p id="catering-count" class="u-text-xs ink60">Menampilkan 0 pesanan katering</p>
+            <span class="table-footer-note">Gunakan filter untuk mempersempit data</span>
+          </div>
+        </section>
+      </main>
+
+      <!-- ---------- LAPORAN PAGE ---------- -->
+      <main id="page-laporan" class="page-shell hidden-page d-flex w-100 flex-column u-gap-6 u-p-8 report-page">
+        <div class="reveal d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-4" style="animation-delay:40ms">
+          <div class="d-flex flex-column u-gap-1">
+            <p class="u-text-base fw-semibold u-leading-6 u-text-ink">Laporan Penjualan</p>
+            <p class="u-text-sm ink60">Pantau performa penjualan, kanal, dan menu dalam satu tampilan.</p>
+          </div>
+          <div class="d-flex flex-wrap align-items-center u-gap-2 report-top-actions">
+            <div class="position-relative order-filter-dropdown">
+              <button data-dropdown="report-period" class="filter-pill d-flex align-items-center u-gap-2 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink" aria-haspopup="menu">
+                <i data-lucide="calendar-range" class="u-size-4 ink60"></i><span data-label="report-period">Bulan ini</span><i data-lucide="chevron-down" class="u-size-4"></i>
+              </button>
+              <div data-menu="report-period" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16" role="menu"></div>
+            </div>
+            <div class="position-relative order-filter-dropdown">
+              <button data-dropdown="report-channel" class="filter-pill d-flex align-items-center u-gap-2 rounded-pill u-border u-border-solid border-soft bg-white u-px-3 u-py-2 u-text-sm u-text-ink" aria-haspopup="menu">
+                <i data-lucide="radio-tower" class="u-size-4 ink60"></i><span data-label="report-channel">Semua Kanal</span><i data-lucide="chevron-down" class="u-size-4"></i>
+              </button>
+              <div data-menu="report-channel" class="anim-pop origin-tr position-absolute u-right-0 u-top-calc-100-8px u-z-50 u-min-w-180px u-rounded-xl u-border u-border-solid border-soft bg-white u-p-1-5 u-shadow-0-12px-32px-rgba-59-31-20-16" role="menu"></div>
+            </div>
+            <button id="report-export-excel" class="report-action-btn"><i data-lucide="file-spreadsheet" class="u-size-4"></i> Excel</button>
+            <button id="report-print" class="report-action-btn"><i data-lucide="printer" class="u-size-4"></i> PDF / Cetak</button>
+          </div>
+        </div>
+
+        <div id="report-custom-range" class="reveal report-custom-range hidden-page" style="animation-delay:60ms">
+          <div><label for="report-date-from">Dari tanggal</label><input id="report-date-from" type="date" value="2026-09-01" /></div>
+          <span class="ink40">—</span>
+          <div><label for="report-date-to">Sampai tanggal</label><input id="report-date-to" type="date" value="2026-09-28" /></div>
+          <button id="report-apply-range" class="press rounded-pill u-bg-maroon u-px-4 u-py-2 u-text-sm fw-medium text-white">Terapkan</button>
+        </div>
+
+        <div class="report-kpi-grid">
+          <article class="reveal report-kpi-card" style="animation-delay:80ms"><div class="report-kpi-icon maroon"><i data-lucide="wallet-cards"></i></div><div><p class="report-kpi-label">Total Pendapatan</p><p id="report-kpi-revenue" class="report-kpi-value">Rp89,4 jt</p><p id="report-kpi-revenue-note" class="report-kpi-note positive">↑ 8% vs periode sebelumnya</p></div></article>
+          <article class="reveal report-kpi-card" style="animation-delay:110ms"><div class="report-kpi-icon amber"><i data-lucide="receipt-text"></i></div><div><p class="report-kpi-label">Total Pesanan</p><p id="report-kpi-orders" class="report-kpi-value">1.248</p><p id="report-kpi-orders-note" class="report-kpi-note positive">↑ 12% vs periode sebelumnya</p></div></article>
+          <article class="reveal report-kpi-card" style="animation-delay:140ms"><div class="report-kpi-icon green"><i data-lucide="circle-dollar-sign"></i></div><div><p class="report-kpi-label">Rata-rata Transaksi</p><p id="report-kpi-aov" class="report-kpi-value">Rp71,6 rb</p><p class="report-kpi-note">per pesanan</p></div></article>
+          <article class="reveal report-kpi-card" style="animation-delay:170ms"><div class="report-kpi-icon blue"><i data-lucide="circle-check-big"></i></div><div><p class="report-kpi-label">Pesanan Selesai</p><p id="report-kpi-completion" class="report-kpi-value">92%</p><p id="report-kpi-completion-note" class="report-kpi-note positive">1.148 pesanan selesai</p></div></article>
+        </div>
+
+        <section class="reveal report-chart-card" style="animation-delay:200ms">
+          <div class="report-card-head">
+            <div><p class="u-text-base fw-semibold u-text-ink">Tren Penjualan</p><p id="report-chart-subtitle" class="u-text-xs ink60">September 2026 · Semua Kanal</p></div>
+            <div class="d-flex flex-wrap align-items-center u-gap-4">
+              <div class="d-flex align-items-center u-gap-2"><span class="report-legend-solid"></span><p class="u-text-xs ink60">Periode Ini</p></div>
+              <div class="d-flex align-items-center u-gap-2"><span class="report-legend-dash"></span><p class="u-text-xs ink60">Periode Sebelumnya</p></div>
+            </div>
+          </div>
+          <div id="linechart" class="position-relative w-100" style="height:390px"></div>
+        </section>
+
+        <div class="report-two-col">
+          <section class="reveal report-panel" style="animation-delay:230ms">
+            <div class="report-card-head"><div><p class="u-text-base fw-semibold u-text-ink">Pendapatan per Kanal</p><p class="u-text-xs ink60">Kontribusi dari seluruh transaksi</p></div><span id="report-channel-total" class="report-mini-total">Rp89,4 jt</span></div>
+            <div id="report-channel-breakdown" class="report-channel-list"></div>
+          </section>
+          <section class="reveal report-panel" style="animation-delay:260ms">
+            <div class="report-card-head"><div><p class="u-text-base fw-semibold u-text-ink">Status Pesanan</p><p class="u-text-xs ink60">Distribusi proses pesanan</p></div><span id="report-status-total" class="report-mini-total">1.248 pesanan</span></div>
+            <div id="report-status-breakdown" class="report-status-list"></div>
+          </section>
+        </div>
+
+        <div class="report-two-col report-bottom-grid">
+          <section class="reveal report-panel" style="animation-delay:290ms">
+            <div class="report-card-head"><div><p class="u-text-base fw-semibold u-text-ink">Menu Terlaris</p><p class="u-text-xs ink60">Berdasarkan jumlah porsi terjual</p></div><button data-nav="Menu Makanan" class="report-link-btn">Kelola menu <i data-lucide="arrow-up-right" class="u-size-3"></i></button></div>
+            <div id="report-top-menu" class="report-menu-list"></div>
+          </section>
+          <section class="reveal report-panel" style="animation-delay:320ms">
+            <div class="report-card-head"><div><p class="u-text-base fw-semibold u-text-ink">Ringkasan 7 Hari Terakhir</p><p class="u-text-xs ink60">Pesanan dan pendapatan harian</p></div><span class="report-mini-total">28 Sep 2026</span></div>
+            <div class="report-table-wrap"><table class="report-table"><thead><tr><th>TANGGAL</th><th>PESANAN</th><th>PENDAPATAN</th><th>AVG.</th></tr></thead><tbody id="report-daily-rows"></tbody></table></div>
+          </section>
+        </div>
+      </main>
+
+
+      <!-- ---------- PROMO PAGE ---------- -->
+      <main id="page-promo" class="page-shell hidden-page d-flex w-100 flex-column u-gap-6 u-p-8 promo-page">
+        <div class="reveal d-flex w-100 flex-wrap align-items-center justify-content-between u-gap-4" style="animation-delay:40ms">
+          <div class="d-flex flex-column u-gap-1">
+            <p class="u-text-base fw-semibold u-leading-6 u-text-ink">Promo Website</p>
+            <p class="u-text-sm ink60">Kelola promo yang ditampilkan pada landing page Lamak Bana.</p>
+          </div>
+          <button id="btn-add-promo" class="press d-flex align-items-center u-gap-2 rounded-pill u-bg-maroon u-px-4 u-py-2-5 u-text-sm fw-medium text-white">
+            <i data-lucide="plus" class="u-size-4"></i> Tambah Promo
+          </button>
+        </div>
+
+        <div class="promo-summary-grid">
+          <article class="reveal promo-summary-card" style="animation-delay:80ms">
+            <span class="promo-summary-icon is-active"><i data-lucide="badge-percent"></i></span>
+            <div><p class="promo-summary-label">Promo Aktif</p><p id="promo-stat-active" class="promo-summary-value">0</p></div>
+          </article>
+          <article class="reveal promo-summary-card" style="animation-delay:110ms">
+            <span class="promo-summary-icon is-scheduled"><i data-lucide="calendar-clock"></i></span>
+            <div><p class="promo-summary-label">Terjadwal</p><p id="promo-stat-scheduled" class="promo-summary-value">0</p></div>
+          </article>
+          <article class="reveal promo-summary-card" style="animation-delay:140ms">
+            <span class="promo-summary-icon is-off"><i data-lucide="eye-off"></i></span>
+            <div><p class="promo-summary-label">Tidak Aktif</p><p id="promo-stat-off" class="promo-summary-value">0</p></div>
+          </article>
+        </div>
+
+        <section class="reveal promo-list-card" style="animation-delay:180ms">
+          <div class="promo-list-head">
+            <div><p class="u-text-base fw-semibold u-text-ink">Daftar Promo</p><p class="u-text-xs ink60">Promo aktif dapat ditampilkan pada section “Promo Spesial Minggu Ini”.</p></div>
+            <div id="promo-tabs" class="promo-tabs">
+              <button class="promo-tab is-active" data-promo-status="Semua">Semua</button>
+              <button class="promo-tab" data-promo-status="Aktif">Aktif</button>
+              <button class="promo-tab" data-promo-status="Terjadwal">Terjadwal</button>
+              <button class="promo-tab" data-promo-status="Nonaktif">Nonaktif</button>
+            </div>
+          </div>
+          <div id="promo-list" class="promo-list"></div>
+        </section>
+      </main>
+
+      <!-- ---------- BANTUAN PAGE ---------- -->
+      <main id="page-bantuan" class="page-shell hidden-page d-flex w-100 flex-column u-gap-6 u-p-8 help-page">
+        <section class="reveal help-hero" style="animation-delay:60ms">
+          <div class="help-hero-copy">
+            <span class="help-kicker"><i data-lucide="life-buoy" class="u-size-4"></i> PUSAT BANTUAN</span>
+            <h2>Bagaimana kami bisa membantu?</h2>
+            <p>Temukan panduan singkat penggunaan Admin Lamak Bana atau cari jawaban dari pertanyaan yang sering ditanyakan.</p>
+          </div>
+          <label class="help-search-wrap">
+            <i data-lucide="search" class="u-size-4"></i>
+            <input id="help-search" type="search" placeholder="Cari bantuan, contoh: tambah menu..." autocomplete="off" />
+          </label>
+        </section>
+
+        <section class="reveal help-section" style="animation-delay:100ms">
+          <div class="help-section-head">
+            <div><p class="u-text-base fw-semibold u-text-ink">Panduan Cepat</p><p class="u-text-xs ink60">Akses fitur yang paling sering digunakan.</p></div>
+          </div>
+          <div id="help-guide-grid" class="help-guide-grid">
+            <button class="help-guide-card" data-nav="Pesanan" data-help-keywords="pesanan order status proses selesai batal pelanggan">
+              <span class="help-guide-icon"><i data-lucide="receipt-text"></i></span>
+              <div><strong>Kelola Pesanan</strong><small>Lihat pesanan masuk, ubah status, dan buka detail pelanggan.</small></div>
+              <i data-lucide="arrow-up-right" class="help-guide-arrow"></i>
+            </button>
+            <button class="help-guide-card" data-nav="Menu Makanan" data-help-keywords="menu makanan harga stok website andalan tambah edit">
+              <span class="help-guide-icon"><i data-lucide="utensils"></i></span>
+              <div><strong>Atur Menu</strong><small>Tambah menu, ubah harga, stok, dan tampilkan menu ke website.</small></div>
+              <i data-lucide="arrow-up-right" class="help-guide-arrow"></i>
+            </button>
+            <button class="help-guide-card" data-nav="Reservasi" data-help-keywords="reservasi meja pelanggan konfirmasi hadir selesai whatsapp">
+              <span class="help-guide-icon"><i data-lucide="calendar-check"></i></span>
+              <div><strong>Kelola Reservasi</strong><small>Konfirmasi reservasi, atur meja, dan pantau agenda hari ini.</small></div>
+              <i data-lucide="arrow-up-right" class="help-guide-arrow"></i>
+            </button>
+            <button class="help-guide-card" data-nav="Katering" data-help-keywords="katering catering acara nasi kotak prasmanan dp produksi">
+              <span class="help-guide-icon"><i data-lucide="chef-hat"></i></span>
+              <div><strong>Kelola Katering</strong><small>Pantau pesanan acara, jumlah pax, DP, hingga status produksi.</small></div>
+              <i data-lucide="arrow-up-right" class="help-guide-arrow"></i>
+            </button>
+          </div>
+        </section>
+
+        <section class="help-two-col">
+          <article class="reveal help-panel" style="animation-delay:140ms">
+            <div class="help-section-head">
+              <div><p class="u-text-base fw-semibold u-text-ink">Pertanyaan Umum</p><p class="u-text-xs ink60">Jawaban singkat untuk penggunaan sehari-hari.</p></div>
+            </div>
+            <div id="help-faq" class="help-faq">
+              <div class="help-faq-item" data-help-keywords="pesanan status baru diproses siap selesai">
+                <button class="help-faq-question" type="button" aria-expanded="false"><span>Bagaimana mengubah status pesanan?</span><i data-lucide="chevron-down"></i></button>
+                <div class="help-faq-answer"><p>Buka menu <strong>Pesanan</strong>, pilih baris pesanan, lalu gunakan tombol proses berikutnya. Status bergerak dari Baru → Diproses → Siap → Selesai.</p></div>
+              </div>
+              <div class="help-faq-item" data-help-keywords="menu website tampil nonaktif stok">
+                <button class="help-faq-question" type="button" aria-expanded="false"><span>Bagaimana menyembunyikan menu dari website?</span><i data-lucide="chevron-down"></i></button>
+                <div class="help-faq-answer"><p>Masuk ke <strong>Menu Makanan</strong>, kemudian nonaktifkan toggle <strong>Website</strong> pada menu yang tidak ingin ditampilkan.</p></div>
+              </div>
+              <div class="help-faq-item" data-help-keywords="reservasi konfirmasi hadir pelanggan meja">
+                <button class="help-faq-question" type="button" aria-expanded="false"><span>Apa alur status reservasi?</span><i data-lucide="chevron-down"></i></button>
+                <div class="help-faq-answer"><p>Reservasi berjalan dari Menunggu → Dikonfirmasi → Hadir → Selesai. Reservasi juga dapat dibatalkan melalui halaman detail.</p></div>
+              </div>
+              <div class="help-faq-item" data-help-keywords="laporan excel pdf cetak filter tanggal kanal">
+                <button class="help-faq-question" type="button" aria-expanded="false"><span>Bagaimana mengunduh laporan?</span><i data-lucide="chevron-down"></i></button>
+                <div class="help-faq-answer"><p>Pada halaman <strong>Laporan</strong>, pilih periode dan kanal terlebih dahulu. Gunakan tombol Excel untuk ekspor data atau PDF/Cetak untuk membuka dialog cetak browser.</p></div>
+              </div>
+              <div class="help-faq-item" data-help-keywords="promo website aktif tanggal diskon">
+                <button class="help-faq-question" type="button" aria-expanded="false"><span>Bagaimana menampilkan promo di website?</span><i data-lucide="chevron-down"></i></button>
+                <div class="help-faq-answer"><p>Buka <strong>Promo</strong>, aktifkan promo dan toggle <strong>Website</strong>. Pastikan periode promo masih berlaku agar statusnya menjadi Aktif.</p></div>
+              </div>
+            </div>
+            <div id="help-no-result" class="help-no-result hidden-page">Tidak ada panduan yang cocok dengan pencarian.</div>
+          </article>
+
+          <article class="reveal help-panel help-contact" style="animation-delay:180ms">
+            <div class="help-section-head">
+              <div><p class="u-text-base fw-semibold u-text-ink">Masih Butuh Bantuan?</p><p class="u-text-xs ink60">Kirim catatan kendala kepada pengelola sistem.</p></div>
+            </div>
+            <form id="help-form" class="help-form">
+              <label><span>Kategori</span><select id="help-category" required><option value="">Pilih kategori</option><option>Pesanan</option><option>Menu Makanan</option><option>Reservasi</option><option>Katering</option><option>Laporan</option><option>Promo</option><option>Lainnya</option></select></label>
+              <label><span>Judul</span><input id="help-subject" required type="text" maxlength="80" placeholder="Contoh: Tidak bisa mengubah status pesanan" /></label>
+              <label><span>Detail Kendala</span><textarea id="help-message" required rows="5" maxlength="400" placeholder="Jelaskan kendala secara singkat..."></textarea><small><span id="help-message-count">0</span>/400 karakter</small></label>
+              <button type="submit" class="drawer-btn drawer-btn-primary help-submit"><i data-lucide="send" class="u-size-4"></i> Kirim Pertanyaan</button>
+              <p class="help-form-note"><i data-lucide="info" class="u-size-3"></i> Pada prototype ini, form hanya mensimulasikan pengiriman dan belum terhubung ke sistem tiket.</p>
+            </form>
+          </article>
+        </section>
+      </main>
+
+      <!-- ---------- PENGATURAN PAGE ---------- -->
+      <main id="page-settings" class="page-shell hidden-page d-flex w-100 flex-column u-gap-6 u-p-8 settings-page">
+        <section class="reveal settings-head" style="animation-delay:60ms">
+          <div>
+            <p class="settings-kicker"><i data-lucide="settings-2" class="u-size-4"></i> PENGATURAN ADMIN</p>
+            <h2>Pengaturan Lamak Bana</h2>
+            <p>Atur profil admin, informasi restoran, jam operasional, dan preferensi notifikasi.</p>
+          </div>
+          <div class="settings-head-actions">
+            <button id="settings-reset" type="button" class="settings-secondary-btn"><i data-lucide="rotate-ccw" class="u-size-4"></i> Reset</button>
+            <button id="settings-save" type="button" class="drawer-btn drawer-btn-primary"><i data-lucide="save" class="u-size-4"></i> Simpan Perubahan</button>
+          </div>
+        </section>
+
+        <section class="settings-grid">
+          <article class="reveal settings-card" style="animation-delay:100ms">
+            <div class="settings-card-head">
+              <span class="settings-card-icon"><i data-lucide="user-round"></i></span>
+              <div><p class="u-text-base fw-semibold u-text-ink">Profil Admin</p><p class="u-text-xs ink60">Informasi yang tampil pada panel admin.</p></div>
+            </div>
+            <div class="settings-profile-preview">
+              <span id="settings-avatar" class="settings-avatar">AU</span>
+              <div><strong id="settings-preview-name">Admin Utama</strong><small id="settings-preview-role">Super Admin</small></div>
+            </div>
+            <div class="settings-form-grid">
+              <label class="settings-field"><span>Nama Admin</span><input id="settings-admin-name" type="text" maxlength="60" value="Admin Utama" /></label>
+              <label class="settings-field"><span>Role</span><select id="settings-admin-role"><option>Super Admin</option><option>Admin</option><option>Operator</option></select></label>
+              <label class="settings-field settings-span-2"><span>Email</span><input id="settings-admin-email" type="email" placeholder="admin@contoh.com" /></label>
+            </div>
+          </article>
+
+          <article class="reveal settings-card" style="animation-delay:130ms">
+            <div class="settings-card-head">
+              <span class="settings-card-icon"><i data-lucide="store"></i></span>
+              <div><p class="u-text-base fw-semibold u-text-ink">Informasi Restoran</p><p class="u-text-xs ink60">Informasi dasar untuk kebutuhan website dan kontak pelanggan.</p></div>
+            </div>
+            <div class="settings-form-grid">
+              <label class="settings-field settings-span-2"><span>Nama Restoran</span><input id="settings-store-name" type="text" maxlength="80" value="Lamak Bana" /></label>
+              <label class="settings-field"><span>WhatsApp</span><input id="settings-store-phone" type="text" maxlength="24" placeholder="08xxxxxxxxxx" /></label>
+              <label class="settings-field"><span>Kota</span><input id="settings-store-city" type="text" maxlength="60" value="Jakarta" /></label>
+              <label class="settings-field settings-span-2"><span>Alamat</span><textarea id="settings-store-address" rows="3" maxlength="180" placeholder="Masukkan alamat restoran..."></textarea></label>
+            </div>
+          </article>
+
+          <article class="reveal settings-card" style="animation-delay:160ms">
+            <div class="settings-card-head">
+              <span class="settings-card-icon"><i data-lucide="clock-3"></i></span>
+              <div><p class="u-text-base fw-semibold u-text-ink">Jam Operasional</p><p class="u-text-xs ink60">Dipakai sebagai acuan reservasi dan informasi pada website.</p></div>
+            </div>
+            <div class="settings-hours-list">
+              <div class="settings-hours-row"><div><strong>Senin – Jumat</strong><small>Hari kerja</small></div><label><span>Buka</span><input id="settings-weekday-open" type="time" value="09:00" /></label><label><span>Tutup</span><input id="settings-weekday-close" type="time" value="22:00" /></label></div>
+              <div class="settings-hours-row"><div><strong>Sabtu – Minggu</strong><small>Akhir pekan</small></div><label><span>Buka</span><input id="settings-weekend-open" type="time" value="08:00" /></label><label><span>Tutup</span><input id="settings-weekend-close" type="time" value="23:00" /></label></div>
+            </div>
+          </article>
+
+          <article class="reveal settings-card" style="animation-delay:190ms">
+            <div class="settings-card-head">
+              <span class="settings-card-icon"><i data-lucide="bell-ring"></i></span>
+              <div><p class="u-text-base fw-semibold u-text-ink">Notifikasi</p><p class="u-text-xs ink60">Pilih informasi yang ingin ditampilkan kepada admin.</p></div>
+            </div>
+            <div class="settings-toggle-list">
+              <label class="settings-toggle-row"><div><strong>Pesanan Baru</strong><small>Notifikasi ketika ada pesanan baru masuk.</small></div><input id="settings-notif-order" type="checkbox" class="menu-native-switch" checked /></label>
+              <label class="settings-toggle-row"><div><strong>Reservasi Baru</strong><small>Notifikasi reservasi yang perlu dikonfirmasi.</small></div><input id="settings-notif-reservation" type="checkbox" class="menu-native-switch" checked /></label>
+              <label class="settings-toggle-row"><div><strong>Katering</strong><small>Pengingat pesanan katering mendatang.</small></div><input id="settings-notif-catering" type="checkbox" class="menu-native-switch" checked /></label>
+              <label class="settings-toggle-row"><div><strong>Stok Menipis</strong><small>Peringatan ketika stok menu hampir habis.</small></div><input id="settings-notif-stock" type="checkbox" class="menu-native-switch" checked /></label>
+            </div>
+          </article>
+        </section>
+
+        <section class="reveal settings-note" style="animation-delay:220ms">
+          <i data-lucide="database" class="u-size-4"></i>
+          <div><strong>Mode Prototype</strong><span>Pengaturan disimpan pada browser menggunakan localStorage. Saat backend tersedia, bagian ini dapat langsung dihubungkan ke database dan konfigurasi website.</span></div>
+        </section>
+      </main>
+
+      <!-- ---------- PLACEHOLDER PAGE ---------- -->
+      <main id="page-placeholder" class="hidden-page d-flex w-100 flex-column u-gap-2 u-p-8">
+        <div class="d-flex u-h-420px w-100 flex-column align-items-center justify-content-center u-gap-2 u-rounded-2xl u-border u-border-dashed bg-white" style="border-color: rgba(59,31,20,.2)">
+          <p id="placeholder-title" class="u-font-anton u-text-2xl u-leading-1-3 u-text-ink">HALAMAN</p>
+          <p id="placeholder-sub" class="u-text-sm ink60">Pilih “Dashboard” di sidebar untuk kembali ke beranda.</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Order detail drawer -->
+    <div id="order-detail" class="hidden-page position-fixed u-inset-0 u-z-60 d-flex justify-content-end" style="background:rgba(0,0,0,.28)">
+      <aside id="order-detail-panel" class="order-detail-panel anim-slide bg-white">
+        <div class="order-drawer-head">
+          <div>
+            <p class="u-text-xs fw-medium u-tracking-0-24px ink60">DETAIL PESANAN</p>
+            <p id="detail-id" class="u-text-2xl fw-semibold u-leading-1-3 u-text-ink">#LB-2609-019</p>
+          </div>
+          <button id="order-detail-close" aria-label="Tutup detail" class="u-grid u-size-7 u-place-items-center rounded-pill ink60 u-transition-colors u-hover-bg-rgba-59-31-20-06"><i data-lucide="x" class="u-size-4"></i></button>
+        </div>
+        <div id="order-detail-body" class="order-detail-body"></div>
+        <div id="order-detail-actions" class="order-detail-actions"></div>
+      </aside>
+    </div>
+
+
+    <!-- Menu editor drawer -->
+    <div id="menu-editor" class="hidden-page position-fixed u-inset-0 u-z-60 d-flex justify-content-end" style="background:rgba(0,0,0,.28)">
+      <aside id="menu-editor-panel" class="menu-editor-panel anim-slide bg-white">
+        <div class="order-drawer-head">
+          <div>
+            <p class="u-text-xs fw-medium u-tracking-0-24px ink60">MENU MAKANAN</p>
+            <p id="menu-editor-title" class="u-text-2xl fw-semibold u-leading-1-3 u-text-ink">Edit Menu</p>
+          </div>
+          <button id="menu-editor-close" aria-label="Tutup editor" class="u-grid u-size-7 u-place-items-center rounded-pill ink60 u-transition-colors u-hover-bg-rgba-59-31-20-06"><i data-lucide="x" class="u-size-4"></i></button>
+        </div>
+        <form id="menu-editor-form" class="menu-editor-body">
+          <input id="menu-form-id" type="hidden" />
+          <div class="menu-photo-upload">
+            <div class="menu-photo-placeholder"><i data-lucide="image" class="u-size-6"></i><span>Foto Menu</span></div>
+            <button type="button" id="btn-menu-photo" class="menu-inline-link">Ganti foto</button>
+          </div>
+          <label class="menu-field"><span>Nama Menu</span><input id="menu-form-name" required type="text" placeholder="Contoh: Rendang Daging" /></label>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Kategori</span><select id="menu-form-category"><option>Daging</option><option>Ayam</option><option>Gulai</option><option>Telur</option><option>Pendamping</option></select></label>
+            <label class="menu-field"><span>Harga</span><div class="menu-price-input"><b>Rp</b><input id="menu-form-price" required type="number" min="0" step="1000" /></div></label>
+          </div>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Stok Hari Ini</span><input id="menu-form-stock" type="number" min="0" /></label>
+            <label class="menu-field"><span>Status</span><select id="menu-form-available"><option value="true">Tersedia</option><option value="false">Tidak Tersedia</option></select></label>
+          </div>
+          <label class="menu-field"><span>Deskripsi Website</span><textarea id="menu-form-desc" rows="4" maxlength="150" placeholder="Deskripsi singkat menu..."></textarea><small><span id="menu-desc-count">0</span>/150 karakter</small></label>
+          <div class="menu-editor-switches">
+            <label class="menu-setting-row"><div><strong>Tampil di Website</strong><small>Publikasikan menu pada halaman website.</small></div><input id="menu-form-website" type="checkbox" class="menu-native-switch" /></label>
+            <label class="menu-setting-row"><div><strong>Menu Andalan</strong><small>Tampilkan pada section “Menu Andalan Kami”.</small></div><input id="menu-form-featured" type="checkbox" class="menu-native-switch" /></label>
+          </div>
+        </form>
+        <div class="order-detail-actions">
+          <button id="menu-delete" type="button" class="drawer-btn drawer-btn-secondary">Hapus</button>
+          <button id="menu-save" type="button" class="drawer-btn drawer-btn-primary"><i data-lucide="save" class="u-size-4"></i> Simpan Perubahan</button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Website menu preview modal -->
+    <div id="menu-preview" class="hidden-page position-fixed u-inset-0 u-z-60 menu-preview-overlay">
+      <section class="menu-preview-modal anim-pop">
+        <div class="menu-preview-head">
+          <div><p class="u-text-xs fw-medium u-tracking-0-24px ink60">PREVIEW WEBSITE</p><p class="u-text-base fw-semibold u-text-ink">Menu Andalan Kami</p></div>
+          <button id="menu-preview-close" class="u-grid u-size-7 u-place-items-center rounded-pill ink60" aria-label="Tutup preview"><i data-lucide="x" class="u-size-4"></i></button>
+        </div>
+        <div class="website-preview-canvas">
+          <p class="website-preview-eyebrow">• MENU KAMI</p>
+          <div class="d-flex flex-wrap align-items-end justify-content-between u-gap-3"><div><h2>MENU ANDALAN KAMI</h2><p>Resep turun-temurun, dimasak setiap pagi dengan rempah pilihan.</p></div><span>Lihat Semua Menu</span></div>
+          <div id="website-preview-items" class="website-preview-grid"></div>
+        </div>
+      </section>
+    </div>
+
+
+    <!-- Reservation detail drawer -->
+    <div id="reservation-detail" class="hidden-page position-fixed u-inset-0 u-z-60 d-flex justify-content-end" style="background:rgba(0,0,0,.28)">
+      <aside id="reservation-detail-panel" class="order-detail-panel anim-slide bg-white">
+        <div class="order-drawer-head">
+          <div><p class="u-text-xs fw-medium u-tracking-0-24px ink60">DETAIL RESERVASI</p><p id="reservation-detail-id" class="u-text-2xl fw-semibold u-leading-1-3 u-text-ink">#RS-000</p></div>
+          <button id="reservation-detail-close" aria-label="Tutup detail" class="u-grid u-size-7 u-place-items-center rounded-pill ink60 u-transition-colors u-hover-bg-rgba-59-31-20-06"><i data-lucide="x" class="u-size-4"></i></button>
+        </div>
+        <div id="reservation-detail-body" class="order-detail-body"></div>
+        <div id="reservation-detail-actions" class="order-detail-actions"></div>
+      </aside>
+    </div>
+
+    <!-- Reservation editor drawer -->
+    <div id="reservation-editor" class="hidden-page position-fixed u-inset-0 u-z-60 d-flex justify-content-end" style="background:rgba(0,0,0,.28)">
+      <aside id="reservation-editor-panel" class="menu-editor-panel anim-slide bg-white">
+        <div class="order-drawer-head">
+          <div><p class="u-text-xs fw-medium u-tracking-0-24px ink60">RESERVASI</p><p id="reservation-editor-title" class="u-text-2xl fw-semibold u-leading-1-3 u-text-ink">Reservasi Baru</p></div>
+          <button id="reservation-editor-close" aria-label="Tutup form" class="u-grid u-size-7 u-place-items-center rounded-pill ink60 u-transition-colors u-hover-bg-rgba-59-31-20-06"><i data-lucide="x" class="u-size-4"></i></button>
+        </div>
+        <form id="reservation-editor-form" class="menu-editor-body">
+          <input id="reservation-form-id" type="hidden" />
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Nama Pelanggan</span><input id="reservation-form-name" required type="text" placeholder="Nama pelanggan" /></label>
+            <label class="menu-field"><span>No. WhatsApp</span><input id="reservation-form-phone" required type="tel" placeholder="08xx-xxxx-xxxx" /></label>
+          </div>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Tanggal</span><input id="reservation-form-date" required type="date" /></label>
+            <label class="menu-field"><span>Waktu</span><input id="reservation-form-time" required type="time" /></label>
+          </div>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Jumlah Tamu</span><input id="reservation-form-pax" required type="number" min="1" max="30" /></label>
+            <label class="menu-field"><span>Meja</span><input id="reservation-form-table" type="text" placeholder="Contoh: Meja 12" /></label>
+          </div>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Area</span><select id="reservation-form-area"><option>Ruang Utama</option><option>Area Jendela</option><option>Area Keluarga</option><option>Private Room</option></select></label>
+            <label class="menu-field"><span>Sumber</span><select id="reservation-form-source"><option>Website</option><option>WhatsApp</option><option>Telepon</option><option>Admin</option></select></label>
+          </div>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Acara / Keperluan</span><input id="reservation-form-occasion" type="text" placeholder="Contoh: Makan keluarga" /></label>
+            <label class="menu-field"><span>Status</span><select id="reservation-form-status"><option>Menunggu</option><option>Dikonfirmasi</option><option>Hadir</option><option>Selesai</option><option>Dibatalkan</option></select></label>
+          </div>
+          <label class="menu-field"><span>Catatan</span><textarea id="reservation-form-note" rows="4" maxlength="220" placeholder="Permintaan tempat duduk, alergi, kursi bayi, dan lainnya..."></textarea><small><span id="reservation-note-count">0</span>/220 karakter</small></label>
+          <div class="reservation-form-hint"><i data-lucide="info" class="u-size-4"></i><span>Pastikan waktu reservasi berada dalam jam operasional restoran.</span></div>
+        </form>
+        <div class="order-detail-actions">
+          <button id="reservation-editor-cancel" type="button" class="drawer-btn drawer-btn-secondary">Batal</button>
+          <button id="reservation-save" type="button" class="drawer-btn drawer-btn-primary"><i data-lucide="save" class="u-size-4"></i> Simpan Reservasi</button>
+        </div>
+      </aside>
+    </div>
+
+
+    <!-- Catering detail drawer -->
+    <div id="catering-detail" class="hidden-page position-fixed u-inset-0 u-z-60 d-flex justify-content-end" style="background:rgba(0,0,0,.28)">
+      <aside id="catering-detail-panel" class="order-detail-panel anim-slide bg-white">
+        <div class="order-drawer-head">
+          <div><p class="u-text-xs fw-medium u-tracking-0-24px ink60">DETAIL KATERING</p><p id="catering-detail-id" class="u-text-2xl fw-semibold u-leading-1-3 u-text-ink">#KT-000</p></div>
+          <button id="catering-detail-close" aria-label="Tutup detail" class="u-grid u-size-7 u-place-items-center rounded-pill ink60 u-transition-colors u-hover-bg-rgba-59-31-20-06"><i data-lucide="x" class="u-size-4"></i></button>
+        </div>
+        <div id="catering-detail-body" class="order-detail-body"></div>
+        <div id="catering-detail-actions" class="order-detail-actions"></div>
+      </aside>
+    </div>
+
+    <!-- Catering editor drawer -->
+    <div id="catering-editor" class="hidden-page position-fixed u-inset-0 u-z-60 d-flex justify-content-end" style="background:rgba(0,0,0,.28)">
+      <aside id="catering-editor-panel" class="catering-editor-panel anim-slide bg-white">
+        <div class="order-drawer-head">
+          <div><p class="u-text-xs fw-medium u-tracking-0-24px ink60">KATERING</p><p id="catering-editor-title" class="u-text-2xl fw-semibold u-leading-1-3 u-text-ink">Katering Baru</p></div>
+          <button id="catering-editor-close" aria-label="Tutup form" class="u-grid u-size-7 u-place-items-center rounded-pill ink60 u-transition-colors u-hover-bg-rgba-59-31-20-06"><i data-lucide="x" class="u-size-4"></i></button>
+        </div>
+        <form id="catering-editor-form" class="menu-editor-body">
+          <input id="catering-form-id" type="hidden" />
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Nama / Perusahaan</span><input id="catering-form-customer" required type="text" placeholder="Contoh: PT Sinar Jaya" /></label>
+            <label class="menu-field"><span>PIC</span><input id="catering-form-pic" required type="text" placeholder="Nama penanggung jawab" /></label>
+          </div>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>No. WhatsApp</span><input id="catering-form-phone" required type="tel" placeholder="08xx-xxxx-xxxx" /></label>
+            <label class="menu-field"><span>Sumber</span><select id="catering-form-source"><option>Website</option><option>WhatsApp</option><option>Telepon</option><option>Admin</option></select></label>
+          </div>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Tanggal Acara</span><input id="catering-form-date" required type="date" /></label>
+            <label class="menu-field"><span>Waktu</span><input id="catering-form-time" required type="time" /></label>
+          </div>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Jenis Acara</span><select id="catering-form-event"><option>Pernikahan</option><option>Acara Kantor</option><option>Arisan & Syukuran</option><option>Lainnya</option></select></label>
+            <label class="menu-field"><span>Jenis Layanan</span><select id="catering-form-service"><option>Nasi Kotak</option><option>Prasmanan</option></select></label>
+          </div>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Jumlah Pax</span><input id="catering-form-pax" required type="number" min="10" step="1" /></label>
+            <label class="menu-field"><span>Status</span><select id="catering-form-status"><option>Menunggu</option><option>Penawaran</option><option>Dikonfirmasi</option><option>Produksi</option><option>Selesai</option><option>Dibatalkan</option></select></label>
+          </div>
+          <label class="menu-field"><span>Paket / Menu</span><input id="catering-form-package" required type="text" placeholder="Contoh: Nasi Kotak Rendang + Ayam Pop" /></label>
+          <label class="menu-field"><span>Alamat / Lokasi Acara</span><textarea id="catering-form-address" rows="3" maxlength="240" placeholder="Alamat pengantaran atau lokasi acara"></textarea></label>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Total Pesanan</span><input id="catering-form-total" required type="number" min="0" step="1000" placeholder="1400000" /></label>
+            <label class="menu-field"><span>DP Dibayar</span><input id="catering-form-dp" type="number" min="0" step="1000" placeholder="700000" /></label>
+          </div>
+          <label class="menu-field"><span>Catatan</span><textarea id="catering-form-note" rows="4" maxlength="260" placeholder="Peralatan, setup, permintaan menu, waktu pengiriman, dan lainnya..."></textarea><small><span id="catering-note-count">0</span>/260 karakter</small></label>
+          <div class="reservation-form-hint"><i data-lucide="info" class="u-size-4"></i><span>Pastikan tanggal, jumlah pax, lokasi, paket, dan pembayaran sudah dikonfirmasi sebelum pesanan masuk tahap Produksi.</span></div>
+        </form>
+        <div class="order-detail-actions">
+          <button id="catering-editor-cancel" type="button" class="drawer-btn drawer-btn-secondary">Batal</button>
+          <button id="catering-save" type="button" class="drawer-btn drawer-btn-primary"><i data-lucide="save" class="u-size-4"></i> Simpan Katering</button>
+        </div>
+      </aside>
+    </div>
+
+
+    <!-- Promo editor drawer -->
+    <div id="promo-editor" class="hidden-page position-fixed u-inset-0 u-z-60 d-flex justify-content-end" style="background:rgba(0,0,0,.28)">
+      <aside id="promo-editor-panel" class="menu-editor-panel anim-slide bg-white">
+        <div class="order-drawer-head">
+          <div><p class="u-text-xs fw-medium u-tracking-0-24px ink60">PROMO</p><p id="promo-editor-title" class="u-text-2xl fw-semibold u-leading-1-3 u-text-ink">Tambah Promo</p></div>
+          <button id="promo-editor-close" aria-label="Tutup form" class="u-grid u-size-7 u-place-items-center rounded-pill ink60 u-transition-colors u-hover-bg-rgba-59-31-20-06"><i data-lucide="x" class="u-size-4"></i></button>
+        </div>
+        <form id="promo-editor-form" class="menu-editor-body">
+          <input id="promo-form-id" type="hidden" />
+          <label class="menu-field"><span>Nama Promo</span><input id="promo-form-name" required type="text" placeholder="Contoh: Paket Hemat Nasi Rendang" /></label>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Tipe Promo</span><select id="promo-form-type"><option>Diskon Persen</option><option>Gratis Ongkir</option><option>Harga Spesial</option></select></label>
+            <label class="menu-field"><span>Nilai Promo</span><input id="promo-form-value" type="text" placeholder="Contoh: 20% atau Rp10.000" /></label>
+          </div>
+          <div class="menu-form-row">
+            <label class="menu-field"><span>Mulai</span><input id="promo-form-start" required type="date" /></label>
+            <label class="menu-field"><span>Berakhir</span><input id="promo-form-end" required type="date" /></label>
+          </div>
+          <label class="menu-field"><span>Deskripsi Singkat</span><textarea id="promo-form-desc" rows="4" maxlength="180" placeholder="Keterangan yang tampil di website..."></textarea><small><span id="promo-desc-count">0</span>/180 karakter</small></label>
+          <div class="menu-editor-switches">
+            <label class="menu-setting-row"><div><strong>Promo Aktif</strong><small>Promo dapat digunakan pelanggan.</small></div><input id="promo-form-active" type="checkbox" class="menu-native-switch" /></label>
+            <label class="menu-setting-row"><div><strong>Tampil di Website</strong><small>Tampilkan promo pada landing page.</small></div><input id="promo-form-website" type="checkbox" class="menu-native-switch" /></label>
+          </div>
+        </form>
+        <div class="order-detail-actions">
+          <button id="promo-delete" type="button" class="drawer-btn drawer-btn-secondary">Hapus</button>
+          <button id="promo-save" type="button" class="drawer-btn drawer-btn-primary"><i data-lucide="save" class="u-size-4"></i> Simpan Promo</button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Dropdown background overlay (20% black) -->
+    <div id="overlay" class="hidden-page position-fixed u-inset-0 u-z-40" style="background: rgba(0,0,0,.2)"></div>
+
+    <!-- Notification modal -->
+    <div id="notif" class="hidden-page position-fixed u-inset-0 u-z-60 d-flex justify-content-end" style="background: rgba(0,0,0,.2)">
+      <div id="notif-panel" class="anim-slide d-flex h-100 u-w-380px flex-column u-gap-4 u-border-l u-border-solid border-soft bg-white u-p-6">
+        <div class="d-flex align-items-center justify-content-between">
+          <p class="u-text-base fw-semibold u-leading-6 u-text-ink">Notifikasi</p>
+          <button id="notif-close" aria-label="Tutup" class="u-grid u-size-7 u-place-items-center rounded-pill ink60 u-transition-colors u-hover-bg-rgba-59-31-20-06">
+            <i data-lucide="x" class="u-size-4"></i>
+          </button>
+        </div>
+        <div id="notif-list" class="d-flex flex-column u-gap-2"></div>
+        <button class="mt-auto rounded-pill u-bg-maroon u-py-2-5 u-text-sm fw-medium text-white u-transition-opacity u-hover-opacity-90">Tandai semua terbaca</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- jQuery harus dimuat SEBELUM Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+
+<div id="ux-toast" class="ux-toast"></div>
+</body>
+</html>
