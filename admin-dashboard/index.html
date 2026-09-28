@@ -260,28 +260,28 @@
             <div class="order-stat-icon" style="background:rgba(139,30,30,.09);color:#8b1e1e"><i data-lucide="bell-ring" class="u-size-5"></i></div>
             <div class="d-flex flex-column u-gap-1">
               <p class="u-text-xs ink60">Pesanan Baru</p>
-              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number">12</p><span class="u-text-xs u-text-maroon">perlu tindakan</span></div>
+              <div class="d-flex align-items-end u-gap-2"> <p class="order-stat-number summary-baru">0</p> <span class="u-text-xs u-text-maroon">perlu tindakan</span>
             </div>
           </button>
           <button class="order-stat-card reveal text-start" data-order-status="Diproses" style="animation-delay:120ms">
             <div class="order-stat-icon" style="background:rgba(242,169,59,.18);color:#9a6500"><i data-lucide="chef-hat" class="u-size-5"></i></div>
             <div class="d-flex flex-column u-gap-1">
               <p class="u-text-xs ink60">Sedang Diproses</p>
-              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number">8</p><span class="u-text-xs ink60">di dapur</span></div>
+              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number summary-proses">0</p><span class="u-text-xs ink60">di dapur</span></div>
             </div>
           </button>
           <button class="order-stat-card reveal text-start" data-order-status="Siap" style="animation-delay:160ms">
             <div class="order-stat-icon" style="background:rgba(47,93,58,.10);color:#2f5d3a"><i data-lucide="package-check" class="u-size-5"></i></div>
             <div class="d-flex flex-column u-gap-1">
               <p class="u-text-xs ink60">Siap Disajikan</p>
-              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number">5</p><span class="u-text-xs u-text-leaf">siap diambil</span></div>
+              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number summary-siap">0</p><span class="u-text-xs u-text-leaf">siap diambil</span></div>
             </div>
           </button>
           <button class="order-stat-card reveal text-start" data-order-status="Selesai" style="animation-delay:200ms">
             <div class="order-stat-icon" style="background:rgba(47,93,58,.10);color:#2f5d3a"><i data-lucide="circle-check-big" class="u-size-5"></i></div>
             <div class="d-flex flex-column u-gap-1">
               <p class="u-text-xs ink60">Selesai Hari Ini</p>
-              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number">103</p><span class="u-text-xs ink60">pesanan</span></div>
+              <div class="d-flex align-items-end u-gap-2"><p class="order-stat-number summary-selesai">0</p><span class="u-text-xs ink60">pesanan</span></div>
             </div>
           </button>
         </div>
@@ -312,10 +312,18 @@
           </div>
 
           <div id="order-tabs" class="order-tabs" role="tablist" aria-label="Status pesanan">
-            <button class="order-tab is-active" data-status="Semua">Semua <span>128</span></button>
-            <button class="order-tab" data-status="Baru">Baru <span>12</span></button>
-            <button class="order-tab" data-status="Diproses">Diproses <span>8</span></button>
-            <button class="order-tab" data-status="Siap">Siap <span>5</span></button>
+            <button class="order-tab is-active" data-status="Semua">
+    Semua <span id="tab-semua-count">0</span>
+</button>
+            <button class="order-tab" data-status="Baru">
+    Baru <span id="tab-baru-count">0</span>
+</button>
+            <button class="order-tab" data-status="Diproses">
+    Diproses <span id="tab-proses-count">0</span>
+</button>
+            <button class="order-tab" data-status="Siap">
+    Siap <span id="tab-siap-count">0</span>
+</button>
             <button class="order-tab" data-status="Selesai">Selesai</button>
             <button class="order-tab" data-status="Dibatalkan">Dibatalkan</button>
           </div>

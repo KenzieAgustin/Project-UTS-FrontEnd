@@ -1,5 +1,112 @@
 $(function () {
 
+  loadMenuFromDatabase();
+
+  loadOrdersFromDatabase();
+
+  loadOrderSummary();
+
+  async function loadOrdersFromDatabase(){
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:3000/api/orders"
+        );
+
+        const data = await response.json();
+
+        $("#tab-semua-count").text(data.length);
+
+$("#tab-baru-count").text(
+    data.filter(o => o.status === "Baru").length
+);
+
+$("#tab-proses-count").text(
+    data.filter(o => o.status === "Diproses").length
+);
+
+$("#tab-siap-count").text(
+    data.filter(o => o.status === "Siap").length
+);
+
+        console.log("DATA MYSQL ORDER:", data);
+
+
+        ORDER_DATA = data.map(order => ({
+
+            id: "#" + order.order_code,
+
+            customer: order.customer_name,
+
+            phone: "-",
+
+            summary: order.items,
+
+            channel: order.order_type,
+
+            time: new Date(order.order_time)
+                .toLocaleTimeString("id-ID",{
+                    hour:"2-digit",
+                    minute:"2-digit"
+                }),
+
+            total: "Rp" + Number(order.total_price)
+                .toLocaleString("id-ID"),
+
+            status: order.status
+
+        }));
+
+        console.log("ORDER_DATA BARU:", ORDER_DATA);
+
+
+        renderOrders();
+        renderFullOrders();
+
+
+    }catch(error){
+
+        console.error(
+            "Gagal mengambil data pesanan",
+            error
+        );
+
+    }
+
+}
+
+async function loadOrderSummary(){
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:3000/api/order-summary"
+        );
+
+        const data = await response.json();
+
+
+        $(".summary-baru").text(data.baru || 0);
+
+        $(".summary-proses").text(data.diproses || 0);
+
+        $(".summary-siap").text(data.siap || 0);
+
+        $(".summary-selesai").text(data.selesai || 0);
+
+
+    }catch(error){
+
+        console.error(
+            "Gagal mengambil summary order",
+            error
+        );
+
+    }
+
+}
+
   /* ---------------- Data ---------------- */
   const NAV_UTAMA = [
     ['Dashboard', 'layout-dashboard'], ['Pesanan', 'receipt'], ['Menu Makanan', 'utensils'],
@@ -15,6 +122,56 @@ $(function () {
     Dibatalkan: { bg: 'rgba(180,35,24,.09)', color: '#b42318' },
   };
 
+  async function loadMenuFromDatabase(){
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:3000/api/menu"
+        );
+
+        const data = await response.json();
+
+
+        MENU_DATA = data.map(item => ({
+
+            id: "MN-" + String(item.id).padStart(3,"0"),
+
+            name:item.name,
+
+            category:item.category,
+
+            price:item.price,
+
+            stock:item.stock,
+
+            available:item.status === "tersedia",
+
+            website:true,
+
+            featured:false,
+
+            desc:item.description,
+
+            tone:"rendang"
+
+        }));
+
+
+        renderMenuPage();
+
+
+    }catch(error){
+
+        console.error(
+            "Gagal mengambil data menu",
+            error
+        );
+
+    }
+
+}
+
   const ORDERS = [
     ['#LB-2609-018','Rina Maharani','Rendang Daging ×2, Nasi','Makan di Tempat','12:40','Rp78.000','Selesai'],
     ['#LB-2609-017','Budi Santoso','Ayam Pop ×1, Es Teh','Ojek Online','12:32','Rp41.000','Diproses'],
@@ -23,7 +180,7 @@ $(function () {
     ['#LB-2609-014','Andi Pratama','Gulai Tunjang ×2, Nasi Putih','Makan di Tempat','10:48','Rp64.000','Selesai'],
   ];
 
-  const ORDER_DATA = [
+  let ORDER_DATA = [
     {
       id:'#LB-2609-019', customer:'Siti Rahma', phone:'0812-8765-4321',
       items:[['Rendang Daging',2,'Rp28.000'],['Nasi Putih',2,'Rp8.000'],['Es Teh Manis',1,'Rp7.000']],
@@ -2034,8 +2191,7 @@ $(function () {
   applySettingsToShell();
   initUnifiedSelects();
   renderSidebar();
-  renderOrders();
-  renderFullOrders();
+
   renderMenuPage();
   renderReservationPage();
   renderCateringPage();
@@ -2043,7 +2199,10 @@ $(function () {
   renderPromoPage();
   renderMenus();
   renderNotif();
+
   wire();
+
+  loadOrdersFromDatabase();
   lucide.createIcons();
   requestAnimationFrame(function () { buildLineChart('#linechart-dash'); });
 
