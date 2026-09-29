@@ -832,11 +832,197 @@ body {
     background-color: var(--gray-photo);
 }
 
+/* ============ FOOTER SECTION ============ */
+.footer {
+    background-color: #8b1d1d;
+    overflow: hidden;
+}
+
+.footer-section {
+    position: relative;
+    width: 100%;
+    background-color: var(--maroon);
+    padding: 130px 20px 0 20px;  /* tanpa padding bawah: watermark menempel & terpotong di dasar footer */
+    margin-bottom: 0 !important; /* Mencegah margin section yang memunculkan warna krem */
+    overflow: hidden;
+}
+
+/* 1. LAYER MOTIF BATIK MINANGKABAU */
+.footer-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url('assets/pattern.svg') -2px -32px / var(--pattern-size) repeat;
+    opacity: var(--pattern-opacity);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2; /* Memastikan teks dan tautan berada di atas motif */
+}
+
+/* 2. GRID: kolom kiri fleksibel + 3 kolom kecil yang rapat di sisi kanan */
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr repeat(3, 104px);
+    column-gap: 24px;
+    align-items: baseline;   /* logo & judul kolom sejajar di garis dasar teks */
+    padding-bottom: 60px;
+}
+
+/* Kolom 1: identitas */
+.footer-logo {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;   /* dikunci agar tinggi baris tidak bergantung pada font */
+    letter-spacing: 1px;
+    color: var(--cream);
+    margin-bottom: 19px;
+}
+
+.footer-desc {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--cream);
+    opacity: 0.8;
+    margin-bottom: 18px;
+    max-width: 370px; /* membuat kalimat patah setelah "resep" */
+}
+
+.footer-contact p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--cream);
+    opacity: 0.8;
+    margin: 0;
+}
+
+.footer-email {
+    color: var(--cream);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity 0.3s ease;
+}
+
+.footer-email:hover { opacity: 0.7; }
+
+/* Kolom 2-4: judul + daftar */
+.footer-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--yellow);
+    letter-spacing: 0;
+    text-transform: uppercase;
+    margin-bottom: 9px;
+}
+
+.footer-links,
+.footer-schedule {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-links a {
+    display: block;
+    color: var(--cream);
+    text-decoration: none;
+    font-size: 14px;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.footer-links a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+/* Jam buka: hari dan jam tampil bertumpuk, jaraknya sama dengan daftar link */
+.footer-schedule li {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--cream);
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+/* Bagian bawah (copyright & sosmed) */
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 26px 0 0 0;
+    border-top: 1px solid rgba(255, 246, 233, 0.1);
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.copyright {
+    font-size: 14px;
+    color: var(--cream);
+    opacity: 0.6;
+    margin: 0;
+}
+
+.footer-sosmed {
+    display: flex;
+    gap: 16px;
+}
+
+.sosmed-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 246, 233, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.sosmed-circle:hover {
+    background-color: rgba(255, 246, 233, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Watermark raksasa (SVG): hanya bagian atas huruf yang terlihat */
+.footer-bg-text {
+    display: block;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1200px;
+    height: auto;
+    margin: 44px auto 0 auto;
+    pointer-events: none;
+    user-select: none;
+}
+
+.footer-bg-text text {
+    font-family: var(--font-display);
+    font-size: 320px;
+    fill: rgba(255, 246, 233, 0.1);
+}
+
+/* Desain: tiga kolom kanan sedikit keluar dari garis container (hanya di layar lebar) */
+@media (min-width: 1280px) {
+    .footer-grid { margin-right: -36px; }
+}
+
 /* Responsive Reservasi — MOBILE */
 @media (max-width: 992px) {
     .reservasi-section { padding: 80px 20px 60px 20px; }
     .reservasi-title-big { font-size: 56px; }
-    .reservasi-wave { height: 70px; }
+    .reservasi-section { --wave-h: 70px; }
     .reservasi-circle {
         position: relative;
         right: auto;
@@ -846,6 +1032,11 @@ body {
         margin: 48px auto -170px auto;
     }
     .reservasi-circle-small { display: none; }
+    .footer-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 40px 24px;
+    }
+    .footer-col-1 { grid-column: 1 / -1; }
 }
 
 /* Responsive Reservasi — MOBILE */
@@ -856,6 +1047,11 @@ body {
     .reservasi-actions .btn-solid-red,
     .reservasi-actions .btn-cream { flex: 1; }
     .reservasi-circle { width: 280px; height: 280px; margin-bottom: -120px; }
+    .footer-section { padding: 110px 16px 0 16px; } /* ruang untuk lingkaran foto Reservasi yang menjorok ke footer */
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px 20px; padding-bottom: 40px; }
+    .footer-desc { max-width: none; }
+    .footer-bottom { flex-direction: column-reverse; align-items: flex-start; gap: 24px; }
+    .footer-bg-text { margin-top: 32px; }
 }
 
 /* ============ ANIMASI ============ */
