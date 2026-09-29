@@ -248,6 +248,7 @@ body {
 .kategori-subtitle,
 .promo-tag,
 .menu-tag { color: black; font-size: 14px; margin-bottom: 8px; }
+.menu-tag { color: var(--cream); }
 .kategori-desc,
 .promo-subtitle,
 .menu-subtitle { font-size: 16px; }
@@ -417,7 +418,7 @@ body {
     flex-direction: column;
 }
 
-.card-offset { transform: translateY(48px); }
+.card-offset { transform: none; }
 
 .card-img-wrapper { position: relative; height: 280px; background-color: var(--gray-photo); }
 
@@ -693,48 +694,6 @@ body {
     .kenapa-item-title { font-size: 18px; }
 }
 
-/* ANIMASI: scroll reveal */
-.js .reveal {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.js .reveal.show {
-    opacity: 1;
-    transform: none;
-}
-
-.js .kenapa-item.reveal:nth-child(2) { transition-delay: 0.15s; }
-.js .kenapa-item.reveal:nth-child(3) { transition-delay: 0.3s; }
-.js .kenapa-item.reveal:nth-child(4) { transition-delay: 0.45s; }
-
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-10px); }
-}
-
-.tentang-badge-1 { animation: float 4s ease-in-out infinite; }
-.tentang-badge-2 { animation: float 5s ease-in-out infinite reverse; }
-
-/* Angka 01-04 naik sedikit dan berubah warna saat item di-hover */
-.kenapa-num { transition: transform 0.3s ease, color 0.3s ease; }
-.kenapa-item:hover .kenapa-num {
-    transform: translateY(-6px);
-    color: var(--cream);
-}
-
-/* Foto lengkung membesar tipis saat di-hover */
-.tentang-arch { transition: transform 0.5s ease, box-shadow 0.5s ease; }
-.tentang-arch:hover {
-    transform: scale(1.02);
-    box-shadow: 0 28px 50px rgba(0,0,0,0.22);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .reveal { opacity: 1; transform: none; transition: none; }
-    .tentang-badge-1, .tentang-badge-2 { animation: none; }
-}
 /* Katering */
 .katering-section { width: 100%; background-color: #fff; padding: 100px 20px; }
 
@@ -898,3 +857,187 @@ body {
     .reservasi-actions .btn-cream { flex: 1; }
     .reservasi-circle { width: 280px; height: 280px; margin-bottom: -120px; }
 }
+
+/* ============ ANIMASI ============ */
+
+/* SCROLL REVEAL (aktif hanya kalau JS jalan, lihat class .js di script.js) */
+.js .reveal {
+    opacity: 0;
+    translate: 0 40px;
+    transition:
+        opacity 0.8s ease var(--d, 0s),
+        translate 0.8s ease var(--d, 0s),
+        scale 0.4s ease,
+        box-shadow 0.4s ease;
+}
+
+.js .reveal.show {
+    opacity: 1;
+    translate: 0 0;
+}
+
+/* Stagger: delay hanya berlaku saat muncul, otomatis reset saat menghilang.
+   Berlaku untuk item ke-2, 3, 4 dalam satu induk (kartu Promo/Menu, poin Kenapa Kami, dll) */
+.js .reveal.show:nth-child(2) { --d: 0.15s; }
+.js .reveal.show:nth-child(3) { --d: 0.3s; }
+.js .reveal.show:nth-child(4) { --d: 0.45s; }
+
+/* HERO: animasi saat halaman dibuka */
+@keyframes rise {
+    from { opacity: 0; translate: 0 50px; }
+    to   { opacity: 1; translate: 0 0; }
+}
+
+.hero-subtitle { animation: rise 0.8s ease 0.1s both; }
+.hero-title    { animation: rise 0.9s ease 0.25s both; }
+.circle-center { animation: rise 1s ease 0.35s both; }
+.circle-left   { animation: rise 1s ease 0.5s both; }
+.circle-right  { animation: rise 1s ease 0.65s both; }
+
+/* Ornamen rempah melayang pelan */
+@keyframes drift {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 -14px; }
+}
+
+.ornament-1 { animation: drift 6s ease-in-out infinite; }
+.ornament-2 { animation: drift 7s ease-in-out infinite reverse; }
+.ornament-3 { animation: drift 5s ease-in-out infinite; }
+
+/* NAVBAR: garis bawah link (desktop saja) + menu mobile turun halus */
+@media (min-width: 993px) {
+    .nav-links li a { position: relative; }
+
+    .nav-links li a::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -6px;
+        width: 100%;
+        height: 2px;
+        background: var(--maroon);
+        transform-origin: left;
+        scale: 0 1;
+        transition: scale 0.3s ease;
+    }
+
+    .nav-links li a:hover::after,
+    .nav-links li a.active-link::after { scale: 1 1; }
+}
+
+@keyframes menuDrop {
+    from { opacity: 0; translate: 0 -10px; }
+    to   { opacity: 1; translate: 0 0; }
+}
+
+.nav-links.open { animation: menuDrop 0.3s ease; }
+
+/* TOMBOL: naik sedikit saat di-hover */
+.btn-pesan:hover,
+.btn:hover,
+.btn-cream:hover,
+.btn-solid-red:hover {
+    translate: 0 -3px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+/* KATEGORI: kotak naik saat di-hover */
+.kategori-item:hover .kategori-box { transform: translateY(-6px); }
+
+/* PROMO: kartu membesar tipis, badge bergoyang, foto zoom */
+.promo-card:hover {
+    scale: 1.02;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+}
+
+@keyframes wiggle {
+    0%, 100% { rotate: -6deg; }
+    50%      { rotate: 6deg; }
+}
+
+.promo-card .card-badge { animation: wiggle 3s ease-in-out infinite; }
+
+.card-circle { transition: scale 0.5s ease; }
+.promo-card:hover .card-circle { scale: 1.08; }
+
+/* Tentang Kami dan Kenapa Kami */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+}
+
+.tentang-badge-1 { animation: float 4s ease-in-out infinite; }
+.tentang-badge-2 { animation: float 5s ease-in-out infinite reverse; }
+
+.kenapa-num { transition: transform 0.3s ease, color 0.3s ease; }
+.kenapa-item:hover .kenapa-num {
+    transform: translateY(-6px);
+    color: var(--cream);
+}
+
+.tentang-arch { transition: transform 0.5s ease, box-shadow 0.5s ease; }
+.tentang-arch:hover {
+    transform: scale(1.02);
+    box-shadow: 0 28px 50px rgba(0,0,0,0.22);
+}
+
+/* Katering: kartu naik, foto zoom, pill bergeser */
+.katering-card {
+    transition: scale 0.4s ease, box-shadow 0.4s ease;
+}
+
+.katering-card:hover {
+    scale: 1.02;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+}
+
+.katering-card .foto-placeholder { transition: scale 0.5s ease; }
+.katering-card:hover .foto-placeholder { scale: 1.1; }
+
+.katering-pill { transition: translate 0.3s ease, background-color 0.3s ease, color 0.3s ease; }
+.katering-card:hover .katering-pill {
+    translate: 0 -4px;
+    background-color: var(--maroon);
+    color: var(--cream);
+}
+
+/* Reservasi: lingkaran foto membesar tipis, lingkaran kecil melayang */
+.reservasi-circle { transition: scale 0.5s ease, box-shadow 0.5s ease, opacity 0.8s ease var(--d, 0s), translate 0.8s ease var(--d, 0s); }
+.reservasi-circle:hover {
+    scale: 1.04;
+    box-shadow: 0 28px 60px rgba(0,0,0,0.25);
+}
+
+.reservasi-circle-small { animation: float 6s ease-in-out infinite; }
+
+/* Judul "LAPAR?" berdenyut pelan */
+@keyframes pulse {
+    0%, 100% { scale: 1; }
+    50%      { scale: 1.05; }
+}
+
+.reservasi-title-big {
+    display: inline-block;
+    transform-origin: left center;
+    animation: pulse 3s ease-in-out infinite;
+}
+
+/* MENU: kartu naik saat di-hover */
+.js .menu-card.reveal.show {
+    transition:
+        opacity 0.8s ease var(--d, 0s),
+        translate 0.35s ease,
+        box-shadow 0.35s ease;
+}
+
+.js .menu-card.reveal.show:hover {
+    translate: 0 -12px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+}
+
+/* pengguna yang mematikan animasi di perangkatnya */
+@media (prefers-reduced-motion: reduce) {
+    .js .reveal { opacity: 1; translate: none; transition: none; }
+    *, *::before, *::after { animation: none !important; }
+}
+
