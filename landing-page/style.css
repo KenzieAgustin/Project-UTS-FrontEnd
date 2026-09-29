@@ -832,7 +832,7 @@ body {
     background-color: var(--gray-photo);
 }
 
-/* ============ FOOTER SECTION ============ */
+/*FOOTER SECTION*/
 .footer {
     background-color: #8b1d1d;
     overflow: hidden;
@@ -842,17 +842,15 @@ body {
     position: relative;
     width: 100%;
     background-color: var(--maroon);
-    padding: 130px 20px 0 20px;  /* tanpa padding bawah: watermark menempel & terpotong di dasar footer */
-    margin-bottom: 0 !important; /* Mencegah margin section yang memunculkan warna krem */
+    padding: 130px 20px 0 20px; 
+    margin-bottom: 0 !important; 
     overflow: hidden;
 }
 
-/* 1. LAYER MOTIF BATIK MINANGKABAU */
 .footer-section::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: url('assets/pattern.svg') -2px -32px / var(--pattern-size) repeat;
     opacity: var(--pattern-opacity);
     z-index: 1;
     pointer-events: none;
@@ -862,24 +860,22 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     position: relative;
-    z-index: 2; /* Memastikan teks dan tautan berada di atas motif */
+    z-index: 2;
 }
 
-/* 2. GRID: kolom kiri fleksibel + 3 kolom kecil yang rapat di sisi kanan */
 .footer-grid {
     display: grid;
     grid-template-columns: 1fr repeat(3, 104px);
     column-gap: 24px;
-    align-items: baseline;   /* logo & judul kolom sejajar di garis dasar teks */
+    align-items: baseline;  
     padding-bottom: 60px;
 }
 
-/* Kolom 1: identitas */
 .footer-logo {
     font-family: var(--font-display);
     font-size: 28px;
     font-weight: 700;
-    line-height: 1;   /* dikunci agar tinggi baris tidak bergantung pada font */
+    line-height: 1;  
     letter-spacing: 1px;
     color: var(--cream);
     margin-bottom: 19px;
@@ -891,7 +887,7 @@ body {
     color: var(--cream);
     opacity: 0.8;
     margin-bottom: 18px;
-    max-width: 370px; /* membuat kalimat patah setelah "resep" */
+    max-width: 370px;
 }
 
 .footer-contact p {
@@ -911,7 +907,6 @@ body {
 
 .footer-email:hover { opacity: 0.7; }
 
-/* Kolom 2-4: judul + daftar */
 .footer-title {
     font-size: 13px;
     font-weight: 500;
@@ -943,7 +938,6 @@ body {
     text-decoration: underline;
 }
 
-/* Jam buka: hari dan jam tampil bertumpuk, jaraknya sama dengan daftar link */
 .footer-schedule li {
     display: flex;
     flex-direction: column;
@@ -954,7 +948,6 @@ body {
     white-space: nowrap;
 }
 
-/* Bagian bawah (copyright & sosmed) */
 .footer-bottom {
     display: flex;
     justify-content: space-between;
@@ -994,7 +987,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Watermark raksasa (SVG): hanya bagian atas huruf yang terlihat */
 .footer-bg-text {
     display: block;
     position: relative;
@@ -1013,7 +1005,6 @@ body {
     fill: rgba(255, 246, 233, 0.1);
 }
 
-/* Desain: tiga kolom kanan sedikit keluar dari garis container (hanya di layar lebar) */
 @media (min-width: 1280px) {
     .footer-grid { margin-right: -36px; }
 }
