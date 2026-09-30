@@ -996,6 +996,10 @@ body {
 .katering-card .foto-placeholder { transition: scale 0.5s ease; }
 .katering-card:hover .foto-placeholder { scale: 1.1; }
 
+.js .katering-grid .katering-card.reveal { translate: -60px 0; }
+.js .katering-grid .katering-card.reveal:not(:first-child) { translate: 60px 0; }
+.js .katering-grid .katering-card.reveal.show { translate: 0 0; }
+
 .katering-pill { transition: translate 0.3s ease, background-color 0.3s ease, color 0.3s ease; }
 .katering-card:hover .katering-pill {
     translate: 0 -4px;
