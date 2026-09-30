@@ -13,6 +13,16 @@ kategoriItems.forEach((item) => {
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-links a');
 
+// NAVBAR: bayangan muncul saat halaman sudah discroll
+const navbarEl = document.querySelector('.navbar');
+
+const setNavbarShadow = () => {
+    navbarEl.classList.toggle('scrolled', window.scrollY > 20);
+};
+
+window.addEventListener('scroll', setNavbarShadow);
+window.addEventListener('load', setNavbarShadow);
+
 const setActiveLink = () => {
     let currentSectionId = sections[0] ? sections[0].id : '';
 
