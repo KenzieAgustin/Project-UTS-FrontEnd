@@ -73,6 +73,53 @@ if (navToggle && navLinksList) {
     });
 }
 
+// BACK TO TOP: tombol muncul setelah discroll turun ke plg bawah ngeklik buat balik ke atas
+const backToTopBtn = document.getElementById('backToTop');
+
+if (backToTopBtn) {
+    window.addEventListener('scroll', () => {
+        backToTopBtn.classList.toggle('show', window.scrollY > 400);
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+// STATUS BUKA/TUTUP: dihitung dari jam buka resto, pakai waktu WIB
+const statusBadge = document.getElementById('statusBadge');
+
+const updateStatusBadge = () => {
+    if (!statusBadge) return;
+
+    const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta',
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+    }).formatToParts(new Date());
+
+    const map = {};
+    parts.forEach((p) => { map[p.type] = p.value; });
+
+    const isWeekend = map.weekday === 'Sat' || map.weekday === 'Sun';
+    const minutesNow = parseInt(map.hour, 10) * 60 + parseInt(map.minute, 10);
+
+    // Buka Senin-Jumat (8-21) dan Sabtu-Minggu (8-22)
+    const openAt = 8 * 60; // 08.00
+    const closeAt = isWeekend ? 22 * 60 : 21 * 60; // 22.00 Sabtu-Minggu, 21.00 Senin-Jumat
+
+    const isOpen = minutesNow >= openAt && minutesNow < closeAt;
+
+    statusBadge.textContent = isOpen ? 'Buka Sekarang' : 'Tutup';
+    statusBadge.classList.toggle('open', isOpen);
+    statusBadge.classList.toggle('closed', !isOpen);
+};
+
+updateStatusBadge();
+setInterval(updateStatusBadge, 60000); // ngcek ulang tiap 1 menit
+
 // SCROLL REVEAL: munculkan elemen .reveal saat masuk layar, sembunyikan lagi saat keluar
 const revealEls = document.querySelectorAll('.reveal');
 
