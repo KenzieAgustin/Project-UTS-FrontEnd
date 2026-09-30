@@ -33,6 +33,14 @@ const setActiveLink = () => {
         }
     });
 
+    // Kalau sudah discroll sampai halaman paling bawah, paksa section terakhir aktif
+    const scrolledToBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+
+    if (scrolledToBottom) {
+        currentSectionId = sections[sections.length - 1].id;
+    }
+
     navLinks.forEach((link) => {
         link.classList.remove('active-link');
         if (link.getAttribute('href') === `#${currentSectionId}`) {
