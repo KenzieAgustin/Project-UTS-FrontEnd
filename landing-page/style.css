@@ -4,9 +4,11 @@
     --cream: #FFF6E9;
     --yellow: #F2A93B;
     --green: #2F5D3A;
+    --green-dark: #173B21; 
     --gray-photo: #C4C4C4;
     --font-display: 'Anton', sans-serif;
     --font-body: 'Poppins', sans-serif;
+    --navbar-offset: 96px;
 }
 
 * {
@@ -17,6 +19,7 @@
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: var(--navbar-offset);
 }
 
 body {
@@ -784,7 +787,30 @@ body {
 }
 
 .reservasi-content { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
-.reservasi-tag { color: black; font-size: 14px; margin-bottom: 8px; }
+
+.reservasi-tag-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.reservasi-tag { color: black; font-size: 14px; margin: 0; }
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+.status-badge.open { color: var(--green-dark); background-color: rgba(47, 93, 58, 0.14); }
+.status-badge.closed { color: var(--maroon-dark); background-color: rgba(139, 30, 30, 0.12); }
 
 .reservasi-title {
     font-family: var(--font-display);
@@ -834,11 +860,188 @@ body {
     background-color: var(--gray-photo);
 }
 
+/*FOOTER SECTION*/
+.footer {
+    background-color: #8b1d1d;
+    overflow: hidden;
+}
+
+.footer-section {
+    position: relative;
+    width: 100%;
+    background-color: var(--maroon);
+    padding: 130px 20px 0 20px; 
+    margin-bottom: 0 !important; 
+    overflow: hidden;
+}
+
+.footer-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: var(--pattern-opacity);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr repeat(3, 104px);
+    column-gap: 24px;
+    align-items: baseline;  
+    padding-bottom: 60px;
+}
+
+.footer-logo {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;  
+    letter-spacing: 1px;
+    color: var(--cream);
+    margin-bottom: 19px;
+}
+
+.footer-desc {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--cream);
+    opacity: 0.8;
+    margin-bottom: 18px;
+    max-width: 370px;
+}
+
+.footer-contact p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--cream);
+    opacity: 0.8;
+    margin: 0;
+}
+
+.footer-email {
+    color: var(--cream);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity 0.3s ease;
+}
+
+.footer-email:hover { opacity: 0.7; }
+
+.footer-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--yellow);
+    letter-spacing: 0;
+    text-transform: uppercase;
+    margin-bottom: 9px;
+}
+
+.footer-links,
+.footer-schedule {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-links a {
+    display: block;
+    color: var(--cream);
+    text-decoration: none;
+    font-size: 14px;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.footer-links a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.footer-schedule li {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--cream);
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 26px 0 0 0;
+    border-top: 1px solid rgba(255, 246, 233, 0.1);
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.copyright {
+    font-size: 14px;
+    color: var(--cream);
+    opacity: 0.8;
+    margin: 0;
+}
+
+.footer-sosmed {
+    display: flex;
+    gap: 16px;
+}
+
+.sosmed-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 246, 233, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.sosmed-circle:hover {
+    background-color: rgba(255, 246, 233, 0.15);
+    transform: translateY(-2px);
+}
+
+.footer-bg-text {
+    display: block;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1200px;
+    height: auto;
+    margin: 44px auto 0 auto;
+    pointer-events: none;
+    user-select: none;
+}
+
+.footer-bg-text text {
+    font-family: var(--font-display);
+    font-size: 320px;
+    fill: rgba(255, 246, 233, 0.1);
+}
+
+@media (min-width: 1280px) {
+    .footer-grid { margin-right: -36px; }
+}
+
 /* Responsive Reservasi — MOBILE */
 @media (max-width: 992px) {
     .reservasi-section { padding: 80px 20px 60px 20px; }
     .reservasi-title-big { font-size: 56px; }
-    .reservasi-wave { height: 70px; }
+    .reservasi-section { --wave-h: 70px; }
     .reservasi-circle {
         position: relative;
         right: auto;
@@ -848,6 +1051,11 @@ body {
         margin: 48px auto -170px auto;
     }
     .reservasi-circle-small { display: none; }
+    .footer-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 40px 24px;
+    }
+    .footer-col-1 { grid-column: 1 / -1; }
 }
 
 /* Responsive Reservasi — MOBILE */
@@ -858,6 +1066,11 @@ body {
     .reservasi-actions .btn-solid-red,
     .reservasi-actions .btn-cream { flex: 1; }
     .reservasi-circle { width: 280px; height: 280px; margin-bottom: -120px; }
+    .footer-section { padding: 110px 16px 0 16px; } /* ruang untuk lingkaran foto Reservasi yang menjorok ke footer */
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px 20px; padding-bottom: 40px; }
+    .footer-desc { max-width: none; }
+    .footer-bottom { flex-direction: column-reverse; align-items: flex-start; gap: 24px; }
+    .footer-bg-text { margin-top: 32px; }
 }
 
 /* ============ ANIMASI ============ */
@@ -996,6 +1209,10 @@ body {
 .katering-card .foto-placeholder { transition: scale 0.5s ease; }
 .katering-card:hover .foto-placeholder { scale: 1.1; }
 
+.js .katering-grid .katering-card.reveal { translate: -60px 0; }
+.js .katering-grid .katering-card.reveal:not(:first-child) { translate: 60px 0; }
+.js .katering-grid .katering-card.reveal.show { translate: 0 0; }
+
 .katering-pill { transition: translate 0.3s ease, background-color 0.3s ease, color 0.3s ease; }
 .katering-card:hover .katering-pill {
     translate: 0 -4px;
@@ -1011,6 +1228,13 @@ body {
 }
 
 .reservasi-circle-small { animation: float 6s ease-in-out infinite; }
+
+@keyframes statusPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+}
+
+.status-badge.open::before { animation: statusPulse 1.5s ease-in-out infinite; }
 
 /* Judul "LAPAR?" berdenyut pelan */
 @keyframes pulse {
@@ -1042,9 +1266,75 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
+.back-to-top {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--maroon);
+    color: var(--cream);
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: opacity 0.3s ease, translate 0.3s ease, visibility 0.3s ease, background-color 0.3s ease;
+    z-index: 60;
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+}
+
+.back-to-top:hover {
+    background-color: var(--maroon-dark);
+    translate: 0 -4px;
+}
+
+/* Link "lewati ke konten" yang sekarang masih di hidden, muncul saat diklik lewat keyboard */
+.skip-link {
+    position: fixed;
+    left: 16px;
+    top: -100px;
+    z-index: 1000;
+    padding: 10px 20px;
+    border-radius: 999px;
+    background-color: var(--cream);
+    color: var(--maroon);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus { top: 16px; }
+
+a:focus-visible,
+button:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px #1a1a1a;
+}
+
+#konten-utama:focus { outline: none; }
+
+@media (max-width: 575px) {
+    .back-to-top { right: 16px; bottom: 16px; width: 44px; height: 44px; }
+}
+
 /* pengguna yang mematikan animasi di perangkatnya */
 @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
     .js .reveal { opacity: 1; translate: none; transition: none; }
     *, *::before, *::after { animation: none !important; }
 }
-
