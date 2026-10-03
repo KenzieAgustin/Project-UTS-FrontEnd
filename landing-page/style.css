@@ -1357,3 +1357,23 @@ body {
         animation-range: exit 0% exit 100%;
     }
 }
+
+/* Link "lewati ke konten" yang di hidden, hanya muncul saat dklik menggunakan tab */
+.skip-link {
+    position: fixed;
+    left: 16px;
+    top: -100px;
+    z-index: 1000;
+    padding: 10px 20px;
+    border-radius: 999px;
+    background-color: var(--cream);
+    color: var(--maroon);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus { 
+    top: 16px; 
+}
