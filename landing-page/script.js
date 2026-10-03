@@ -135,202 +135,132 @@ const revealObserver = new IntersectionObserver((entries) => {
 revealEls.forEach((el) => revealObserver.observe(el));
 
 // ==========================================
-// SYNC MENU ADMIN → LANDING PAGE
+// RENDER MENU LANDING PAGE DARI localStorage ato data dari Admin
 // ==========================================
-
-(function syncAdminMenuToLanding() {
+(function renderMenuFromAdmin() {
 
     const STORAGE_KEY = 'lamak-bana-menu-data';
 
+    // false = tampilin semua menu yang website ON
+    // true  = hanya menu yg website ON dan Menu Andalan
+    const SHOW_ONLY_FEATURED = false;
+
+    const grid = document.querySelector('.menu-section .menu-grid');
+    if (!grid) return;
+
+    // Kembalikan null kalo admin belom pernah nyimpen data
     function getAdminMenuData() {
-
         try {
-
-            const saved =
-                localStorage.getItem(STORAGE_KEY);
-
-            if (!saved) {
-                return [];
-            }
-
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === null) return null;
             const data = JSON.parse(saved);
-
-            return Array.isArray(data)
-                ? data
-                : [];
-
+            return Array.isArray(data) ? data : null;
         } catch (error) {
-
-            console.warn(
-                'Gagal membaca menu admin:',
-                error
-            );
-
-            return [];
+            console.warn('Gagal membaca menu admin:', error);
+            return null;
         }
     }
 
-
     function formatRupiah(value) {
-
-        return 'Rp' +
-            Number(value || 0)
-                .toLocaleString('id-ID');
-
+        return 'Rp' + Number(value || 0).toLocaleString('id-ID');
     }
 
+    function createMenuCard(menu) {
+        const card = document.createElement('div');
+        card.className = 'menu-card reveal';
+        card.dataset.menuId = menu.id || '';
 
-    function findMenuByName(menuData, name) {
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'card-img-wrapper';
 
-        const target =
-            name.toLowerCase().trim();
+        if (menu.featured) {
+            const badge = document.createElement('span');
+            badge.className = 'badge-terlaris';
+            badge.textContent = '★ Terlaris';
+            imgWrap.appendChild(badge);
+        }
 
-        return menuData.find(function(menu) {
+        const foto = document.createElement('div');
+        foto.className = 'foto-placeholder';
+        foto.textContent = 'FOTO';
+        imgWrap.appendChild(foto);
 
-            return String(menu.name || '')
-                .toLowerCase()
-                .trim() === target;
+        const body = document.createElement('div');
+        body.className = 'card-body';
 
+        const row = document.createElement('div');
+        row.className = 'card-title-row';
+
+        const title = document.createElement('h3');
+        title.className = 'menu-card-title';
+        title.textContent = String(menu.name || '').toUpperCase();
+
+        const price = document.createElement('span');
+        price.className = 'menu-card-price';
+        price.textContent = formatRupiah(menu.price);
+
+        row.appendChild(title);
+        row.appendChild(price);
+
+        const desc = document.createElement('p');
+        desc.className = 'menu-card-desc';
+        desc.textContent = menu.desc || '';
+
+        const btn = document.createElement('a');
+        btn.className = 'btn-solid-red';
+        btn.href = '#';
+        btn.textContent = 'Pesan';
+        btn.dataset.menuId = menu.id || '';
+
+        body.appendChild(row);
+        body.appendChild(desc);
+        body.appendChild(btn);
+
+        card.appendChild(imgWrap);
+        card.appendChild(body);
+        return card;
+    }
+
+    function renderMenuCards() {
+        const menuData = getAdminMenuData();
+
+        // admin belum pernah nyimpen apa pun, maka pakai kartu HTML asli
+        if (menuData === null) return;
+
+        const visible = menuData.filter(function (menu) {
+            if (menu.website === false) return false;
+            if (SHOW_ONLY_FEATURED && !menu.featured) return false;
+            return true;
         });
 
-    }
+        grid.innerHTML = '';
 
-
-    function syncMenuCards() {
-
-        const menuData =
-            getAdminMenuData();
-
-        if (!menuData.length) {
+        if (!visible.length) {
+            const empty = document.createElement('p');
+            empty.className = 'menu-card-desc';
+            empty.style.gridColumn = '1 / -1';
+            empty.style.color = 'var(--cream)';
+            empty.style.textAlign = 'center';
+            empty.textContent = 'Menu sedang diperbarui. Silakan cek kembali sebentar lagi.';
+            grid.appendChild(empty);
             return;
         }
 
-
-        const cards =
-            document.querySelectorAll(
-                '.menu-section .menu-card'
-            );
-
-
-        cards.forEach(function(card) {
-
-            const title =
-                card.querySelector(
-                    '.menu-card-title'
-                );
-
-            if (!title) {
-                return;
-            }
-
-
-            const menuName =
-                title.textContent
-                    .trim()
-                    .toLowerCase();
-
-
-            const menu =
-                findMenuByName(
-                    menuData,
-                    menuName
-                );
-
-
-            // Tidak ada data dari admin
-            // → biarkan HTML asli
-            if (!menu) {
-                return;
-            }
-
-
-            // ==============================
-            // HARGA
-            // ==============================
-
-            const price =
-                card.querySelector(
-                    '.menu-card-price'
-                );
-
-            if (price) {
-
-                price.textContent =
-                    formatRupiah(menu.price);
-
-            }
-
-
-            // ==============================
-            // DESKRIPSI
-            // ==============================
-
-            const desc =
-                card.querySelector(
-                    '.menu-card-desc'
-                );
-
-            if (desc && menu.desc) {
-
-                desc.textContent =
-                    menu.desc;
-
-            }
-
-
-            // ==============================
-            // WEBSITE ON / OFF
-            // ==============================
-
-            if (menu.website === false) {
-
-                card.style.display = 'none';
-
-            } else {
-
-                card.style.display = '';
-
-            }
-
+        visible.forEach(function (menu) {
+            const card = createMenuCard(menu);
+            grid.appendChild(card);
+            // wajib daftarin  ke observer, kalo gak kartu tetap opacity 0
+            revealObserver.observe(card);
         });
-
     }
 
+    renderMenuCards();
 
-    // Jalankan saat halaman selesai dimuat
-    if (
-        document.readyState ===
-        'loading'
-    ) {
-
-        document.addEventListener(
-            'DOMContentLoaded',
-            syncMenuCards
-        );
-
-    } else {
-
-        syncMenuCards();
-
-    }
-
-
-    // Jika localStorage berubah
-    // dari halaman/tab lain
-    window.addEventListener(
-        'storage',
-        function(event) {
-
-            if (
-                event.key === STORAGE_KEY
-            ) {
-
-                syncMenuCards();
-
-            }
-
+    // ngupdate otomatis kalo admin ngubah data di tab lain
+    window.addEventListener('storage', function (event) {
+        if (event.key === STORAGE_KEY) {
+            renderMenuCards();
         }
-    );
-
+    });
 
 })();
