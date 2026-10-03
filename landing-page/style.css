@@ -4,9 +4,11 @@
     --cream: #FFF6E9;
     --yellow: #F2A93B;
     --green: #2F5D3A;
+    --green-dark: #173B21; 
     --gray-photo: #C4C4C4;
     --font-display: 'Anton', sans-serif;
     --font-body: 'Poppins', sans-serif;
+    --navbar-offset: 96px;
 }
 
 * {
@@ -17,6 +19,7 @@
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: var(--navbar-offset);
 }
 
 body {
@@ -806,8 +809,8 @@ body {
     background-color: currentColor;
 }
 
-.status-badge.open { color: var(--green); background-color: rgba(47, 93, 58, 0.14); }
-.status-badge.closed { color: var(--maroon); background-color: rgba(139, 30, 30, 0.12); }
+.status-badge.open { color: var(--green-dark); background-color: rgba(47, 93, 58, 0.14); }
+.status-badge.closed { color: var(--maroon-dark); background-color: rgba(139, 30, 30, 0.12); }
 
 .reservasi-title {
     font-family: var(--font-display);
@@ -986,7 +989,7 @@ body {
 .copyright {
     font-size: 14px;
     color: var(--cream);
-    opacity: 0.6;
+    opacity: 0.8;
     margin: 0;
 }
 
@@ -1298,45 +1301,40 @@ body {
     translate: 0 -4px;
 }
 
+/* Link "lewati ke konten" yang sekarang masih di hidden, muncul saat diklik lewat keyboard */
+.skip-link {
+    position: fixed;
+    left: 16px;
+    top: -100px;
+    z-index: 1000;
+    padding: 10px 20px;
+    border-radius: 999px;
+    background-color: var(--cream);
+    color: var(--maroon);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus { top: 16px; }
+
+a:focus-visible,
+button:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px #1a1a1a;
+}
+
+#konten-utama:focus { outline: none; }
+
 @media (max-width: 575px) {
     .back-to-top { right: 16px; bottom: 16px; width: 44px; height: 44px; }
 }
 
 /* pengguna yang mematikan animasi di perangkatnya */
 @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
     .js .reveal { opacity: 1; translate: none; transition: none; }
     *, *::before, *::after { animation: none !important; }
-
-    .highlight-word { color: var(--yellow); }
-    .highlight-word::after { transform: scaleX(1); }
-}
-
-/* HERO: highlight berjalan di kata "HATI" */
-.highlight-word {
-    position: relative;
-    display: inline-block;
-    color: var(--cream);
-    animation: highlightColor 0.4s ease 1.3s forwards;
-}
-
-@keyframes highlightColor {
-    to { color: var(--yellow); }
-}
-
-.highlight-word::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -4px;
-    width: 100%;
-    height: 6px;
-    background-color: var(--yellow);
-    border-radius: 3px;
-    transform: scaleX(0);
-    transform-origin: left;
-    animation: drawUnderline 0.5s ease 1.35s forwards;
-}
-
-@keyframes drawUnderline {
-    to { transform: scaleX(1); }
 }
