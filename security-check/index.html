@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Check - Lamak Bana</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="security-page">
+    <section class="security-card" aria-labelledby="security-title">
+      <div class="brand-mark">LAMAK BANA</div>
+
+      <div class="security-icon" aria-hidden="true">
+        <span>⌁</span>
+      </div>
+
+      <p class="eyebrow">ADMIN ACCESS</p>
+      <h1 id="security-title">Security Check</h1>
+      <p class="intro">
+        Masukkan akun admin untuk melanjutkan ke dashboard pengelolaan Lamak Bana.
+      </p>
+
+      <form id="security-form" novalidate>
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username"
+               placeholder="Masukkan username" required>
+
+        <label for="password">Password</label>
+        <div class="password-wrap">
+          <input id="password" name="password" type="password"
+                 autocomplete="current-password" placeholder="Masukkan password" required>
+          <button id="toggle-password" type="button" aria-label="Tampilkan password">Lihat</button>
+        </div>
+
+        <p id="security-error" class="error-message" role="alert" aria-live="polite"></p>
+
+        <button class="submit-button" type="submit">Masuk ke Dashboard</button>
+      </form>
+
+      <a class="back-link" href="../landing-page/index.html">← Kembali ke website</a>
+
+      <p class="demo-note">Akses demo UTS · Frontend authentication</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
