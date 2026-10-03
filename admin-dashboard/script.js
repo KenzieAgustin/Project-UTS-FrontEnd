@@ -390,6 +390,56 @@ $(function () {
         )
         .appendTo($wrap);
     });
+    renderDashboardCounters();
+  }
+
+  /* ---------------- Dashboard: counter dr ORDER_DATA ---------------- */
+  const ORDER_LATE_MINUTES = 30;
+
+  function orderTimestamp(o) {
+    const months = { jan:0, feb:1, mar:2, apr:3, mei:4, may:4, jun:5, jul:6, agu:7, agt:7, aug:7, sep:8, okt:9, oct:9, nov:10, des:11, dec:11 };
+    const d = String(o.date || '').trim().split(/\s+/);
+    const t = String(o.time || '').split(/[:.]/);
+    const month = months[String(d[1] || '').slice(0, 3).toLowerCase()];
+    if (d.length < 3 || month === undefined || t.length < 2) return null;
+    return new Date(Number(d[2]), month, Number(d[0]), Number(t[0]), Number(t[1]));
+  }
+
+  function countLateOrders() {
+    const now = Date.now();
+    return ORDER_DATA.filter(function (o) {
+      if (o.status !== 'Baru' && o.status !== 'Diproses') return false;
+      const ts = orderTimestamp(o);
+      return ts && (now - ts.getTime()) > ORDER_LATE_MINUTES * 60000;
+    }).length;
+  }
+
+  function renderDashboardCounters() {
+    const countBy = function (status) {
+      return ORDER_DATA.filter(function (o) { return o.status === status; }).length;
+    };
+    const late = countLateOrders();
+
+    $('.ops-metric[data-dashboard-status="Baru"] .ops-metric-value').text(countBy('Baru'));
+    $('.ops-metric[data-dashboard-status="Diproses"] .ops-metric-value').text(countBy('Diproses'));
+    $('.ops-metric[data-dashboard-status="Siap"] .ops-metric-value').text(countBy('Siap'));
+    $('.ops-metric.is-danger .ops-metric-value').text(late);
+
+    $('.recent-orders-panel .work-surface-head p').first()
+      .text(ORDER_DATA.length + ' pesanan · fokus pada antrean aktif');
+
+    const $lateRow = $('.attention-section .priority-row.is-danger');
+    $lateRow.find('strong').text(late + ' pesanan terlambat');
+    $lateRow.css('display', late ? '' : 'none');
+
+    const attention = $('.attention-section .priority-row').filter(function () {
+      return this.style.display !== 'none';
+    }).length;
+    $('.attention-count').text(attention);
+    $('.attention-section .side-section-head p').text(
+      attention ? attention + ' item membutuhkan tindakan' : 'Tidak ada yang perlu dicek'
+    );
+    $('.ops-metric.is-alert .ops-metric-value').text(attention);
   }
 
   /* ---------------- Render: full orders page ---------------- */
@@ -2327,9 +2377,11 @@ $(function () {
   renderReportPage();
   renderPromoPage();
   renderMenus();
+  renderOrders();
   renderNotif();
 
   wire();
+  setInterval(renderDashboardCounters, 60000); // status "terlambat" ikut berubah seiring waktu
 
   lucide.createIcons();
   requestAnimationFrame(function () { buildLineChart('#linechart-dash'); });
