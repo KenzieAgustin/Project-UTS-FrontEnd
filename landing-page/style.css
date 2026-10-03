@@ -1306,5 +1306,37 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .js .reveal { opacity: 1; translate: none; transition: none; }
     *, *::before, *::after { animation: none !important; }
+
+    .highlight-word { color: var(--yellow); }
+    .highlight-word::after { transform: scaleX(1); }
 }
 
+/* HERO: highlight berjalan di kata "HATI" */
+.highlight-word {
+    position: relative;
+    display: inline-block;
+    color: var(--cream);
+    animation: highlightColor 0.4s ease 1.3s forwards;
+}
+
+@keyframes highlightColor {
+    to { color: var(--yellow); }
+}
+
+.highlight-word::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 6px;
+    background-color: var(--yellow);
+    border-radius: 3px;
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: drawUnderline 0.5s ease 1.35s forwards;
+}
+
+@keyframes drawUnderline {
+    to { transform: scaleX(1); }
+}
