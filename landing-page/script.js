@@ -135,202 +135,419 @@ const revealObserver = new IntersectionObserver((entries) => {
 revealEls.forEach((el) => revealObserver.observe(el));
 
 // ==========================================
-// SYNC MENU ADMIN → LANDING PAGE
+// RENDER MENU LANDING PAGE DARI localStorage ato data dari Admin
 // ==========================================
-
-(function syncAdminMenuToLanding() {
+(function renderMenuFromAdmin() {
 
     const STORAGE_KEY = 'lamak-bana-menu-data';
 
+    // false = tampilin semua menu yang website ON
+    // true  = hanya menu yg website ON dan Menu Andalan
+    const SHOW_ONLY_FEATURED = false;
+
+    const grid = document.querySelector('.menu-section .menu-grid');
+    if (!grid) return;
+
+    // Kembalikan null kalo admin belom pernah nyimpen data
     function getAdminMenuData() {
-
         try {
-
-            const saved =
-                localStorage.getItem(STORAGE_KEY);
-
-            if (!saved) {
-                return [];
-            }
-
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === null) return null;
             const data = JSON.parse(saved);
-
-            return Array.isArray(data)
-                ? data
-                : [];
-
+            return Array.isArray(data) ? data : null;
         } catch (error) {
-
-            console.warn(
-                'Gagal membaca menu admin:',
-                error
-            );
-
-            return [];
+            console.warn('Gagal membaca menu admin:', error);
+            return null;
         }
     }
 
-
     function formatRupiah(value) {
-
-        return 'Rp' +
-            Number(value || 0)
-                .toLocaleString('id-ID');
-
+        return 'Rp' + Number(value || 0).toLocaleString('id-ID');
     }
 
+    function createMenuCard(menu) {
+        const card = document.createElement('div');
+        card.className = 'menu-card reveal';
+        card.dataset.menuId = menu.id || '';
 
-    function findMenuByName(menuData, name) {
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'card-img-wrapper';
 
-        const target =
-            name.toLowerCase().trim();
+        if (menu.featured) {
+            const badge = document.createElement('span');
+            badge.className = 'badge-terlaris';
+            badge.textContent = '★ Terlaris';
+            imgWrap.appendChild(badge);
+        }
 
-        return menuData.find(function(menu) {
+        const foto = document.createElement('div');
+        foto.className = 'foto-placeholder';
+        foto.textContent = 'FOTO';
+        imgWrap.appendChild(foto);
 
-            return String(menu.name || '')
-                .toLowerCase()
-                .trim() === target;
+        const body = document.createElement('div');
+        body.className = 'card-body';
 
+        const row = document.createElement('div');
+        row.className = 'card-title-row';
+
+        const title = document.createElement('h3');
+        title.className = 'menu-card-title';
+        title.textContent = String(menu.name || '').toUpperCase();
+
+        const price = document.createElement('span');
+        price.className = 'menu-card-price';
+        price.textContent = formatRupiah(menu.price);
+
+        row.appendChild(title);
+        row.appendChild(price);
+
+        const desc = document.createElement('p');
+        desc.className = 'menu-card-desc';
+        desc.textContent = menu.desc || '';
+
+        const btn = document.createElement('a');
+        btn.className = 'btn-solid-red';
+        btn.href = '#';
+        btn.textContent = 'Pesan';
+        btn.dataset.menuId = menu.id || '';
+
+        // kalo stok habis ato ga tersedia,maka → tombol dimatikan
+        if (menu.available === false || Number(menu.stock) <= 0) {
+            btn.textContent = 'Habis';
+            btn.classList.add('is-disabled');
+            btn.setAttribute('aria-disabled', 'true');
+        }
+
+        body.appendChild(row);
+        body.appendChild(desc);
+        body.appendChild(btn);
+
+        card.appendChild(imgWrap);
+        card.appendChild(body);
+        return card;
+    }
+
+    function renderMenuCards() {
+        const menuData = getAdminMenuData();
+
+        // admin belum pernah nyimpen apa pun, maka pakai kartu HTML asli
+        if (menuData === null) return;
+
+        const visible = menuData.filter(function (menu) {
+            if (menu.website === false) return false;
+            if (SHOW_ONLY_FEATURED && !menu.featured) return false;
+            return true;
         });
 
-    }
+        grid.innerHTML = '';
 
-
-    function syncMenuCards() {
-
-        const menuData =
-            getAdminMenuData();
-
-        if (!menuData.length) {
+        if (!visible.length) {
+            const empty = document.createElement('p');
+            empty.className = 'menu-card-desc';
+            empty.style.gridColumn = '1 / -1';
+            empty.style.color = 'var(--cream)';
+            empty.style.textAlign = 'center';
+            empty.textContent = 'Menu sedang diperbarui. Silakan cek kembali sebentar lagi.';
+            grid.appendChild(empty);
             return;
         }
 
+        visible.forEach(function (menu) {
+            const card = createMenuCard(menu);
+            grid.appendChild(card);
+            // wajib daftarin  ke observer, kalo gak kartu tetap opacity 0
+            revealObserver.observe(card);
+        });
+    }
 
-        const cards =
-            document.querySelectorAll(
-                '.menu-section .menu-card'
-            );
+    renderMenuCards();
 
+    // ngupdate otomatis kalo admin ngubah data di tab lain
+    window.addEventListener('storage', function (event) {
+        if (event.key === STORAGE_KEY) {
+            renderMenuCards();
+        }
+    });
 
-        cards.forEach(function(card) {
+})();
 
-            const title =
-                card.querySelector(
-                    '.menu-card-title'
-                );
+// ==========================================
+// PESAN DARI LANDING PAGE KE PESANAN ADMIN (localStorage)
+// ==========================================
+(function orderFromLanding() {
 
-            if (!title) {
-                return;
+    const MENU_KEY  = 'lamak-bana-menu-data';
+    const ORDER_KEY = 'lamak-bana-order-data';
+
+    const modal   = document.getElementById('orderModal');
+    const form    = document.getElementById('orderForm');
+    const grid    = document.querySelector('.menu-section .menu-grid');
+    if (!modal || !form || !grid) return;
+
+    const itemsWrap = document.getElementById('orderItems');
+    const totalEl   = document.getElementById('orderTotal');
+    const errorEl   = document.getElementById('orderError');
+    const formView  = document.getElementById('orderFormView');
+    const doneView  = document.getElementById('orderDoneView');
+    const doneId    = document.getElementById('orderDoneId');
+    const channelEl = document.getElementById('orderChannel');
+    const infoWrap  = document.getElementById('orderInfoWrap');
+
+    let menuOptions = [];
+
+    function formatRupiah(value) {
+        return 'Rp' + Number(value || 0).toLocaleString('id-ID');
+    }
+
+    function cleanText(value, max) {
+        // buang <> supaya gajadi HTML di dashboard admin
+        return String(value || '').replace(/[<>]/g, '').trim().slice(0, max);
+    }
+
+    function toTitleCase(text) {
+        return String(text).toLowerCase().replace(/(^|\s)\S/g, function (c) { return c.toUpperCase(); });
+    }
+
+    // daftar menu yang boleh dipesan
+    // prioritasnya data admin. kalo belum ada dia ambil dari kartu HTML.
+    function loadMenuOptions() {
+        let data = null;
+        try {
+            const saved = localStorage.getItem(MENU_KEY);
+            if (saved !== null) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) data = parsed;
             }
+        } catch (e) { data = null; }
 
+        if (data) {
+            return data.filter(function (m) {
+                return m.website !== false && m.available !== false && Number(m.stock) > 0;
+            }).map(function (m) {
+                return { id: String(m.id), name: String(m.name), price: Number(m.price) || 0 };
+            });
+        }
 
-            const menuName =
-                title.textContent
-                    .trim()
-                    .toLowerCase();
+        return Array.from(document.querySelectorAll('.menu-section .menu-card')).map(function (card) {
+            const name  = toTitleCase(card.querySelector('.menu-card-title').textContent.trim());
+            const price = Number(card.querySelector('.menu-card-price').textContent.replace(/\D/g, '')) || 0;
+            return { id: name, name: name, price: price };
+        });
+    }
 
+    function findOption(id) {
+        return menuOptions.find(function (m) { return m.id === id; });
+    }
 
-            const menu =
-                findMenuByName(
-                    menuData,
-                    menuName
-                );
+    function addItemRow(selectedId, qty) {
+        const row = document.createElement('div');
+        row.className = 'order-item-row';
 
-
-            // Tidak ada data dari admin
-            // → biarkan HTML asli
-            if (!menu) {
-                return;
-            }
-
-
-            // ==============================
-            // HARGA
-            // ==============================
-
-            const price =
-                card.querySelector(
-                    '.menu-card-price'
-                );
-
-            if (price) {
-
-                price.textContent =
-                    formatRupiah(menu.price);
-
-            }
-
-
-            // ==============================
-            // DESKRIPSI
-            // ==============================
-
-            const desc =
-                card.querySelector(
-                    '.menu-card-desc'
-                );
-
-            if (desc && menu.desc) {
-
-                desc.textContent =
-                    menu.desc;
-
-            }
-
-
-            // ==============================
-            // WEBSITE ON / OFF
-            // ==============================
-
-            if (menu.website === false) {
-
-                card.style.display = 'none';
-
-            } else {
-
-                card.style.display = '';
-
-            }
-
+        const select = document.createElement('select');
+        select.className = 'order-item-menu';
+        select.setAttribute('aria-label', 'Pilih menu');
+        menuOptions.forEach(function (m) {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = m.name + ' — ' + formatRupiah(m.price);
+            if (m.id === selectedId) opt.selected = true;
+            select.appendChild(opt);
         });
 
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.className = 'order-item-qty';
+        qtyInput.min = '1';
+        qtyInput.max = '50';
+        qtyInput.value = String(qty || 1);
+        qtyInput.setAttribute('aria-label', 'Jumlah');
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'order-item-remove';
+        remove.setAttribute('aria-label', 'Hapus baris menu');
+        remove.textContent = '×';
+
+        row.appendChild(select);
+        row.appendChild(qtyInput);
+        row.appendChild(remove);
+        itemsWrap.appendChild(row);
     }
 
-
-    // Jalankan saat halaman selesai dimuat
-    if (
-        document.readyState ===
-        'loading'
-    ) {
-
-        document.addEventListener(
-            'DOMContentLoaded',
-            syncMenuCards
-        );
-
-    } else {
-
-        syncMenuCards();
-
+    function readItems() {
+        const items = [];
+        itemsWrap.querySelectorAll('.order-item-row').forEach(function (row) {
+            const menu = findOption(row.querySelector('.order-item-menu').value);
+            const qty  = Math.min(50, Math.max(1, parseInt(row.querySelector('.order-item-qty').value, 10) || 1));
+            if (menu) items.push({ menu: menu, qty: qty });
+        });
+        return items;
     }
 
+    function updateTotal() {
+        const total = readItems().reduce(function (sum, it) { return sum + it.menu.price * it.qty; }, 0);
+        totalEl.textContent = formatRupiah(total);
+    }
 
-    // Jika localStorage berubah
-    // dari halaman/tab lain
-    window.addEventListener(
-        'storage',
-        function(event) {
+    function showError(message) {
+        errorEl.textContent = message;
+        errorEl.hidden = !message;
+    }
 
-            if (
-                event.key === STORAGE_KEY
-            ) {
+    function toggleInfoField() {
+        infoWrap.hidden = channelEl.value !== 'Makan di Tempat';
+    }
 
-                syncMenuCards();
-
-            }
-
+    function openModal(menuId, menuName) {
+        menuOptions = loadMenuOptions();
+        if (!menuOptions.length) {
+            alert('Maaf, belum ada menu yang tersedia untuk dipesan.');
+            return;
         }
-    );
 
+        form.reset();
+        itemsWrap.innerHTML = '';
+        showError('');
+
+        const target = String(menuName || '').toLowerCase().trim();
+        const preselect = menuOptions.find(function (m) {
+            return (menuId && m.id === menuId) || m.name.toLowerCase() === target;
+        });
+        addItemRow(preselect ? preselect.id : menuOptions[0].id, 1);
+
+        toggleInfoField();
+        updateTotal();
+        formView.hidden = false;
+        doneView.hidden = true;
+
+        modal.classList.add('open');
+        document.body.classList.add('modal-open');
+        document.getElementById('orderCustomer').focus();
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        document.body.classList.remove('modal-open');
+    }
+
+    // format ID dan waktu sama persis dengan admin (generateOrderId, currentOrderDateParts)
+    function generateOrderId(orders) {
+        let max = 0;
+        orders.forEach(function (o) {
+            const match = String(o.id || '').match(/(\d+)$/);
+            if (match) max = Math.max(max, Number(match[1]) || 0);
+        });
+        const now = new Date();
+        const yy = String(now.getFullYear()).slice(-2);
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        return '#LB-' + yy + mm + '-' + String(max + 1).padStart(3, '0');
+    }
+
+    function submitOrder() {
+        const customer = cleanText(document.getElementById('orderCustomer').value, 60);
+        const phone    = cleanText(document.getElementById('orderPhone').value, 20);
+        const channel  = channelEl.value;
+        const info     = cleanText(document.getElementById('orderInfo').value, 40);
+        const note     = cleanText(document.getElementById('orderNote').value, 200);
+        const items    = readItems();
+
+        if (!customer) { showError('Nama wajib diisi.'); return; }
+        if (!/^[0-9+\-\s]{8,20}$/.test(phone)) { showError('Nomor telepon tidak valid.'); return; }
+        if (!items.length) { showError('Pilih minimal satu menu.'); return; }
+        showError('');
+
+        let orders = [];
+        try {
+            const saved = localStorage.getItem(ORDER_KEY);
+            const parsed = saved ? JSON.parse(saved) : [];
+            if (Array.isArray(parsed)) orders = parsed;
+        } catch (e) { orders = []; }
+
+        const now  = new Date();
+        const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+        const date = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        const total = items.reduce(function (sum, it) { return sum + it.menu.price * it.qty; }, 0);
+        const id = generateOrderId(orders);
+
+        const order = {
+            id: id,
+            customer: customer,
+            phone: phone,
+            items: items.map(function (it) { return [it.menu.name, it.qty, formatRupiah(it.menu.price)]; }),
+            summary: items.map(function (it) { return it.menu.name + ' ×' + it.qty; }).join(', '),
+            channel: channel,
+            channelInfo: channel === 'Makan di Tempat' ? (info || 'Meja belum ditentukan') : '-',
+            time: time,
+            date: date,
+            total: formatRupiah(total),
+            subtotal: formatRupiah(total),
+            discount: 'Rp0',
+            status: 'Baru',
+            payment: 'Bayar di Tempat',
+            paymentStatus: 'BELUM DIBAYAR',
+            note: note || 'Tidak ada catatan khusus.',
+            timeline: [[time, 'Pesanan diterima']],
+            source: 'Website'
+        };
+
+        orders.unshift(order);
+
+        try {
+            localStorage.setItem(ORDER_KEY, JSON.stringify(orders));
+        } catch (e) {
+            showError('Pesanan gagal disimpan di browser ini. Coba lagi.');
+            return;
+        }
+
+        doneId.textContent = id;
+        formView.hidden = true;
+        doneView.hidden = false;
+    }
+
+    // klik pesan di kartu menu (delegasi berlaku buat kartu hasil render JS)
+    grid.addEventListener('click', function (event) {
+        const btn = event.target.closest('.btn-solid-red');
+        if (!btn) return;
+        event.preventDefault();
+        if (btn.classList.contains('is-disabled')) return;
+
+        const card  = btn.closest('.menu-card');
+        const title = card ? card.querySelector('.menu-card-title') : null;
+        openModal(btn.dataset.menuId, title ? title.textContent : '');
+    });
+
+    document.getElementById('orderAddItem').addEventListener('click', function () {
+        addItemRow(menuOptions[0].id, 1);
+        updateTotal();
+    });
+
+    itemsWrap.addEventListener('click', function (event) {
+        if (!event.target.classList.contains('order-item-remove')) return;
+        if (itemsWrap.querySelectorAll('.order-item-row').length <= 1) {
+            showError('Minimal satu menu harus dipilih.');
+            return;
+        }
+        event.target.closest('.order-item-row').remove();
+        updateTotal();
+    });
+
+    itemsWrap.addEventListener('input', updateTotal);
+    itemsWrap.addEventListener('change', updateTotal);
+    channelEl.addEventListener('change', toggleInfoField);
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        submitOrder();
+    });
+
+    document.getElementById('orderModalClose').addEventListener('click', closeModal);
+    document.getElementById('orderDoneClose').addEventListener('click', closeModal);
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
 
 })();
