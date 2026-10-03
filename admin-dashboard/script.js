@@ -1345,34 +1345,13 @@ $(function () {
     ]
   };
 
-  function reportPeriodFactor() {
-    const p = state.reportFilters.period;
-    if (p === '7 hari terakhir') return 7 / 28;
-    if (p === 'Tahun ini') return 8.65;
-    if (p === 'Rentang tanggal') {
-      const a = new Date(state.reportFilters.dateFrom + 'T00:00:00');
-      const b = new Date(state.reportFilters.dateTo + 'T00:00:00');
-      if (isNaN(a) || isNaN(b) || b < a) return 1;
-      return Math.max(1, Math.round((b - a) / 86400000) + 1) / 28;
-    }
-    return 1;
-  }
-
+  // angka laporan dihitung
   function reportChannelFactor() {
     const ch = state.reportFilters.channel;
     if (ch === 'Makan di Tempat') return 48200000 / REPORT_BASE.revenue;
     if (ch === 'Ojek Online') return 26700000 / REPORT_BASE.revenue;
     if (ch === 'Katering') return 14500000 / REPORT_BASE.revenue;
     return 1;
-  }
-
-  function reportMetrics() {
-    const pf = reportPeriodFactor(), cf = reportChannelFactor();
-    const revenue = Math.max(0, Math.round(REPORT_BASE.revenue * pf * cf));
-    const orders = Math.max(1, Math.round(REPORT_BASE.orders * pf * (state.reportFilters.channel === 'Semua' ? 1 : cf * 1.06)));
-    const aov = Math.round(revenue / Math.max(orders, 1));
-    const completion = state.reportFilters.channel === 'Katering' ? .89 : state.reportFilters.channel === 'Ojek Online' ? .91 : .92;
-    return { revenue:revenue, orders:orders, aov:aov, completion:completion, completed:Math.round(orders * completion), pf:pf, cf:cf };
   }
 
   function reportRupiah(v, compact) {
@@ -1385,72 +1364,150 @@ $(function () {
     return 'Rp' + Math.round(v).toLocaleString('id-ID');
   }
 
-  function reportPeriodText() {
-    if (state.reportFilters.period === 'Rentang tanggal') {
-      const fmt = function (d) { const x=new Date(d+'T00:00:00'); return isNaN(x) ? d : x.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); };
-      return fmt(state.reportFilters.dateFrom) + ' – ' + fmt(state.reportFilters.dateTo);
+  const REPORT_CHANNEL_COLORS = { 'Makan di Tempat':'#8b1e1e', 'Ojek Online':'#d69223', 'Katering':'#2f5d3a', 'Take Away':'#265f87' };
+  const REPORT_STATUS_ORDER = [
+    { name:'Selesai', color:'#2f5d3a' }, { name:'Diproses', color:'#d69223' }, { name:'Baru', color:'#8b1e1e' },
+    { name:'Siap', color:'#265f87' }, { name:'Dibatalkan', color:'#a45a5a' }
+  ];
+
+  function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0); }
+  function endOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999); }
+
+  // rrntang tanggal sesuai filter periode (relatif terhadap hari ini)
+  function reportRange() {
+    const f = state.reportFilters, now = new Date();
+    if (f.period === '7 hari terakhir') {
+      const from = startOfDay(now); from.setDate(from.getDate() - 6);
+      return { from:from, to:endOfDay(now) };
     }
-    if (state.reportFilters.period === '7 hari terakhir') return '22–28 Sep 2026';
-    if (state.reportFilters.period === 'Tahun ini') return 'Jan–Sep 2026';
-    return 'September 2026';
+    if (f.period === 'Tahun ini') return { from:new Date(now.getFullYear(), 0, 1), to:endOfDay(new Date(now.getFullYear(), 11, 31)) };
+    if (f.period === 'Rentang tanggal') {
+      const a = new Date(f.dateFrom + 'T00:00:00'), b = new Date(f.dateTo + 'T00:00:00');
+      if (!isNaN(a) && !isNaN(b) && b >= a) return { from:a, to:endOfDay(b) };
+    }
+    return { from:new Date(now.getFullYear(), now.getMonth(), 1), to:endOfDay(new Date(now.getFullYear(), now.getMonth() + 1, 0)) };
   }
 
+  // pesanan dalam rentang
+  function reportOrders(from, to, channel) {
+    return ORDER_DATA.filter(function (o) {
+      const ts = orderTimestamp(o);
+      if (!ts || ts < from || ts > to) return false;
+      return !channel || channel === 'Semua' || o.channel === channel;
+    });
+  }
+
+  function reportSum(orders) {
+    const paid = orders.filter(function (o) { return o.status !== 'Dibatalkan'; });
+    const revenue = paid.reduce(function (s, o) { return s + rupiahNumber(o.total); }, 0);
+    const done = orders.filter(function (o) { return o.status === 'Selesai'; }).length;
+    return { orders:orders.length, paid:paid.length, revenue:revenue, aov:paid.length ? Math.round(revenue / paid.length) : 0, completed:done, completion:orders.length ? done / orders.length : 0 };
+  }
+
+  function reportMetrics() {
+    const r = reportRange();
+    return reportSum(reportOrders(r.from, r.to, state.reportFilters.channel));
+  }
+
+  function reportDateLabel(d) { return d.toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); }
+
+  function reportPeriodText() {
+    const f = state.reportFilters, r = reportRange();
+    if (f.period === 'Bulan ini') return r.from.toLocaleDateString('id-ID', { month:'long', year:'numeric' });
+    if (f.period === 'Tahun ini') return String(r.from.getFullYear());
+    return reportDateLabel(r.from) + ' – ' + reportDateLabel(r.to);
+  }
+
+  // ringkasan harian
+  function reportDaily(from, to, channel, onlyWithOrders) {
+    const rows = [], day = startOfDay(from);
+    while (day <= to) {
+      const s = reportSum(reportOrders(startOfDay(day), endOfDay(day), channel));
+      if (!onlyWithOrders || s.orders) rows.push({ date:reportDateLabel(day), orders:s.orders, revenue:s.revenue, aov:s.aov });
+      day.setDate(day.getDate() + 1);
+    }
+    return rows;
+  }
+
+  function reportEmpty(text) { return $('<p>', { class:'u-text-xs ink60', text:text, css:{ padding:'12px 0' } }); }
+
   function renderReportPage() {
-    const m = reportMetrics();
+    const f = state.reportFilters, r = reportRange(), m = reportMetrics();
     $('#report-kpi-revenue').text(reportRupiah(m.revenue, true));
     $('#report-kpi-orders').text(m.orders.toLocaleString('id-ID'));
     $('#report-kpi-aov').text(reportRupiah(m.aov, true));
-    $('#report-kpi-completion').text(Math.round(m.completion*100) + '%');
+    $('#report-kpi-completion').text(Math.round(m.completion * 100) + '%');
     $('#report-kpi-completion-note').text(m.completed.toLocaleString('id-ID') + ' pesanan selesai');
-    $('#report-chart-subtitle').text(reportPeriodText() + ' · ' + dropdownLabel('report-channel', state.reportFilters.channel));
-    $('#report-custom-range').toggleClass('hidden-page', state.reportFilters.period !== 'Rentang tanggal');
-    $('#report-date-from').val(state.reportFilters.dateFrom); $('#report-date-to').val(state.reportFilters.dateTo);
+    $('#report-chart-subtitle').text(reportPeriodText() + ' · ' + dropdownLabel('report-channel', f.channel));
+    $('#report-custom-range').toggleClass('hidden-page', f.period !== 'Rentang tanggal');
+    $('#report-date-from').val(f.dateFrom); $('#report-date-to').val(f.dateTo);
 
-    const $channels=$('#report-channel-breakdown').empty();
-    const selected=state.reportFilters.channel;
-    $.each(REPORT_BASE.channels,function(_,c){
-      const scaledRevenue=Math.round(c.revenue*m.pf);
-      const pct=Math.round(c.revenue/REPORT_BASE.revenue*100);
-      const dim=selected !== 'Semua' && selected !== c.name;
-      $('<div>',{class:'report-channel-row'}).css('opacity', dim ? .42 : 1).html(
-        '<div class="report-channel-name"><span class="report-channel-dot" style="background:'+c.color+'"></span><span>'+c.name+'</span></div>'+
-        '<div class="report-channel-bar"><i style="width:'+pct+'%;background:'+c.color+'"></i></div>'+
-        '<div class="report-channel-value"><strong>'+reportRupiah(scaledRevenue,true)+'</strong><small>'+pct+'%</small></div>'
+    // pendapatan per kanal ato periode
+    const periodOrders = reportOrders(r.from, r.to, 'Semua');
+    const names = Object.keys(REPORT_CHANNEL_COLORS);
+    periodOrders.forEach(function (o) { if (names.indexOf(o.channel) === -1) names.push(o.channel); });
+    const byChannel = names.map(function (n) {
+      return { name:n, color:REPORT_CHANNEL_COLORS[n] || '#a45a5a', revenue:reportSum(periodOrders.filter(function (o) { return o.channel === n; })).revenue };
+    });
+    const totalRevenue = byChannel.reduce(function (s, c) { return s + c.revenue; }, 0);
+    const $channels = $('#report-channel-breakdown').empty();
+    $.each(byChannel, function (_, c) {
+      const pct = totalRevenue ? Math.round(c.revenue / totalRevenue * 100) : 0;
+      const dim = f.channel !== 'Semua' && f.channel !== c.name;
+      $('<div>', { class:'report-channel-row' }).css('opacity', dim ? .42 : 1).html(
+        '<div class="report-channel-name"><span class="report-channel-dot" style="background:' + c.color + '"></span><span>' + c.name + '</span></div>' +
+        '<div class="report-channel-bar"><i style="width:' + pct + '%;background:' + c.color + '"></i></div>' +
+        '<div class="report-channel-value"><strong>' + reportRupiah(c.revenue, true) + '</strong><small>' + pct + '%</small></div>'
       ).appendTo($channels);
     });
-    $('#report-channel-total').text(reportRupiah(REPORT_BASE.revenue*m.pf,true));
+    $('#report-channel-total').text(reportRupiah(totalRevenue, true));
 
-    const $statuses=$('#report-status-breakdown').empty();
-    const totalBase=REPORT_BASE.statuses.reduce(function(a,b){return a+b.count;},0);
-    $.each(REPORT_BASE.statuses,function(_,st){
-      const count=Math.max(0,Math.round(st.count*m.pf*(state.reportFilters.channel==='Semua'?1:m.cf*1.06)));
-      const pct=Math.round(st.count/totalBase*100);
-      $('<div>',{class:'report-status-row'}).html('<div class="report-status-label"><span class="report-status-badge-dot" style="background:'+st.color+'"></span>'+st.name+'</div><div class="report-status-bar"><i style="width:'+pct+'%;background:'+st.color+'"></i></div><div class="report-status-count">'+count.toLocaleString('id-ID')+' · '+pct+'%</div>').appendTo($statuses);
+    // status pesanan
+    const filtered = reportOrders(r.from, r.to, f.channel);
+    const $statuses = $('#report-status-breakdown').empty();
+    $.each(REPORT_STATUS_ORDER, function (_, st) {
+      const count = filtered.filter(function (o) { return o.status === st.name; }).length;
+      const pct = filtered.length ? Math.round(count / filtered.length * 100) : 0;
+      $('<div>', { class:'report-status-row' }).html('<div class="report-status-label"><span class="report-status-badge-dot" style="background:' + st.color + '"></span>' + st.name + '</div><div class="report-status-bar"><i style="width:' + pct + '%;background:' + st.color + '"></i></div><div class="report-status-count">' + count.toLocaleString('id-ID') + ' · ' + pct + '%</div>').appendTo($statuses);
     });
-    $('#report-status-total').text(m.orders.toLocaleString('id-ID')+' pesanan');
+    $('#report-status-total').text(m.orders.toLocaleString('id-ID') + ' pesanan');
 
-    const $menus=$('#report-top-menu').empty();
-    $.each(REPORT_BASE.menus,function(i,item){
-      const qty=Math.max(1,Math.round(item.qty*m.pf*(state.reportFilters.channel==='Semua'?1:m.cf*1.08)));
-      const rev=Math.round(item.revenue*m.pf*(state.reportFilters.channel==='Semua'?1:m.cf));
-      $('<div>',{class:'report-menu-item'}).html('<div class="report-rank">'+(i+1)+'</div><div class="report-menu-name"><strong>'+item.name+'</strong><small>'+qty.toLocaleString('id-ID')+' porsi terjual</small></div><div class="report-menu-sales"><strong>'+reportRupiah(rev,true)+'</strong><small>pendapatan</small></div>').appendTo($menus);
+    // menu terlaris
+    const sold = {};
+    filtered.forEach(function (o) {
+      if (o.status === 'Dibatalkan') return;
+      (Array.isArray(o.items) ? o.items : []).forEach(function (it) {
+        const row = sold[it[0]] || (sold[it[0]] = { name:it[0], qty:0, revenue:0 });
+        row.qty += Number(it[1]) || 0;
+        row.revenue += (Number(it[1]) || 0) * rupiahNumber(it[2]);
+      });
+    });
+    const top = Object.keys(sold).map(function (k) { return sold[k]; })
+      .sort(function (x, y) { return y.qty - x.qty || y.revenue - x.revenue; }).slice(0, 5);
+    const $menus = $('#report-top-menu').empty();
+    if (!top.length) $menus.append(reportEmpty('Belum ada pesanan pada periode ini.'));
+    $.each(top, function (i, item) {
+      $('<div>', { class:'report-menu-item' }).html('<div class="report-rank">' + (i + 1) + '</div><div class="report-menu-name"><strong>' + item.name + '</strong><small>' + item.qty.toLocaleString('id-ID') + ' porsi terjual</small></div><div class="report-menu-sales"><strong>' + reportRupiah(item.revenue, true) + '</strong><small>pendapatan</small></div>').appendTo($menus);
     });
 
-    const $daily=$('#report-daily-rows').empty();
-    $.each(REPORT_BASE.daily,function(_,d){
-      const orders=Math.max(1,Math.round(d.orders*(state.reportFilters.channel==='Semua'?1:m.cf*1.06)));
-      const rev=Math.round(d.revenue*(state.reportFilters.channel==='Semua'?1:m.cf));
-      $('<tr>').html('<td>'+d.date+' 2026</td><td>'+orders.toLocaleString('id-ID')+'</td><td>'+reportRupiah(rev,false)+'</td><td>'+reportRupiah(rev/orders,true)+'</td>').appendTo($daily);
+    // ringkasan 7 hari terakhir
+    const today = new Date(), from7 = startOfDay(today); from7.setDate(from7.getDate() - 6);
+    const $daily = $('#report-daily-rows').empty();
+    $.each(reportDaily(from7, endOfDay(today), f.channel, false), function (_, d) {
+      $('<tr>').html('<td>' + d.date + '</td><td>' + d.orders.toLocaleString('id-ID') + '</td><td>' + reportRupiah(d.revenue, false) + '</td><td>' + (d.aov ? reportRupiah(d.aov, true) : '-') + '</td>').appendTo($daily);
     });
+    $('#report-daily-rows').closest('.report-panel').find('.report-mini-total').text(reportDateLabel(today));
 
     if (state.page === 'Laporan') requestAnimationFrame(function(){ buildLineChart('#linechart'); });
     lucide.createIcons();
   }
 
   function exportReportExcel() {
-    const m=reportMetrics();
-    let rows=[['Laporan Penjualan Lamak Bana'],['Periode',reportPeriodText()],['Kanal',dropdownLabel('report-channel',state.reportFilters.channel)],[],['Ringkasan','Nilai'],['Total Pendapatan',reportRupiah(m.revenue,false)],['Total Pesanan',m.orders],['Rata-rata Transaksi',reportRupiah(m.aov,false)],['Pesanan Selesai',Math.round(m.completion*100)+'%'],[],['Tanggal','Pesanan','Pendapatan','Rata-rata']];
-    REPORT_BASE.daily.forEach(function(d){const o=Math.max(1,Math.round(d.orders*(state.reportFilters.channel==='Semua'?1:m.cf*1.06)));const r=Math.round(d.revenue*(state.reportFilters.channel==='Semua'?1:m.cf));rows.push([d.date+' 2026',o,reportRupiah(r,false),reportRupiah(r/o,false)]);});
+    const m = reportMetrics(), r = reportRange();
+    let rows = [['Laporan Penjualan Lamak Bana'], ['Periode', reportPeriodText()], ['Kanal', dropdownLabel('report-channel', state.reportFilters.channel)], [], ['Ringkasan', 'Nilai'], ['Total Pendapatan', reportRupiah(m.revenue, false)], ['Total Pesanan', m.orders], ['Rata-rata Transaksi', reportRupiah(m.aov, false)], ['Pesanan Selesai', Math.round(m.completion * 100) + '%'], [], ['Tanggal', 'Pesanan', 'Pendapatan', 'Rata-rata']];
+    reportDaily(r.from, r.to, state.reportFilters.channel, true).forEach(function (d) {
+      rows.push([d.date, d.orders, reportRupiah(d.revenue, false), d.aov ? reportRupiah(d.aov, false) : '-']);
+    });
     const html='<html><head><meta charset="UTF-8"></head><body><table>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+String(c==null?'':c).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</td>';}).join('')+'</tr>';}).join('')+'</table></body></html>';
     const blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     a.href=url;a.download='Laporan-Penjualan-Lamak-Bana-'+new Date().toISOString().slice(0,10)+'.xls';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);showToast('Laporan Excel berhasil dibuat.');
@@ -1967,6 +2024,7 @@ $(function () {
         ORDER_DATA = fresh;
         renderOrders();
         renderFullOrders();
+        renderReportPage();
       } catch (err) {
         console.warn('Gagal memuat ulang data pesanan.', err);
       }
