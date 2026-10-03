@@ -159,6 +159,12 @@ $(function () {
     }
   }
 
+  // Pastikan data pesanan awal tersimpan, supaya pesanan dari Landing Page
+  // ditambahkan ke data admin (bukan menggantikannya).
+  try {
+    if (localStorage.getItem('lamak-bana-order-data') === null) saveOrderData();
+  } catch (e) {}
+
 
   const MENU_DATA_DEFAULT = [
     { id:'MN-001', name:'Rendang Daging', category:'Daging', price:28000, stock:12, available:true, website:true, featured:true, tone:'rendang', desc:'Daging sapi dimasak 8 jam dengan santan dan rempah Minang.' },
@@ -1902,6 +1908,20 @@ $(function () {
     $('body').on('change input', '.order-editor-item-menu, .order-editor-item-qty', function () { updateOrderEditorTotal(); });
     $('body').on('submit', '#order-create-form', function (e) { e.preventDefault(); saveNewOrder(); });
 
+    // Pesanan baru dari Landing Page (tab/jendela lain) → muat ulang tanpa refresh
+    window.addEventListener('storage', function (e) {
+      if (e.key !== 'lamak-bana-order-data' || !e.newValue) return;
+      try {
+        const fresh = JSON.parse(e.newValue);
+        if (!Array.isArray(fresh)) return;
+        ORDER_DATA = fresh;
+        renderOrders();
+        renderFullOrders();
+      } catch (err) {
+        console.warn('Gagal memuat ulang data pesanan.', err);
+      }
+    });
+
 
     // Halaman Reservasi
     $('#reservation-search').on('input', function () { state.reservationFilters.search = $(this).val(); renderReservationPage(); });
@@ -2346,4 +2366,3 @@ $(function () {
     }
   });
 })();
-
