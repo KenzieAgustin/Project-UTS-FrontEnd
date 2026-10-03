@@ -1,111 +1,13 @@
 $(function () {
 
-  loadMenuFromDatabase();
+  // Frontend-only admin access gate for the UTS demo.
+  // This is not production-grade authentication.
+  const ADMIN_AUTH_KEY = 'lamak-bana-admin-auth';
 
-  loadOrdersFromDatabase();
-
-  loadOrderSummary();
-
-  async function loadOrdersFromDatabase(){
-
-    try{
-
-        const response = await fetch(
-            "http://localhost:3000/api/orders"
-        );
-
-        const data = await response.json();
-
-        $("#tab-semua-count").text(data.length);
-
-$("#tab-baru-count").text(
-    data.filter(o => o.status === "Baru").length
-);
-
-$("#tab-proses-count").text(
-    data.filter(o => o.status === "Diproses").length
-);
-
-$("#tab-siap-count").text(
-    data.filter(o => o.status === "Siap").length
-);
-
-        console.log("DATA MYSQL ORDER:", data);
-
-
-        ORDER_DATA = data.map(order => ({
-
-            id: "#" + order.order_code,
-
-            customer: order.customer_name,
-
-            phone: "-",
-
-            summary: order.items,
-
-            channel: order.order_type,
-
-            time: new Date(order.order_time)
-                .toLocaleTimeString("id-ID",{
-                    hour:"2-digit",
-                    minute:"2-digit"
-                }),
-
-            total: "Rp" + Number(order.total_price)
-                .toLocaleString("id-ID"),
-
-            status: order.status
-
-        }));
-
-        console.log("ORDER_DATA BARU:", ORDER_DATA);
-
-
-        renderOrders();
-        renderFullOrders();
-
-
-    }catch(error){
-
-        console.error(
-            "Gagal mengambil data pesanan",
-            error
-        );
-
-    }
-
-}
-
-async function loadOrderSummary(){
-
-    try{
-
-        const response = await fetch(
-            "http://localhost:3000/api/order-summary"
-        );
-
-        const data = await response.json();
-
-
-        $(".summary-baru").text(data.baru || 0);
-
-        $(".summary-proses").text(data.diproses || 0);
-
-        $(".summary-siap").text(data.siap || 0);
-
-        $(".summary-selesai").text(data.selesai || 0);
-
-
-    }catch(error){
-
-        console.error(
-            "Gagal mengambil summary order",
-            error
-        );
-
-    }
-
-}
+  if (localStorage.getItem(ADMIN_AUTH_KEY) !== 'true') {
+    window.location.replace('../security-check/index.html');
+    return;
+  }
 
   /* ---------------- Data ---------------- */
   const NAV_UTAMA = [
@@ -172,15 +74,7 @@ async function loadOrderSummary(){
 
 }
 
-  const ORDERS = [
-    ['#LB-2609-018','Rina Maharani','Rendang Daging ×2, Nasi','Makan di Tempat','12:40','Rp78.000','Selesai'],
-    ['#LB-2609-017','Budi Santoso','Ayam Pop ×1, Es Teh','Ojek Online','12:32','Rp41.000','Diproses'],
-    ['#LB-2609-016','PT Sinar Jaya','Nasi Kotak Rendang ×40','Katering','11:15','Rp1.400.000','Diproses'],
-    ['#LB-2609-015','Dewi Lestari','Dendeng Batokok ×1','Ojek Online','11:02','Rp36.000','Dibatalkan'],
-    ['#LB-2609-014','Andi Pratama','Gulai Tunjang ×2, Nasi Putih','Makan di Tempat','10:48','Rp64.000','Selesai'],
-  ];
-
-  let ORDER_DATA = [
+  const ORDER_DATA_DEFAULT = [
     {
       id:'#LB-2609-019', customer:'Siti Rahma', phone:'0812-8765-4321',
       items:[['Rendang Daging',2,'Rp28.000'],['Nasi Putih',2,'Rp8.000'],['Es Teh Manis',1,'Rp7.000']],
@@ -246,6 +140,24 @@ async function loadOrderSummary(){
       timeline:[['10:18','Pesanan diterima']]
     }
   ];
+
+
+  let ORDER_DATA = (function () {
+    try {
+      const saved = localStorage.getItem('lamak-bana-order-data');
+      return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(ORDER_DATA_DEFAULT));
+    } catch (e) {
+      return JSON.parse(JSON.stringify(ORDER_DATA_DEFAULT));
+    }
+  })();
+
+  function saveOrderData() {
+    try {
+      localStorage.setItem('lamak-bana-order-data', JSON.stringify(ORDER_DATA));
+    } catch (e) {
+      console.warn('Data pesanan tidak dapat disimpan di localStorage.', e);
+    }
+  }
 
 
   const MENU_DATA_DEFAULT = [
@@ -458,17 +370,17 @@ async function loadOrderSummary(){
   /* ---------------- Render: orders ---------------- */
   function renderOrders() {
     const $wrap = $('#orders').empty();
-    $.each(ORDERS, function (_, o) {
-      const s = STATUS_STYLE[o[6]];
+    $.each(ORDER_DATA.slice(0, 5), function (_, o) {
+      const s = STATUS_STYLE[o.status] || STATUS_STYLE.Baru;
       $('<div>', { class: 'order-row d-flex w-100 u-cursor-pointer align-items-center u-gap-4 u-border-b u-border-solid border-soft u-px-4 u-py-3-5' })
         .html(
-          '<p class="u-w-120px flex-shrink-0 u-text-sm fw-medium u-leading-5 u-text-ink">' + o[0] + '</p>' +
-          '<p class="u-w-150px flex-shrink-0 u-text-sm u-text-ink">' + o[1] + '</p>' +
-          '<p class="u-min-w-0 u-flex-1 u-text-sm u-text-ink">' + o[2] + '</p>' +
-          '<p class="u-w-130px flex-shrink-0 u-text-sm ink60">' + o[3] + '</p>' +
-          '<p class="u-w-64px flex-shrink-0 u-text-sm ink60">' + o[4] + '</p>' +
-          '<p class="u-w-120px flex-shrink-0 text-end u-text-sm fw-medium u-leading-5 u-text-ink">' + o[5] + '</p>' +
-          '<div class="u-w-110px flex-shrink-0"><span class="d-inline-flex align-items-center rounded-pill u-px-2-5 u-py-0-5 u-text-xs fw-medium" style="background:' + s.bg + ';color:' + s.color + '">' + o[6] + '</span></div>'
+          '<p class="u-w-120px flex-shrink-0 u-text-sm fw-medium u-leading-5 u-text-ink">' + o.id + '</p>' +
+          '<p class="u-w-150px flex-shrink-0 u-text-sm u-text-ink">' + o.customer + '</p>' +
+          '<p class="u-min-w-0 u-flex-1 u-text-sm u-text-ink">' + o.summary + '</p>' +
+          '<p class="u-w-130px flex-shrink-0 u-text-sm ink60">' + o.channel + '</p>' +
+          '<p class="u-w-64px flex-shrink-0 u-text-sm ink60">' + o.time + '</p>' +
+          '<p class="u-w-120px flex-shrink-0 text-end u-text-sm fw-medium u-leading-5 u-text-ink">' + o.total + '</p>' +
+          '<div class="u-w-110px flex-shrink-0"><span class="d-inline-flex align-items-center rounded-pill u-px-2-5 u-py-0-5 u-text-xs fw-medium" style="background:' + s.bg + ';color:' + s.color + '">' + o.status + '</span></div>'
         )
         .appendTo($wrap);
     });
@@ -489,6 +401,24 @@ async function loadOrderSummary(){
       const text = [o.id,o.customer,o.summary,o.channel].join(' ').toLowerCase();
       return statusOk && channelOk && (!q || text.indexOf(q) !== -1);
     });
+  }
+
+  function renderOrderStats() {
+    const count = ORDER_DATA.length;
+    const baru = ORDER_DATA.filter(function (o) { return o.status === 'Baru'; }).length;
+    const diproses = ORDER_DATA.filter(function (o) { return o.status === 'Diproses'; }).length;
+    const siap = ORDER_DATA.filter(function (o) { return o.status === 'Siap'; }).length;
+    const selesai = ORDER_DATA.filter(function (o) { return o.status === 'Selesai'; }).length;
+
+    $('.summary-baru').text(baru);
+    $('.summary-proses').text(diproses);
+    $('.summary-siap').text(siap);
+    $('.summary-selesai').text(selesai);
+
+    $('#tab-semua-count').text(count);
+    $('#tab-baru-count').text(baru);
+    $('#tab-proses-count').text(diproses);
+    $('#tab-siap-count').text(siap);
   }
 
   function renderFullOrders() {
@@ -514,7 +444,8 @@ async function loadOrderSummary(){
           .appendTo($wrap);
       });
     }
-    $('#orders-count').text('Menampilkan ' + data.length + ' dari 128 pesanan');
+    renderOrderStats();
+    $('#orders-count').text('Menampilkan ' + data.length + ' dari ' + ORDER_DATA.length + ' pesanan');
     $('#order-tabs .order-tab').removeClass('is-active').filter('[data-status="' + state.orderFilters.status + '"]').addClass('is-active');
     lucide.createIcons();
   }
@@ -536,10 +467,173 @@ async function loadOrderSummary(){
   function rupiahNumber(text) { return Number(String(text).replace(/[^0-9]/g, '')) || 0; }
   function rupiah(textNumber) { return 'Rp' + Number(textNumber).toLocaleString('id-ID'); }
 
+  /* ---------------- Create: order ---------------- */
+  function orderEditorMenuOptions(selected) {
+    const menus = MENU_DATA.filter(function (m) { return m.available !== false && Number(m.stock) !== 0; });
+    if (!menus.length) return '<option value="">Belum ada menu tersedia</option>';
+    return '<option value="">Pilih menu...</option>' + menus.map(function (m) {
+      const isSelected = m.id === selected ? ' selected' : '';
+      return '<option value="' + resEsc(m.id) + '"' + isSelected + '>' + resEsc(m.name) + ' · ' + menuRupiah(m.price) + '</option>';
+    }).join('');
+  }
+
+  function ensureOrderEditor() {
+    if ($('#order-create-modal').length) return;
+    const html = `
+      <div id="order-create-modal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(30,18,12,.42);padding:24px;overflow:auto;">
+        <div id="order-create-panel" style="width:min(720px,100%);margin:5vh auto;background:#fff;border-radius:24px;border:1px solid rgba(59,31,20,.10);box-shadow:0 24px 70px rgba(59,31,20,.22);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 24px;border-bottom:1px solid rgba(59,31,20,.08);">
+            <div><p style="margin:0;font-size:18px;font-weight:700;color:#2f201a;">Pesanan Baru</p><p style="margin:4px 0 0;font-size:13px;color:rgba(47,32,26,.60);">Buat pesanan dan simpan langsung di browser.</p></div>
+            <button type="button" class="order-create-close" aria-label="Tutup" style="width:38px;height:38px;border:1px solid rgba(59,31,20,.10);border-radius:50%;background:#fff;font-size:22px;line-height:1;color:#3b1f14;cursor:pointer;">×</button>
+          </div>
+          <form id="order-create-form" style="padding:24px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div><label style="display:block;font-size:12px;font-weight:600;color:rgba(47,32,26,.65);margin-bottom:7px;">NAMA PELANGGAN *</label><input id="order-form-customer" required type="text" placeholder="Nama pelanggan" style="width:100%;padding:11px 13px;border:1px solid rgba(59,31,20,.14);border-radius:12px;outline:none;"></div>
+              <div><label style="display:block;font-size:12px;font-weight:600;color:rgba(47,32,26,.65);margin-bottom:7px;">NO. TELEPON</label><input id="order-form-phone" type="text" placeholder="08xxxxxxxxxx" style="width:100%;padding:11px 13px;border:1px solid rgba(59,31,20,.14);border-radius:12px;outline:none;"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+              <div><label style="display:block;font-size:12px;font-weight:600;color:rgba(47,32,26,.65);margin-bottom:7px;">KANAL *</label><select id="order-form-channel" style="width:100%;padding:11px 13px;border:1px solid rgba(59,31,20,.14);border-radius:12px;background:#fff;"><option>Makan di Tempat</option><option>Take Away</option><option>Ojek Online</option><option>Katering</option></select></div>
+              <div><label style="display:block;font-size:12px;font-weight:600;color:rgba(47,32,26,.65);margin-bottom:7px;">INFO KANAL</label><input id="order-form-channel-info" type="text" placeholder="Contoh: Meja 05" style="width:100%;padding:11px 13px;border:1px solid rgba(59,31,20,.14);border-radius:12px;outline:none;"></div>
+            </div>
+            <div style="margin-top:20px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><label style="font-size:12px;font-weight:600;color:rgba(47,32,26,.65);">MENU PESANAN *</label><button type="button" id="order-add-item" style="border:0;background:transparent;color:#8b1e1e;font-weight:600;cursor:pointer;">+ Tambah menu</button></div>
+              <div id="order-editor-items"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+              <div><label style="display:block;font-size:12px;font-weight:600;color:rgba(47,32,26,.65);margin-bottom:7px;">PEMBAYARAN</label><select id="order-form-payment" style="width:100%;padding:11px 13px;border:1px solid rgba(59,31,20,.14);border-radius:12px;background:#fff;"><option>QRIS</option><option>Tunai</option><option>Transfer Bank</option><option>GoPay</option><option>OVO</option></select></div>
+              <div><label style="display:block;font-size:12px;font-weight:600;color:rgba(47,32,26,.65);margin-bottom:7px;">CATATAN</label><input id="order-form-note" type="text" placeholder="Catatan pesanan (opsional)" style="width:100%;padding:11px 13px;border:1px solid rgba(59,31,20,.14);border-radius:12px;outline:none;"></div>
+            </div>
+            <div style="margin-top:20px;padding:15px 16px;border-radius:14px;background:rgba(139,30,30,.05);display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;color:rgba(47,32,26,.60);">Total Pesanan</span><strong id="order-editor-total" style="font-size:20px;color:#8b1e1e;">Rp0</strong></div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px;"><button type="button" class="order-create-close" style="padding:10px 18px;border:1px solid rgba(59,31,20,.12);border-radius:999px;background:#fff;color:#3b1f14;font-weight:600;cursor:pointer;">Batal</button><button type="submit" style="padding:10px 20px;border:0;border-radius:999px;background:#8b1e1e;color:#fff;font-weight:600;cursor:pointer;">Simpan Pesanan</button></div>
+          </form>
+        </div>
+      </div>`;
+    $('body').append(html);
+  }
+
+  function renderOrderEditorItems() {
+    ensureOrderEditor();
+    const $wrap = $('#order-editor-items');
+    if (!$wrap.children().length) addOrderEditorItem();
+    else $wrap.find('.order-editor-item-menu').each(function () {
+      const selected = $(this).val();
+      $(this).html(orderEditorMenuOptions(selected));
+      $(this).val(selected);
+    });
+    updateOrderEditorTotal();
+  }
+
+  function addOrderEditorItem() {
+    ensureOrderEditor();
+    const row = $('<div>', { class:'order-editor-item', style:'display:grid;grid-template-columns:minmax(0,1fr) 82px 90px 36px;gap:8px;align-items:center;margin-bottom:8px;' });
+    row.html(
+      '<select class="order-editor-item-menu" style="width:100%;padding:10px 11px;border:1px solid rgba(59,31,20,.14);border-radius:11px;background:#fff;">' + orderEditorMenuOptions('') + '</select>' +
+      '<input class="order-editor-item-qty" type="number" min="1" value="1" style="width:100%;padding:10px 8px;border:1px solid rgba(59,31,20,.14);border-radius:11px;" aria-label="Jumlah" />' +
+      '<span class="order-editor-item-price" style="font-size:12px;color:rgba(47,32,26,.62);text-align:right;">Rp0</span>' +
+      '<button type="button" class="order-editor-item-remove" aria-label="Hapus menu" style="width:32px;height:32px;border:0;border-radius:50%;background:rgba(59,31,20,.06);color:#8b1e1e;cursor:pointer;">×</button>'
+    );
+    $wrap = $('#order-editor-items');
+    $wrap.append(row);
+    updateOrderEditorTotal();
+  }
+
+  function updateOrderEditorTotal() {
+    let total = 0;
+    $('#order-editor-items .order-editor-item').each(function () {
+      const menu = getMenuItem($(this).find('.order-editor-item-menu').val());
+      const qty = Math.max(1, Number($(this).find('.order-editor-item-qty').val()) || 1);
+      const price = menu ? Number(menu.price) || 0 : 0;
+      total += price * qty;
+      $(this).find('.order-editor-item-price').text(menu ? menuRupiah(price * qty) : 'Rp0');
+    });
+    $('#order-editor-total').text(menuRupiah(total));
+    return total;
+  }
+
+  function generateOrderId() {
+    let max = 0;
+    ORDER_DATA.forEach(function (o) {
+      const match = String(o.id || '').match(/(\d+)$/);
+      if (match) max = Math.max(max, Number(match[1]) || 0);
+    });
+    const now = new Date();
+    const yy = String(now.getFullYear()).slice(-2);
+    const mm = String(now.getMonth() + 1).padStart(2,'0');
+    return '#LB-' + yy + mm + '-' + String(max + 1).padStart(3,'0');
+  }
+
+  function currentOrderDateParts() {
+    const now = new Date();
+    return {
+      time: now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':'),
+      date: now.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})
+    };
+  }
+
+  function openOrderEditor() {
+    ensureOrderEditor();
+    $('#order-create-form')[0].reset();
+    $('#order-form-channel').val('Makan di Tempat');
+    $('#order-form-payment').val('QRIS');
+    $('#order-editor-items').empty();
+    addOrderEditorItem();
+    $('#order-create-modal').css('display','block');
+    $('body').css('overflow','hidden');
+    lucide.createIcons();
+  }
+
+  function closeOrderEditor() {
+    $('#order-create-modal').css('display','none');
+    $('body').css('overflow','');
+  }
+
+  function saveNewOrder() {
+    const customer = $('#order-form-customer').val().trim();
+    const phone = $('#order-form-phone').val().trim() || '-';
+    const channel = $('#order-form-channel').val();
+    const channelInfo = $('#order-form-channel-info').val().trim() || (channel === 'Makan di Tempat' ? 'Meja belum ditentukan' : '-');
+    const payment = $('#order-form-payment').val();
+    const note = $('#order-form-note').val().trim() || 'Tidak ada catatan khusus.';
+    const items = [];
+    let total = 0;
+
+    $('#order-editor-items .order-editor-item').each(function () {
+      const menu = getMenuItem($(this).find('.order-editor-item-menu').val());
+      const qty = Math.max(1, Number($(this).find('.order-editor-item-qty').val()) || 1);
+      if (!menu) return;
+      const price = Number(menu.price) || 0;
+      items.push([menu.name, qty, menuRupiah(price)]);
+      total += price * qty;
+    });
+
+    if (!customer) { showToast('Nama pelanggan wajib diisi.'); return false; }
+    if (!items.length) { showToast('Pilih minimal satu menu.'); return false; }
+
+    const dt = currentOrderDateParts();
+    const id = generateOrderId();
+    const summary = items.map(function (it) { return it[0] + ' ×' + it[1]; }).join(', ');
+    const order = {
+      id:id, customer:customer, phone:phone, items:items, summary:summary,
+      channel:channel, channelInfo:channelInfo, time:dt.time, date:dt.date,
+      total:menuRupiah(total), subtotal:menuRupiah(total), discount:'Rp0',
+      status:'Baru', payment:payment, paymentStatus:'BELUM DIBAYAR', note:note,
+      timeline:[[dt.time,'Pesanan diterima']]
+    };
+
+    ORDER_DATA.unshift(order);
+    saveOrderData();
+    renderOrders();
+    renderFullOrders();
+    closeOrderEditor();
+    showToast(id + ' berhasil dibuat.');
+    return true;
+  }
+
   function renderOrderDetail(order) {
     if (!order) return;
     $('#detail-id').text(order.id);
-    const itemHtml = order.items.map(function (it) {
+    const safeItems = Array.isArray(order.items) ? order.items : [];
+    const itemHtml = safeItems.map(function (it) {
       return '<div class="detail-item"><div><p class="u-text-sm fw-medium u-text-ink">' + it[0] + '</p><p class="u-text-xs ink60">' + it[1] + ' × ' + it[2] + '</p></div><p class="u-text-sm fw-medium u-text-ink">' + it[2] + '</p></div>';
     }).join('');
     const steps = ['Pesanan diterima','Pesanan diproses','Pesanan siap','Pesanan selesai'];
@@ -604,6 +698,8 @@ async function loadOrderSummary(){
     const mm = String(now.getMinutes()).padStart(2,'0');
     const label = { Diproses:'Pesanan diproses', Siap:'Pesanan siap', Selesai:'Pesanan selesai' }[next];
     order.timeline.push([hh + ':' + mm, label]);
+    saveOrderData();
+    renderOrders();
     renderFullOrders();
     renderOrderDetail(order);
     showToast(order.id + ' diperbarui menjadi “' + next + '”.');
@@ -1736,7 +1832,7 @@ async function loadOrderSummary(){
       closeDropdown();
       if (target === 'Pesanan') {
         navigate('Pesanan');
-        showToast('Siap membuat pesanan baru. Form input dapat dihubungkan ke backend/POS pada tahap berikutnya.');
+        openOrderEditor();
       } else if (target === 'Reservasi') {
         navigate('Reservasi');
         openReservationEditor();
@@ -1785,13 +1881,26 @@ async function loadOrderSummary(){
       if (!order) return;
       order.status = 'Dibatalkan';
       order.timeline.push([new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}).replace('.',':'), 'Pesanan dibatalkan']);
+      saveOrderData();
+      renderOrders();
       renderFullOrders();
       renderOrderDetail(order);
       showToast(order.id + ' dibatalkan.');
     }).on('click', '#btn-close-completed', closeOrderDetail);
     $('#btn-new-order').on('click', function () {
-      showToast('Tombol “Pesanan Baru” sudah siap. Form input dapat dihubungkan ke backend/POS pada tahap berikutnya.');
+      openOrderEditor();
     });
+    $('body').on('click', '.order-create-close', function () { closeOrderEditor(); });
+    $('body').on('click', '#order-create-modal', function (e) { if (e.target.id === 'order-create-modal') closeOrderEditor(); });
+    $('body').on('click', '#order-add-item', function () { addOrderEditorItem(); });
+    $('body').on('click', '.order-editor-item-remove', function () {
+      const $rows = $('#order-editor-items .order-editor-item');
+      if ($rows.length <= 1) { showToast('Minimal satu baris menu harus tersedia.'); return; }
+      $(this).closest('.order-editor-item').remove();
+      updateOrderEditorTotal();
+    });
+    $('body').on('change input', '.order-editor-item-menu, .order-editor-item-qty', function () { updateOrderEditorTotal(); });
+    $('body').on('submit', '#order-create-form', function (e) { e.preventDefault(); saveNewOrder(); });
 
 
     // Halaman Reservasi
@@ -2202,7 +2311,6 @@ async function loadOrderSummary(){
 
   wire();
 
-  loadOrdersFromDatabase();
   lucide.createIcons();
   requestAnimationFrame(function () { buildLineChart('#linechart-dash'); });
 

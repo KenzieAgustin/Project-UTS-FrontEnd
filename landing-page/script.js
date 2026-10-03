@@ -133,3 +133,204 @@ const revealObserver = new IntersectionObserver((entries) => {
 });
 
 revealEls.forEach((el) => revealObserver.observe(el));
+
+// ==========================================
+// SYNC MENU ADMIN → LANDING PAGE
+// ==========================================
+
+(function syncAdminMenuToLanding() {
+
+    const STORAGE_KEY = 'lamak-bana-menu-data';
+
+    function getAdminMenuData() {
+
+        try {
+
+            const saved =
+                localStorage.getItem(STORAGE_KEY);
+
+            if (!saved) {
+                return [];
+            }
+
+            const data = JSON.parse(saved);
+
+            return Array.isArray(data)
+                ? data
+                : [];
+
+        } catch (error) {
+
+            console.warn(
+                'Gagal membaca menu admin:',
+                error
+            );
+
+            return [];
+        }
+    }
+
+
+    function formatRupiah(value) {
+
+        return 'Rp' +
+            Number(value || 0)
+                .toLocaleString('id-ID');
+
+    }
+
+
+    function findMenuByName(menuData, name) {
+
+        const target =
+            name.toLowerCase().trim();
+
+        return menuData.find(function(menu) {
+
+            return String(menu.name || '')
+                .toLowerCase()
+                .trim() === target;
+
+        });
+
+    }
+
+
+    function syncMenuCards() {
+
+        const menuData =
+            getAdminMenuData();
+
+        if (!menuData.length) {
+            return;
+        }
+
+
+        const cards =
+            document.querySelectorAll(
+                '.menu-section .menu-card'
+            );
+
+
+        cards.forEach(function(card) {
+
+            const title =
+                card.querySelector(
+                    '.menu-card-title'
+                );
+
+            if (!title) {
+                return;
+            }
+
+
+            const menuName =
+                title.textContent
+                    .trim()
+                    .toLowerCase();
+
+
+            const menu =
+                findMenuByName(
+                    menuData,
+                    menuName
+                );
+
+
+            // Tidak ada data dari admin
+            // → biarkan HTML asli
+            if (!menu) {
+                return;
+            }
+
+
+            // ==============================
+            // HARGA
+            // ==============================
+
+            const price =
+                card.querySelector(
+                    '.menu-card-price'
+                );
+
+            if (price) {
+
+                price.textContent =
+                    formatRupiah(menu.price);
+
+            }
+
+
+            // ==============================
+            // DESKRIPSI
+            // ==============================
+
+            const desc =
+                card.querySelector(
+                    '.menu-card-desc'
+                );
+
+            if (desc && menu.desc) {
+
+                desc.textContent =
+                    menu.desc;
+
+            }
+
+
+            // ==============================
+            // WEBSITE ON / OFF
+            // ==============================
+
+            if (menu.website === false) {
+
+                card.style.display = 'none';
+
+            } else {
+
+                card.style.display = '';
+
+            }
+
+        });
+
+    }
+
+
+    // Jalankan saat halaman selesai dimuat
+    if (
+        document.readyState ===
+        'loading'
+    ) {
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            syncMenuCards
+        );
+
+    } else {
+
+        syncMenuCards();
+
+    }
+
+
+    // Jika localStorage berubah
+    // dari halaman/tab lain
+    window.addEventListener(
+        'storage',
+        function(event) {
+
+            if (
+                event.key === STORAGE_KEY
+            ) {
+
+                syncMenuCards();
+
+            }
+
+        }
+    );
+
+
+})();
