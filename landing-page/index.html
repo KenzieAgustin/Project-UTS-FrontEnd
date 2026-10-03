@@ -3,7 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lamak Bana - Landing Page</title>
+    <title>Lamak Bana - Restoran Masakan Minang Autentik di Jakarta Barat</title>
+
+    <!-- META SEO -->
+    <meta name="description" content="Masakan Minang autentik, dimasak dengan resep turun-temurun sejak 1998.">
+    <meta name="keywords" content="Lamak Bana, restoran Minang, masakan Padang, rendang, ayam pop, dendeng batokok, katering Minang, reservasi meja, Jakarta Barat">
+    <meta name="author" content="Lamak Bana">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#8B1E1E">
+
+    <!-- Tampilan saat link dibagikan -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Lamak Bana">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:title" content="Lamak Bana - Masakan Minang Autentik">
+    <meta property="og:description" content="Lamak Bana: masakan Minang autentik dengan 28 tahun resep keluarga sejak 1998.">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Lamak Bana - Masakan Minang Autentik">
+    <meta name="twitter:description" content="Lamak Bana: masakan Minang autentik dengan 28 tahun resep keluarga sejak 1998.">
+
+    <!-- favicon -->
+    <link rel="icon" href="images/favicon/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="images/favicon/favicon.ico" sizes="32x32">
+    <link rel="apple-touch-icon" href="images/favicon/Apel.png">
 
     <!-- font  -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,8 +36,11 @@
 </head>
 <body>
 
+    <!-- skip langsung ke konten untuk pengguna keyboard & screen reader -->
+    <a href="#konten-utama" class="skip-link">Lewati ke konten utama</a>
+
     <!-- NAVBAR SECTION -->
-    <nav class="navbar">
+    <nav class="navbar" aria-label="Navigasi utama">
         <a href="#beranda" class="logo">LAMAK BANA</a>
         <ul class="nav-links">
             <li><a href="#beranda">Beranda</a></li>
@@ -35,122 +60,72 @@
         </button>
     </nav>
 
+    <main id="konten-utama" tabindex="-1">
+
     <!-- HERO SECTION -->
     <section class="hero" id="beranda">
-        <img src="https://via.placeholder.com/100x100?text=Daun" class="ornament ornament-1" alt="Daun">
-        <img src="https://via.placeholder.com/100x100?text=Kayu+Manis" class="ornament ornament-2" alt="Kayu Manis">
-        <img src="https://via.placeholder.com/100x100?text=Bunga+Lawang" class="ornament ornament-3" alt="Bunga Lawang">
+        <img src="https://via.placeholder.com/100x100?text=Daun" class="ornament ornament-1" alt="Daun" aria-hidden="true">
+        <img src="https://via.placeholder.com/100x100?text=Kayu+Manis" class="ornament ornament-2" alt="Kayu Manis" aria-hidden="true">
+        <img src="https://via.placeholder.com/100x100?text=Bunga+Lawang" class="ornament ornament-3" alt="Bunga Lawang" aria-hidden="true">
 
         <p class="hero-subtitle">Pedas &bull; Gurih &bull; Lamak</p>
-        <h1 class="hero-title">RASA MINANG<br>DIMASAK DENGAN HATI</h1>
+        <h1 class="hero-title">RASA MINANG<br>DIMASAK DENGAN <span class="highlight-word">HATI</span></h1>
 
         <div class="food-circles-container">
-            <div class="food-circle circle-left"></div>
-            <div class="food-circle circle-center"></div>
-            <div class="food-circle circle-right"></div>
+            <div class="food-circle circle-left" role="img" aria-label="Rendang daging sapi dalam mangkuk kayu, ditaburi irisan cabai merah"></div>
+            <div class="food-circle circle-center" role="img" aria-label="Sepiring nasi Padang dengan rendang, daun singkong, dan sambal"></div>
+            <div class="food-circle circle-right" role="img" aria-label="Ayam pop dengan sambal oranye di atas daun pisang"></div>
         </div>
 
-        <svg class="hero-curve" viewBox="0 0 1440 220" preserveAspectRatio="none">
+        <svg class="hero-curve" viewBox="0 0 1440 220" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0,0 C360,180 1080,180 1440,0 L1440,220 L0,220 Z"></path>
         </svg>
     </section>
 
     <!-- KATEGORI SECTION -->
     <section class="kategori" id="kategori">
-        <div class="kategori-header">
+        <div class="kategori-header reveal">
             <p class="kategori-subtitle">&bull; Kategori</p>
             <h2 class="kategori-title">PILIH LAUK FAVORITMU</h2>
             <p class="kategori-desc">Dari rendang yang dimasak berjam-jam sampai sambal ijo yang pedas segar.</p>
         </div>
 
-        <div class="kategori-list">
+        <div class="kategori-list reveal">
             <div class="kategori-item active">
-                <div class="kategori-box box-rendang"></div>
+                <div class="kategori-box box-rendang" aria-hidden="true"></div>
                 <p class="kategori-name">Rendang</p>
             </div>
             <div class="kategori-item">
-                <div class="kategori-box box-dendeng"></div>
+                <div class="kategori-box box-dendeng" aria-hidden="true"></div>
                 <p class="kategori-name">Dendeng Balado</p>
             </div>
             <div class="kategori-item">
-                <div class="kategori-box box-tunjang"></div>
+                <div class="kategori-box box-tunjang" aria-hidden="true"></div>
                 <p class="kategori-name">Gulai Tunjang</p>
             </div>
             <div class="kategori-item">
-                <div class="kategori-box box-ikan"></div>
+                <div class="kategori-box box-ikan" aria-hidden="true"></div>
                 <p class="kategori-name">Gulai Ikan</p>
             </div>
             <div class="kategori-item">
-                <div class="kategori-box box-telur"></div>
+                <div class="kategori-box box-telur" aria-hidden="true"></div>
                 <p class="kategori-name">Telur Balado</p>
             </div>
             <div class="kategori-item">
-                <div class="kategori-box box-perkedel"></div>
+                <div class="kategori-box box-perkedel" aria-hidden="true"></div>
                 <p class="kategori-name">Perkedel</p>
             </div>
             <div class="kategori-item">
-                <div class="kategori-box box-ayambakar"></div>
+                <div class="kategori-box box-ayambakar" aria-hidden="true"></div>
                 <p class="kategori-name">Ayam Bakar</p>
             </div>
         </div>
     </section>
 
-    <section class="promo-section" id="promo">
-      <!-- Header Section -->
-      <div class="promo-header">
-        <div class="promo-tag">&bull; Promo</div>
-        <h2 class="promo-title">PROMO SPESIAL MINGGU INI</h2>
-        <p class="promo-subtitle">Makan enak, harga bersahabat. Jangan sampai kehabisan!</p>
-      </div>
-
-      <div class="promo-grid">
-        <!-- Kolom Kiri (2 Kartu) -->
-        <div class="promo-col-left">
-
-          <!-- Paket Hemat -->
-          <div class="promo-card card-yellow">
-            <div class="card-content">
-              <h3 class="card-title text-black">PAKET HEMAT<br/>NASI RENDANG</h3>
-              <a href="#" class="btn btn-red">Pesan Sekarang</a>
-            </div>
-            <div class="card-badge badge-red">HEMAT<br/>20%</div>
-            <div class="card-circle circle-small"><span>FOTO</span></div>
-          </div>
-
-          <!-- Hidang Keluarga -->
-          <div class="promo-card card-red">
-            <div class="card-content">
-              <h3 class="card-title text-light">HIDANG<br/>KELUARGA</h3>
-              <a href="#" class="btn btn-outline">Pesan Sekarang</a>
-            </div>
-            <div class="card-badge badge-white">HEMAT<br/>30%</div>
-            <div class="card-circle circle-small"><span>FOTO</span></div>
-          </div>
-
-        </div>
-
-        <!-- Kolom Kanan (1 Kartu Besar) -->
-        <div class="promo-col-right">
-
-          <!-- Gratis Ongkir -->
-          <div class="promo-card card-green">
-            <div class="card-content">
-              <h3 class="card-title text-light">GRATIS ONGKIR<br/>MIN. RP100RB</h3>
-              <p class="card-desc text-light">Berlaku untuk pengantaran area Jakarta. Pesan lewat WhatsApp atau aplikasi ojek online.</p>
-              <a href="#" class="btn btn-red">Pesan Sekarang</a>
-            </div>
-            <div class="card-badge badge-white badge-top-right">GRATIS</div>
-            <div class="card-circle circle-large"><span>FOTO</span></div>
-          </div>
-
-        </div>
-
-      </div>
-    </section>
-
+    <!-- Menu -->
     <section class="menu-section" id="menu">
       <!-- Header Section -->
-      <div class="menu-header-container">
+      <div class="menu-header-container reveal">
         <div class="menu-header-text">
           <div class="menu-tag">&bull; Menu Kami</div>
           <h2 class="menu-title">MENU ANDALAN KAMI</h2>
@@ -162,7 +137,7 @@
       <div class="menu-grid">
 
         <!-- Rendang Daging -->
-        <div class="menu-card">
+        <div class="menu-card reveal">
           <div class="card-img-wrapper">
             <span class="badge-terlaris">★ Terlaris</span>
             <div class="foto-placeholder">FOTO</div>
@@ -178,7 +153,7 @@
         </div>
 
         <!-- Ayam Pop -->
-        <div class="menu-card card-offset">
+        <div class="menu-card reveal">
           <div class="card-img-wrapper">
             <div class="foto-placeholder">FOTO</div>
           </div>
@@ -193,7 +168,7 @@
         </div>
 
         <!-- Dendeng Batokok -->
-        <div class="menu-card">
+        <div class="menu-card reveal">
           <div class="card-img-wrapper">
             <div class="foto-placeholder">FOTO</div>
           </div>
@@ -210,6 +185,254 @@
       </div>
     </section>
 
+    <!-- Promo -->
+    <section class="promo-section" id="promo">
+      <!-- Header Section -->
+      <div class="promo-header reveal">
+        <div class="promo-tag">&bull; Promo</div>
+        <h2 class="promo-title">PROMO SPESIAL MINGGU INI</h2>
+        <p class="promo-subtitle">Makan enak, harga bersahabat. Jangan sampai kehabisan!</p>
+      </div>
+
+      <div class="promo-grid">
+        <!-- Kolom Kiri (2 Kartu) -->
+        <div class="promo-col-left">
+
+          <!-- Paket Hemat -->
+          <div class="promo-card card-yellow reveal">
+            <div class="card-content">
+              <h3 class="card-title text-black">PAKET HEMAT<br/>NASI RENDANG</h3>
+              <a href="#" class="btn btn-red">Pesan Sekarang</a>
+            </div>
+            <div class="card-badge badge-red">HEMAT<br/>20%</div>
+            <div class="card-circle circle-small"><span>FOTO</span></div>
+          </div>
+
+          <!-- Hidang Keluarga -->
+          <div class="promo-card card-red reveal">
+            <div class="card-content">
+              <h3 class="card-title text-light">HIDANG<br/>KELUARGA</h3>
+              <a href="#" class="btn btn-outline">Pesan Sekarang</a>
+            </div>
+            <div class="card-badge badge-white">HEMAT<br/>30%</div>
+            <div class="card-circle circle-small"><span>FOTO</span></div>
+          </div>
+
+        </div>
+
+        <!-- Kolom Kanan (1 Kartu Besar) -->
+        <div class="promo-col-right">
+
+          <!-- Gratis Ongkir -->
+          <div class="promo-card card-green reveal">
+            <div class="card-content">
+              <h3 class="card-title text-light">GRATIS ONGKIR<br/>MIN. RP100RB</h3>
+              <p class="card-desc text-light">Berlaku untuk pengantaran area Jakarta. Pesan lewat WhatsApp atau aplikasi ojek online.</p>
+              <a href="#" class="btn btn-red">Pesan Sekarang</a>
+            </div>
+            <div class="card-badge badge-white badge-top-right">GRATIS</div>
+            <div class="card-circle circle-large"><span>FOTO</span></div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Katering -->
+    <section class="katering-section" id="katering">
+      <div class="katering-header reveal">
+        <div class="katering-heading">
+          <p class="katering-tag">&bull; Katering</p>
+          <h2 class="katering-title">KATERING UNTUK<br>SETIAP PERAYAAN</h2>
+        </div>
+        <div class="katering-info">
+          <p class="katering-desc">Dari arisan keluarga hingga pesta pernikahan, kami siapkan hidangan Minang lengkap dengan prasmanan atau nasi kotak.</p>
+          <div class="katering-actions">
+            <a href="#" class="btn-solid-red">Pesan Katering</a>
+            <a href="#" class="btn-cream">Unduh Brosur</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="katering-grid">
+        <div class="katering-card katering-card-wide reveal">
+          <span class="foto-placeholder">FOTO PRASMANAN</span>
+          <span class="katering-pill">Pernikahan</span>
+        </div>
+        <div class="katering-card reveal">
+          <span class="foto-placeholder">FOTO NASI KOTAK</span>
+          <span class="katering-pill">Acara Kantor</span>
+        </div>
+        <div class="katering-card reveal">
+          <span class="foto-placeholder">FOTO ARISAN</span>
+          <span class="katering-pill">Arisan &amp; Syukuran</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tentang Kami -->
+    <section class="tentang-section" id="tentang">
+      <div class="tentang-container">
+
+        <!-- Kiri: foto lengkung + badge melayang -->
+        <div class="tentang-photo reveal">
+          <div class="tentang-arch">
+            <span class="foto-placeholder">FOTO</span>
+          </div>
+          <div class="card-badge badge-red tentang-badge tentang-badge-1">100%<br>HALAL</div>
+          <div class="card-badge badge-white tentang-badge tentang-badge-2">28 TAHUN<br>RESEP</div>
+        </div>
+
+        <!-- Kanan: cerita -->
+        <div class="tentang-text reveal">
+          <p class="tentang-tag">&bull; Tentang Kami</p>
+          <h2 class="tentang-title">RESEP KELUARGA SEJAK 1998</h2>
+          <p>Lamak Bana bermula dari dapur kecil keluarga di Bukittinggi. Resep rendang, gulai, dan sambal diwariskan turun-temurun, dimasak dengan rempah pilihan dan kesabaran yang sama sampai sekarang.</p>
+
+          <blockquote class="tentang-quote">
+            Masakan yang enak itu tidak pernah terburu-buru.
+          </blockquote>
+
+          <div class="tentang-jam">
+            <div class="jam-list">
+              <p class="jam-title">Jam Buka</p>
+              <p>Senin &ndash; Jumat: 08.00 &ndash; 21.00</p>
+              <p>Sabtu &ndash; Minggu: 08.00 &ndash; 22.00</p>
+            </div>
+            <a href="#reservasi" class="btn-solid-red">Reservasi Meja</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Kenapa Kami -->
+    <section class="kenapa-section" id="kenapa">
+      <div class="kenapa-header reveal">
+        <div>
+          <p class="kenapa-tag">&bull; Kenapa Kami</p>
+          <h2 class="kenapa-title">KENAPA HARUS<br>LAMAK BANA?</h2>
+        </div>
+        <p class="kenapa-desc">Bukan sekadar kenyang. Kami menjaga rasa, kebersihan, dan keramahan di setiap piring yang kami hidangkan.</p>
+      </div>
+
+      <div class="kenapa-grid">
+        <div class="kenapa-item reveal">
+          <span class="kenapa-num">01</span>
+          <h3 class="kenapa-item-title">REMPAH ASLI</h3>
+          <p>Cabai, kunyit, lengkuas, dan serai segar, tanpa perasa buatan.</p>
+        </div>
+        <div class="kenapa-item reveal">
+          <span class="kenapa-num">02</span>
+          <h3 class="kenapa-item-title">DIMASAK BERJAM-JAM</h3>
+          <p>Api kecil dan sabar, supaya bumbu meresap sampai ke dalam.</p>
+        </div>
+        <div class="kenapa-item reveal">
+          <span class="kenapa-num">03</span>
+          <h3 class="kenapa-item-title">PELAYANAN CEPAT</h3>
+          <p>Hidangan siap saji, pesanan diantar tanpa menunggu lama.</p>
+        </div>
+        <div class="kenapa-item reveal">
+          <span class="kenapa-num">04</span>
+          <h3 class="kenapa-item-title">100% HALAL</h3>
+          <p>Bahan dan proses memasak terjamin halal dan higienis.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reservasi -->
+    <section class="reservasi-section" id="reservasi">
+      <div class="reservasi-content reveal">
+        <p class="reservasi-tag">&bull; Reservasi</p>
+        <h2 class="reservasi-title"><span class="reservasi-title-big">LAPAR?</span><br>KAMI SIAP MENYAJIKAN.</h2>
+        <p class="reservasi-desc">Pesan menu Minang favoritmu sekarang. Rasa autentik, langsung dari dapur kami ke mejamu.</p>
+        <div class="reservasi-actions">
+          <a href="https://wa.me/6281234567890?text=Halo%20Lamak%20Bana%2C%20saya%20mau%20reservasi%20meja.%0A%0ANama%3A%20%0ATanggal%3A%20%0AJam%3A%20%0AJumlah%20orang%3A%20" class="btn-solid-red" target="_blank" rel="noopener">Reservasi via WhatsApp</a>
+          <a href="#menu" class="btn-cream">Lihat Menu</a>
+        </div>
+      </div>
+      <div class="reservasi-circle reveal">
+        <span class="foto-placeholder">FOTO RENDANG</span>
+      </div>
+      <div class="reservasi-circle-small"></div>
+      <svg class="reservasi-wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,75 C480,65 960,0 1440,12 L1440,120 L0,120 Z"></path>
+      </svg>
+    </section>
+    </main>
+
+    <!-- FOOTER SECTION -->
+    <section class="footer-section" id="footer" role="contentinfo">
+        <div class="footer-container reveal">
+            <div class="footer-grid">
+                
+                <!-- Kolom 1 -->
+                <div class="footer-col footer-col-1">
+                    <h2 class="footer-logo">LAMAK BANA</h2>
+                    <p class="footer-desc">Masakan Minang autentik, dimasak dengan resep turun-temurun sejak 1998.</p>
+                    <div class="footer-contact">
+                        <p>Jl. Letjen S. Parman No. 1, Jakarta Barat</p>
+                        <p>0812-3456-7890</p>
+                        <p><a href="mailto:halo@lamakbana.id" class="footer-email">halo@lamakbana.id</a></p>
+                    </div>
+                </div>
+
+                <!-- Kolom 2 -->
+                <div class="footer-col">
+                    <h3 class="footer-title">JELAJAHI</h3>
+                    <ul class="footer-links">
+                        <li><a href="#beranda">Beranda</a></li>
+                        <li><a href="#menu">Menu</a></li>
+                        <li><a href="#promo">Promo</a></li>
+                        <li><a href="#katering">Katering</a></li>
+                    </ul>
+                </div>
+
+                <!-- Kolom 3 -->
+                <div class="footer-col">
+                    <h3 class="footer-title">TENTANG</h3>
+                    <ul class="footer-links">
+                        <li><a href="#tentang">Tentang Kami</a></li>
+                        <li><a href="#kenapa">Kenapa Kami</a></li>
+                        <li><a href="#reservasi">Reservasi</a></li>
+                    </ul>
+                </div>
+
+                <!-- Kolom 4 -->
+                <div class="footer-col">
+                    <h3 class="footer-title">JAM BUKA</h3>
+                    <ul class="footer-schedule">
+                        <li>
+                            <span class="day">Senin&ndash;Jumat</span>
+                            <span class="time">09.00&ndash;22.00</span>
+                        </li>
+                        <li>
+                            <span class="day">Sabtu&ndash;Minggu</span>
+                            <span class="time">08.00&ndash;23.00</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Baris Bawah -->
+            <div class="footer-bottom">
+                <p class="copyright">&copy; 2026 Lamak Bana. Hak cipta dilindungi.</p>
+                <div class="footer-sosmed">
+                    <a href="#" class="sosmed-circle" aria-label="Sosial Media 1"></a>
+                    <a href="#" class="sosmed-circle" aria-label="Sosial Media 2"></a>
+                    <a href="#" class="sosmed-circle" aria-label="Sosial Media 3"></a>
+                    <a href="#" class="sosmed-circle" aria-label="Sosial Media 4"></a>
+                </div>
+            </div>
+        </div>
+        
+<svg class="footer-bg-text" viewBox="0 0 1200 73" aria-hidden="true" focusable="false">
+    <text x="0" y="-26" dominant-baseline="hanging" textLength="1200" lengthAdjust="spacingAndGlyphs">LAMAK BANA</text>
+</svg>
+    </section>
+
+    <button id="backToTop" class="back-to-top" aria-label="Kembali ke atas">&uarr;</button>
     <script src="script.js"></script>
 </body>
 </html>
