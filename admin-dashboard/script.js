@@ -229,7 +229,11 @@ $(function () {
 
 
   /* ---------------- Catering data ---------------- */
-  const CATERING_TODAY = '2026-09-28';
+  // tanggal hari ini (real), supaya pesanan dari website terhitung dengan benar
+  const CATERING_TODAY = (function () {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  })();
   const CATERING_STATUS_STYLE = {
     Menunggu:     { bg:'rgba(242,169,59,.20)', color:'#7a5200' },
     Penawaran:    { bg:'rgba(139,30,30,.09)', color:'#8b1e1e' },
@@ -257,6 +261,14 @@ $(function () {
       return CATERING_DATA_DEFAULT.map(function (c) { return Object.assign({}, c); });
     }
   })();
+
+  // Pastikan data katering awal tersimpan, supaya pesanan katering dari Landing Page
+  // ditambahkan ke data admin (bukan menggantikannya).
+  try {
+    if (localStorage.getItem('lamak-bana-catering-data') === null) {
+      localStorage.setItem('lamak-bana-catering-data', JSON.stringify(CATERING_DATA));
+    }
+  } catch (e) {}
 
 
   /* ---------------- Promo data ---------------- */
@@ -287,7 +299,7 @@ $(function () {
     status: ['Semua','Selesai','Diproses','Dibatalkan'],
     waktu:  ['Hari ini','7 hari terakhir','Bulan ini','Tahun ini'],
     tahun:  ['2026','2025','2024','2023'],
-    'order-channel': ['Semua','Makan di Tempat','Ojek Online','Katering'],
+    'order-channel': ['Semua','Makan di Tempat','Ambil Sendiri','Ojek Online','Katering'],
     'order-date': ['Hari ini','7 hari','Bulan ini'],
     'menu-category': ['Semua','Daging','Ayam','Gulai','Telur','Pendamping'],
     'reservation-source': ['Semua','Website','WhatsApp','Telepon','Admin'],
@@ -295,7 +307,7 @@ $(function () {
     'catering-service': ['Semua','Nasi Kotak','Prasmanan'],
     'catering-date': ['Hari ini','7 hari','Bulan ini','Semua Tanggal'],
     'report-period': ['7 hari terakhir','Bulan ini','Tahun ini','Rentang tanggal'],
-    'report-channel': ['Semua','Makan di Tempat','Ojek Online','Katering'],
+    'report-channel': ['Semua','Makan di Tempat','Ambil Sendiri','Ojek Online','Katering'],
   };
 
   const DROPDOWN_CONFIG = {
@@ -353,7 +365,7 @@ $(function () {
     orderFilters: { status: 'Semua', channel: 'Semua', date: 'Hari ini', search: '' },
     menuFilters: { category: 'Semua', search: '' },
     reservationFilters: { status:'Semua', source:'Semua', date:'Semua Tanggal', search:'' },
-    cateringFilters: { status:'Semua', service:'Semua', date:'7 hari', search:'' },
+    cateringFilters: { status:'Semua', service:'Semua', date:'Semua Tanggal', search:'' },
     reportFilters: { period:'Bulan ini', channel:'Semua', dateFrom:'2026-09-01', dateTo:'2026-09-28' },
     promoFilters: { status:'Semua' },
     openDropdown: null,
@@ -1309,7 +1321,7 @@ $(function () {
     const payload={customer:customer,pic:pic,phone:phone,date:date,time:time,pax:pax,event:$('#catering-form-event').val(),service:$('#catering-form-service').val(),package:pack,address:$('#catering-form-address').val().trim(),total:total,dp:dp,source:$('#catering-form-source').val(),status:$('#catering-form-status').val(),note:$('#catering-form-note').val().trim()||'Tidak ada catatan khusus.'};
     const id=$('#catering-form-id').val();
     if(id){ const c=getCatering(id); if(!c) return; Object.assign(c,payload); showToast(c.id+' berhasil diperbarui.'); }
-    else { const max=CATERING_DATA.reduce(function(n,c){const x=Number((c.id.match(/(\d+)$/)||[])[1])||0;return Math.max(n,x);},0); const newId='#KT-2609-'+String(max+1).padStart(3,'0'); CATERING_DATA.push(Object.assign({id:newId,createdAt:'28 Sep 2026 · sekarang'},payload)); showToast(newId+' berhasil dibuat.'); }
+    else { const max=CATERING_DATA.reduce(function(n,c){const x=Number((c.id.match(/(\d+)$/)||[])[1])||0;return Math.max(n,x);},0); const now=new Date(); const newId='#KT-'+String(now.getFullYear()).slice(-2)+String(now.getMonth()+1).padStart(2,'0')+'-'+String(max+1).padStart(3,'0'); const createdAt=now.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})+' · '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'); CATERING_DATA.push(Object.assign({id:newId,createdAt:createdAt},payload)); showToast(newId+' berhasil dibuat.'); }
     saveCateringData(); renderCateringPage(); renderMenus(); closeCateringEditor();
   }
 
@@ -2100,14 +2112,14 @@ $(function () {
     $('#page-katering').on('click', '.catering-stat-card', function () {
       const status=$(this).attr('data-catering-status')||'Semua';
       state.cateringFilters.status=status;
-      state.cateringFilters.date='7 hari';
-      swapLabel($('[data-label="catering-date"]'),'7 hari ke depan');
+      state.cateringFilters.date='Semua Tanggal';
+      swapLabel($('[data-label="catering-date"]'),'Semua Tanggal');
       renderCateringPage(); renderMenus();
       document.getElementById('catering-rows').scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'center'});
     });
     $('#catering-reset').on('click', function () {
-      state.cateringFilters={status:'Semua',service:'Semua',date:'7 hari',search:''}; $('#catering-search').val('');
-      swapLabel($('[data-label="catering-service"]'),'Semua Layanan'); swapLabel($('[data-label="catering-date"]'),'7 hari ke depan'); renderCateringPage(); renderMenus();
+      state.cateringFilters={status:'Semua',service:'Semua',date:'Semua Tanggal',search:''}; $('#catering-search').val('');
+      swapLabel($('[data-label="catering-service"]'),'Semua Layanan'); swapLabel($('[data-label="catering-date"]'),'Semua Tanggal'); renderCateringPage(); renderMenus();
     });
     $('#catering-rows, #catering-agenda').on('click','[data-catering-id]',function(){ openCateringDetail($(this).attr('data-catering-id')); });
     $('#catering-rows').on('keydown','.catering-row',function(e){ if(e.key==='Enter'||e.key===' '){e.preventDefault();openCateringDetail($(this).attr('data-catering-id'));} });
@@ -2466,6 +2478,23 @@ $(function () {
   renderNotif();
 
   wire();
+
+  // pesanan katering dari Landing Page langsung muncul tanpa refresh (kalau dashboard terbuka di tab lain)
+  window.addEventListener('storage', function (event) {
+    if (event.key !== 'lamak-bana-catering-data' || !event.newValue) return;
+    try {
+      const fresh = JSON.parse(event.newValue);
+      if (!Array.isArray(fresh)) return;
+      const known = {};
+      CATERING_DATA.forEach(function (c) { known[c.id] = true; });
+      const incoming = fresh.filter(function (c) { return !known[c.id] && c.source === 'Website'; });
+      CATERING_DATA = fresh;
+      renderCateringPage(); renderMenus();
+      if ($('#catering-detail').is(':visible')) renderCateringDetail(getCatering($('#catering-detail').data('catering-id')));
+      if (incoming.length) showToast('Pesanan katering baru dari website: ' + incoming.map(function (c) { return c.id; }).join(', '));
+    } catch (e) {}
+  });
+
   setInterval(renderDashboardCounters, 60000); // status "terlambat" ikut berubah seiring waktu
 
   lucide.createIcons();

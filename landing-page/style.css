@@ -1741,6 +1741,201 @@ button.btn-cream {
     z-index: 7;
 }
 
+/* ============ MODAL KATERING ============ */
+.catering-modal-panel { width: min(620px, 100%); }
+
+.catering-modal-panel .order-modal-head { align-items: flex-start; gap: 16px; }
+.catering-modal-panel .order-modal-close { flex-shrink: 0; }
+
+.catering-modal-sub {
+    margin-top: 4px;
+    font-size: 13px;
+    color: rgba(26, 26, 26, 0.6);
+}
+
+.catering-step {
+    margin: 6px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed rgba(139, 30, 30, 0.25);
+    font-family: var(--font-display);
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: var(--maroon);
+}
+
+.catering-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(26, 26, 26, 0.65);
+}
+
+.order-field textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid rgba(139, 30, 30, 0.25);
+    border-radius: 12px;
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.5;
+    color: #1a1a1a;
+    resize: vertical;
+}
+
+.order-field textarea:focus {
+    outline: 2px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.catering-hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: rgba(26, 26, 26, 0.55);
+}
+
+/* pilihan layanan dalam bentuk kartu radio */
+.catering-service-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.catering-service-option { position: relative; cursor: pointer; }
+
+.catering-service-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.catering-service-card {
+    position: relative;
+    display: block;
+    height: 100%;
+    padding: 12px 14px 12px 42px;
+    border: 1px solid rgba(139, 30, 30, 0.25);
+    border-radius: 14px;
+    background: #fff;
+    transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.catering-service-card strong {
+    display: block;
+    font-size: 14px;
+    color: #1a1a1a;
+}
+
+.catering-service-card small {
+    display: block;
+    margin-top: 3px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(26, 26, 26, 0.6);
+}
+
+.catering-service-option input:checked + .catering-service-card {
+    border-color: var(--maroon);
+    background: rgba(139, 30, 30, 0.06);
+    box-shadow: inset 0 0 0 1px var(--maroon);
+}
+
+.catering-service-option input:checked + .catering-service-card strong { color: var(--maroon); }
+
+/* indikator bulat seperti radio */
+.catering-service-card::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(139, 30, 30, 0.35);
+    border-radius: 50%;
+    background: #fff;
+    box-sizing: border-box;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.catering-service-option input:checked + .catering-service-card::before {
+    border-color: var(--maroon);
+    box-shadow: inset 0 0 0 3px #fff;
+    background: var(--maroon);
+}
+
+.catering-service-option input:not(:checked) + .catering-service-card { border-color: rgba(26, 26, 26, 0.15); }
+
+.catering-service-option input:focus-visible + .catering-service-card {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.catering-estimate { margin-bottom: 8px; gap: 12px; }
+.catering-estimate small {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    color: rgba(26, 26, 26, 0.6);
+}
+
+.catering-disclaimer {
+    margin-bottom: 16px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(26, 26, 26, 0.6);
+}
+
+.catering-done-summary {
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: rgba(139, 30, 30, 0.07);
+    font-weight: 500;
+}
+
+#catDoneView .order-modal-title { font-size: 24px; }
+
+@media (max-width: 575px) {
+    .catering-service-options { grid-template-columns: 1fr; }
+    .catering-estimate strong { font-size: 18px; }
+}
+
+/* ============ PROMO DI FORM PESAN ============ */
+.order-promo-banner {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border: 1px dashed var(--maroon);
+    border-radius: 14px;
+    background: rgba(242, 169, 59, 0.18);
+}
+
+.order-promo-banner strong {
+    display: block;
+    font-size: 14px;
+    color: var(--maroon);
+}
+
+.order-promo-banner small {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    color: rgba(26, 26, 26, 0.7);
+}
+
+.order-discount-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 0 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--green);
+}
+
+.order-discount-row:not([hidden]) + .order-total-row { margin-top: 8px; }
 /* HERO: foto lingkaran berganti dengan pudar halus */
 .food-circle { overflow: hidden; }
 
