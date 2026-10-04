@@ -9,6 +9,246 @@ kategoriItems.forEach((item) => {
     });
 });
 
+// KATEGORI data dari admin, pop up info singkat
+// Data diatur di Admin Dashboard > Menu Makanan > Kategori Landing Page
+(function kategoriFromAdmin() {
+
+    const KATEGORI_KEY = 'lamak-bana-kategori-data';
+    const MENU_KEY     = 'lamak-bana-menu-data';
+
+    const KATEGORI_DEFAULT = [
+        { id: 'KAT-001', name: 'Rendang',        image: 'images/menu/rendang.jpg',       desc: 'Daging sapi dimasak perlahan dengan santan dan rempah sampai bumbunya kering dan meresap.', taste: 'Gurih, Rempah kuat',  spicy: 1, menuId: 'MN-001', menuName: 'Rendang Daging', visible: true },
+        { id: 'KAT-002', name: 'Dendeng Balado', image: 'images/menu/dendengbalado.jpg', desc: 'Irisan daging sapi tipis digoreng kering lalu dibalut sambal cabai merah.',                taste: 'Pedas, Renyah',       spicy: 2, menuId: '',       menuName: '',               visible: true },
+        { id: 'KAT-003', name: 'Gulai Tunjang',  image: 'images/menu/gulaitunjang.jpg',  desc: 'Kikil sapi kenyal dalam kuah gulai kuning kental yang kaya rempah.',                        taste: 'Gurih, Berkuah',      spicy: 1, menuId: 'MN-004', menuName: 'Gulai Tunjang',  visible: true },
+        { id: 'KAT-004', name: 'Gulai Ikan',     image: 'images/menu/gulaiikan.jpg',     desc: 'Ikan segar dimasak dalam kuah santan kuning dengan sedikit asam kandis.',                   taste: 'Gurih, Sedikit asam', spicy: 1, menuId: 'MN-005', menuName: 'Gulai Ikan',     visible: true },
+        { id: 'KAT-005', name: 'Telur Balado',   image: 'images/menu/telurbalado.jpg',   desc: 'Telur rebus digoreng sebentar lalu disiram sambal balado merah.',                           taste: 'Pedas manis',         spicy: 2, menuId: 'MN-006', menuName: 'Telur Balado',   visible: true },
+        { id: 'KAT-006', name: 'Perkedel',       image: 'images/menu/perkedel.jpg',      desc: 'Kentang tumbuk berbumbu, dicelup telur, lalu digoreng sampai keemasan.',                    taste: 'Gurih, Lembut',       spicy: 0, menuId: 'MN-007', menuName: 'Perkedel',       visible: true },
+        { id: 'KAT-007', name: 'Ayam Bakar',     image: 'images/menu/ayambakar.jpg',     desc: 'Ayam berbumbu kuning dibakar di atas arang sampai harum.',                                  taste: 'Gurih, Smoky',        spicy: 1, menuId: 'MN-008', menuName: 'Ayam Bakar',     visible: true }
+    ];
+
+    const SPICY_LABEL = ['Tidak pedas', 'Sedikit pedas', 'Pedas', 'Sangat pedas'];
+
+    const list = document.querySelector('.kategori-list');
+    if (!list) return;
+
+    let data = [];
+    let lastTrigger = null;
+
+    /* helper */
+    function loadKategori() {
+        try {
+            const saved = localStorage.getItem(KATEGORI_KEY);
+            const parsed = saved ? JSON.parse(saved) : null;
+            if (Array.isArray(parsed)) return parsed;
+        } catch (e) { /* pakai default */ }
+        return KATEGORI_DEFAULT;
+    }
+
+    function formatRupiah(value) {
+        return 'Rp' + Number(value || 0).toLocaleString('id-ID');
+    }
+
+    function cssUrl(src) {
+        return 'url("' + String(src).replace(/["\\\n\r]/g, '') + '")';
+    }
+
+    // cari menu terkait data admin dulu (harga & stok terbaru), kalau belum ada pakai kartu HTML
+    function findMenu(k) {
+        if (!k.menuId && !k.menuName) return null;
+
+        try {
+            const menus = JSON.parse(localStorage.getItem(MENU_KEY));
+            if (Array.isArray(menus)) {
+                const m = menus.find(function (x) { return x.id === k.menuId; });
+                if (!m || m.website === false) return null;
+                return {
+                    id: m.id,
+                    name: m.name,
+                    price: Number(m.price) || 0,
+                    available: m.available !== false && Number(m.stock) > 0
+                };
+            }
+        } catch (e) { /* lanjut ke kartu HTML */ }
+
+        const target = String(k.menuName || '').toLowerCase();
+        const card = Array.from(document.querySelectorAll('.menu-section .menu-card')).find(function (c) {
+            const t = c.querySelector('.menu-card-title');
+            return t && t.textContent.trim().toLowerCase() === target;
+        });
+        if (!card) return null;
+        return {
+            id: '',
+            name: k.menuName,
+            price: Number(card.querySelector('.menu-card-price').textContent.replace(/\D/g, '')) || 0,
+            available: true
+        };
+    }
+
+    /* daftar kategori */
+    function render() {
+        data = loadKategori().filter(function (k) { return k.visible !== false && k.name; });
+        list.innerHTML = '';
+
+        if (!data.length) {
+            const empty = document.createElement('p');
+            empty.className = 'kategori-desc kategori-empty';
+            empty.textContent = 'Kategori sedang diperbarui.';
+            list.appendChild(empty);
+            return;
+        }
+
+        data.forEach(function (k, i) {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'kategori-item' + (i === 0 ? ' active' : '');
+            item.dataset.kategoriId = k.id;
+            item.setAttribute('aria-haspopup', 'dialog');
+            item.setAttribute('aria-label', 'Lihat info ' + k.name);
+
+            const box = document.createElement('span');
+            box.className = 'kategori-box';
+            box.setAttribute('aria-hidden', 'true');
+            if (k.image) box.style.backgroundImage = cssUrl(k.image);
+            else {
+                box.classList.add('kategori-box-initial');
+                box.textContent = String(k.name).charAt(0).toUpperCase();
+            }
+
+            const name = document.createElement('span');
+            name.className = 'kategori-name';
+            name.textContent = k.name;
+
+            item.appendChild(box);
+            item.appendChild(name);
+            list.appendChild(item);
+        });
+    }
+
+    /* pop up */
+    const modal = document.createElement('div');
+    modal.className = 'order-modal kategori-modal';
+    modal.id = 'kategoriModal';
+    modal.innerHTML =
+        '<div class="order-modal-panel kategori-modal-panel" role="dialog" aria-modal="true" aria-labelledby="kategoriModalTitle">' +
+            '<div class="kategori-modal-photo" id="kategoriModalPhoto">' +
+                '<button type="button" class="order-modal-close kategori-modal-close" id="kategoriModalClose" aria-label="Tutup">&times;</button>' +
+            '</div>' +
+            '<div class="kategori-modal-body">' +
+                '<h3 class="order-modal-title" id="kategoriModalTitle"></h3>' +
+                '<div class="kategori-modal-tags" id="kategoriModalTags"></div>' +
+                '<p class="kategori-modal-desc" id="kategoriModalDesc"></p>' +
+                '<div class="kategori-modal-footer" id="kategoriModalFooter"></div>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(modal);
+
+    const photoEl  = document.getElementById('kategoriModalPhoto');
+    const titleEl  = document.getElementById('kategoriModalTitle');
+    const tagsEl   = document.getElementById('kategoriModalTags');
+    const descEl   = document.getElementById('kategoriModalDesc');
+    const footerEl = document.getElementById('kategoriModalFooter');
+    const closeBtn = document.getElementById('kategoriModalClose');
+
+    function addTag(text, extraClass) {
+        const tag = document.createElement('span');
+        tag.className = 'kategori-tag' + (extraClass ? ' ' + extraClass : '');
+        tag.textContent = text;
+        tagsEl.appendChild(tag);
+    }
+
+    function openModal(k) {
+        titleEl.textContent = String(k.name).toUpperCase();
+        descEl.textContent = k.desc || '';
+
+        photoEl.style.backgroundImage = k.image ? cssUrl(k.image) : '';
+        photoEl.classList.toggle('no-photo', !k.image);
+
+        // tag: level pedas + rasa
+        tagsEl.innerHTML = '';
+        const spicy = Math.min(3, Math.max(0, Number(k.spicy) || 0));
+        addTag((spicy ? '🌶'.repeat(spicy) + ' ' : '') + SPICY_LABEL[spicy], 'kategori-tag-spicy');
+        String(k.taste || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean).forEach(function (t) {
+            addTag(t);
+        });
+
+        // harga + tombol pesan dari menu terkait
+        footerEl.innerHTML = '';
+        const menu = findMenu(k);
+        const btn = document.createElement('a');
+        btn.className = 'btn-solid-red';
+
+        if (menu) {
+            const price = document.createElement('div');
+            price.className = 'kategori-modal-price';
+            price.innerHTML = '<small></small><strong></strong>';
+            price.querySelector('small').textContent = menu.name;
+            price.querySelector('strong').textContent = formatRupiah(menu.price);
+            footerEl.appendChild(price);
+
+            btn.href = '#menu';
+            if (menu.available) {
+                btn.textContent = 'Pesan Sekarang';
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    closeModal(true);
+                    if (typeof window.lamakOpenOrder === 'function') window.lamakOpenOrder(menu.id, menu.name);
+                    else document.getElementById('menu').scrollIntoView({ behavior: 'smooth' });
+                });
+            } else {
+                btn.textContent = 'Sedang Habis';
+                btn.classList.add('is-disabled');
+                btn.setAttribute('aria-disabled', 'true');
+            }
+        } else {
+            btn.href = '#menu';
+            btn.textContent = 'Lihat Menu';
+            btn.addEventListener('click', function () { closeModal(true); });
+        }
+        footerEl.appendChild(btn);
+
+        modal.classList.add('open');
+        document.body.classList.add('modal-open');
+        closeBtn.focus();
+    }
+
+    // keepScroll = true kalau langsung lanjut ke modal lain / scroll ke menu
+    function closeModal(keepScroll) {
+        modal.classList.remove('open');
+        document.body.classList.remove('modal-open');
+        if (!keepScroll && lastTrigger) lastTrigger.focus();
+    }
+
+    /* event */
+    list.addEventListener('click', function (event) {
+        const item = event.target.closest('.kategori-item');
+        if (!item) return;
+
+        list.querySelectorAll('.kategori-item').forEach(function (i) { i.classList.remove('active'); });
+        item.classList.add('active');
+
+        const k = data.find(function (x) { return x.id === item.dataset.kategoriId; });
+        if (!k) return;
+        lastTrigger = item;
+        openModal(k);
+    });
+
+    closeBtn.addEventListener('click', function () { closeModal(); });
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+
+    render();
+
+    // update otomatis kalau admin mengubah kategori/menu di tab lain
+    window.addEventListener('storage', function (event) {
+        if (event.key === KATEGORI_KEY) render();
+    });
+
+})();
+
 // NAVBAR: tandai link sesuai section yang sedang dilihat 
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-links a');
@@ -141,12 +381,15 @@ revealEls.forEach((el) => revealObserver.observe(el));
 
     const STORAGE_KEY = 'lamak-bana-menu-data';
 
-    // false = tampilin semua menu yang website ON
-    // true  = hanya menu yg website ON dan Menu Andalan
-    const SHOW_ONLY_FEATURED = false;
+    // jumlah menu yang tampil sebelum tombol "Lihat Semua Menu" diklik
+    const HIGHLIGHT_COUNT = 3;
 
+    const section = document.querySelector('.menu-section');
     const grid = document.querySelector('.menu-section .menu-grid');
+    const toggleBtn = document.getElementById('menuToggleAll');
     if (!grid) return;
+
+    let showAll = false;
 
     // Kembalikan null kalo admin belom pernah nyimpen data
     function getAdminMenuData() {
@@ -228,17 +471,40 @@ revealEls.forEach((el) => revealObserver.observe(el));
         return card;
     }
 
+    // 3 Menu Andalan tampil duluan, sisanya disembunyikan sampai "Lihat Semua Menu" diklik
+    function sortForDisplay(list) {
+        const featured = list.filter(function (m) { return m.featured; }).slice(0, HIGHLIGHT_COUNT);
+        const rest = list.filter(function (m) { return featured.indexOf(m) === -1; });
+        // belum ada Menu Andalan sama sekali -> pakai urutan biasa
+        return featured.length ? featured.concat(rest) : list;
+    }
+
+    function applyToggle() {
+        const cards = grid.querySelectorAll('.menu-card');
+        cards.forEach(function (card, i) {
+            card.classList.toggle('menu-card-extra', i >= HIGHLIGHT_COUNT);
+        });
+        grid.classList.toggle('show-all', showAll);
+
+        if (toggleBtn) {
+            toggleBtn.hidden = cards.length <= HIGHLIGHT_COUNT;
+            toggleBtn.textContent = showAll ? 'Tampilkan Lebih Sedikit' : 'Lihat Semua Menu';
+            toggleBtn.setAttribute('aria-expanded', String(showAll));
+        }
+    }
+
     function renderMenuCards() {
         const menuData = getAdminMenuData();
 
         // admin belum pernah nyimpen apa pun, maka pakai kartu HTML asli
-        if (menuData === null) return;
+        if (menuData === null) {
+            applyToggle();
+            return;
+        }
 
-        const visible = menuData.filter(function (menu) {
-            if (menu.website === false) return false;
-            if (SHOW_ONLY_FEATURED && !menu.featured) return false;
-            return true;
-        });
+        const visible = sortForDisplay(menuData.filter(function (menu) {
+            return menu.website !== false;
+        }));
 
         grid.innerHTML = '';
 
@@ -250,6 +516,7 @@ revealEls.forEach((el) => revealObserver.observe(el));
             empty.style.textAlign = 'center';
             empty.textContent = 'Menu sedang diperbarui. Silakan cek kembali sebentar lagi.';
             grid.appendChild(empty);
+            applyToggle();
             return;
         }
 
@@ -258,6 +525,18 @@ revealEls.forEach((el) => revealObserver.observe(el));
             grid.appendChild(card);
             // wajib daftarin  ke observer, kalo gak kartu tetap opacity 0
             revealObserver.observe(card);
+        });
+
+        applyToggle();
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function (event) {
+            event.preventDefault();
+            showAll = !showAll;
+            applyToggle();
+            // waktu ditutup, balik ke atas section supaya pengunjung gak "nyasar" di bawah
+            if (!showAll && section) section.scrollIntoView({ behavior: 'smooth' });
         });
     }
 
