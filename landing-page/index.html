@@ -320,7 +320,7 @@
               <p>Senin &ndash; Jumat: 08.00 &ndash; 21.00</p>
               <p>Sabtu &ndash; Minggu: 08.00 &ndash; 22.00</p>
             </div>
-            <a href="#reservasi" class="btn-solid-red">Reservasi Meja</a>
+            <a href="#reservasi" class="btn-solid-red" data-open-reservation>Reservasi Meja</a>
           </div>
         </div>
 
@@ -368,8 +368,8 @@
         <h2 class="reservasi-title"><span class="reservasi-title-big">LAPAR?</span><br>KAMI SIAP MENYAJIKAN.</h2>
         <p class="reservasi-desc">Pesan menu Minang favoritmu sekarang. Rasa autentik, langsung dari dapur kami ke mejamu.</p>
         <div class="reservasi-actions">
-          <a href="https://wa.me/6281234567890?text=Halo%20Lamak%20Bana%2C%20saya%20mau%20reservasi%20meja.%0A%0ANama%3A%20%0ATanggal%3A%20%0AJam%3A%20%0AJumlah%20orang%3A%20" class="btn-solid-red" target="_blank" rel="noopener">Reservasi via WhatsApp</a>
-          <a href="#menu" class="btn-cream">Lihat Menu</a>
+          <a href="#reservasi" class="btn-solid-red" data-open-reservation>Reservasi Online</a>
+          <a href="https://wa.me/6281234567890?text=Halo%20Lamak%20Bana%2C%20saya%20mau%20reservasi%20meja.%0A%0ANama%3A%20%0ATanggal%3A%20%0AJam%3A%20%0AJumlah%20orang%3A%20" class="btn-cream" target="_blank" rel="noopener">Via WhatsApp</a>
         </div>
       </div>
       <div class="reservasi-circle reveal">
@@ -453,76 +453,81 @@
 </svg>
     </section>
 
-    <!-- MODAL PESAN -->
-    <div class="order-modal" id="orderModal">
-        <div class="order-modal-panel" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
+<!-- MODAL RESERVASI -->
+<div class="order-modal" id="reservationModal">
+    <div class="order-modal-panel" role="dialog" aria-modal="true" aria-labelledby="reservationModalTitle">
 
-            <div id="orderFormView">
-                <div class="order-modal-head">
-                    <h3 class="order-modal-title" id="orderModalTitle">PESAN SEKARANG</h3>
-                    <button type="button" class="order-modal-close" id="orderModalClose" aria-label="Tutup">&times;</button>
+        <div id="reservationFormView">
+            <div class="order-modal-head">
+                <h3 class="order-modal-title" id="reservationModalTitle">RESERVASI MEJA</h3>
+                <button type="button" class="order-modal-close" id="reservationModalClose" aria-label="Tutup">&times;</button>
+            </div>
+
+            <form id="reservationForm" novalidate>
+                <div class="order-grid-2">
+                    <div class="order-field">
+                        <label for="resCustomer">Nama *</label>
+                        <input id="resCustomer" type="text" maxlength="60" placeholder="Nama kamu" autocomplete="name">
+                    </div>
+                    <div class="order-field">
+                        <label for="resPhone">No. WhatsApp *</label>
+                        <input id="resPhone" type="tel" maxlength="20" placeholder="08xxxxxxxxxx" autocomplete="tel">
+                    </div>
                 </div>
 
-                <form id="orderForm" novalidate>
-                    <div class="order-grid-2">
-                        <div class="order-field">
-                            <label for="orderCustomer">Nama *</label>
-                            <input id="orderCustomer" type="text" maxlength="60" placeholder="Nama kamu" autocomplete="name">
-                        </div>
-                        <div class="order-field">
-                            <label for="orderPhone">No. Telepon *</label>
-                            <input id="orderPhone" type="tel" maxlength="20" placeholder="08xxxxxxxxxx" autocomplete="tel">
-                        </div>
-                    </div>
-
-                    <div class="order-grid-2">
-                        <div class="order-field">
-                            <label for="orderChannel">Pesan untuk</label>
-                            <select id="orderChannel">
-                                <option>Makan di Tempat</option>
-                                <option>Take Away</option>
-                            </select>
-                        </div>
-                        <div class="order-field" id="orderInfoWrap">
-                            <label for="orderInfo">Nomor meja (opsional)</label>
-                            <input id="orderInfo" type="text" maxlength="40" placeholder="Contoh: Meja 05">
-                        </div>
-                    </div>
-
+                <div class="order-grid-2">
                     <div class="order-field">
-                        <div class="order-items-head">
-                            <label>Menu *</label>
-                            <button type="button" class="order-link-btn" id="orderAddItem">+ Tambah menu</button>
-                        </div>
-                        <div id="orderItems"></div>
+                        <label for="resDate">Tanggal *</label>
+                        <input id="resDate" type="date">
                     </div>
-
                     <div class="order-field">
-                        <label for="orderNote">Catatan (opsional)</label>
-                        <input id="orderNote" type="text" maxlength="200" placeholder="Contoh: sambal dipisah">
+                        <label for="resTime">Jam *</label>
+                        <input id="resTime" type="time">
                     </div>
+                </div>
 
-                    <div class="order-total-row">
-                        <span>Total</span>
-                        <strong id="orderTotal">Rp0</strong>
+                <div class="order-grid-2">
+                    <div class="order-field">
+                        <label for="resPax">Jumlah tamu *</label>
+                        <input id="resPax" type="number" min="1" max="30" value="2">
                     </div>
+                    <div class="order-field">
+                        <label for="resArea">Area</label>
+                        <select id="resArea">
+                            <option>Ruang Utama</option>
+                            <option>Area Jendela</option>
+                            <option>Area Keluarga</option>
+                            <option>Private Room</option>
+                        </select>
+                    </div>
+                </div>
 
-                    <p class="order-error" id="orderError" role="alert" hidden></p>
+                <div class="order-field">
+                    <label for="resOccasion">Acara / keperluan (opsional)</label>
+                    <input id="resOccasion" type="text" maxlength="60" placeholder="Contoh: Makan keluarga">
+                </div>
 
-                    <button type="submit" class="btn-solid-red order-submit">Kirim Pesanan</button>
-                </form>
-            </div>
+                <div class="order-field">
+                    <label for="resNote">Catatan (opsional)</label>
+                    <input id="resNote" type="text" maxlength="220" placeholder="Contoh: butuh kursi bayi">
+                </div>
 
-            <div id="orderDoneView" class="order-done" hidden>
-                <h3 class="order-modal-title">PESANAN DITERIMA</h3>
-                <p>Terima kasih! Nomor pesananmu:</p>
-                <p class="order-done-id" id="orderDoneId"></p>
-                <p>Pesanan sudah masuk ke dapur kami. Pembayaran dilakukan di tempat.</p>
-                <button type="button" class="btn-solid-red" id="orderDoneClose">Tutup</button>
-            </div>
+                <p class="order-error" id="resError" role="alert" hidden></p>
 
+                <button type="submit" class="btn-solid-red order-submit">Kirim Reservasi</button>
+            </form>
         </div>
+
+        <div id="resDoneView" class="order-done" hidden>
+            <h3 class="order-modal-title">RESERVASI DITERIMA</h3>
+            <p>Terima kasih! Nomor reservasimu:</p>
+            <p class="order-done-id" id="resDoneId"></p>
+            <p>Reservasi berstatus <strong>Menunggu</strong>. Kami akan menghubungi lewat WhatsApp untuk konfirmasi.</p>
+            <button type="button" class="btn-solid-red" id="resDoneClose">Tutup</button>
+        </div>
+
     </div>
+</div>
 
     <button id="backToTop" class="back-to-top" aria-label="Kembali ke atas">&uarr;</button>
     <script src="script.js"></script>

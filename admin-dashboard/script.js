@@ -220,6 +220,12 @@ $(function () {
     }
   })();
 
+  // Pastikan data reservasi awal tersimpan, supaya reservasi dari Landing Page
+  // ditambahkan ke data admin (bukan menggantikannya).
+  try {
+    if (localStorage.getItem('lamak-bana-reservation-data') === null) saveReservationData();
+  } catch (e) {}
+
 
 
   /* ---------------- Catering data ---------------- */
@@ -340,7 +346,7 @@ $(function () {
     filters: { status: 'Semua', waktu: 'Hari ini', tahun: '2026' },
     orderFilters: { status: 'Semua', channel: 'Semua', date: 'Hari ini', search: '' },
     menuFilters: { category: 'Semua', search: '' },
-    reservationFilters: { status:'Semua', source:'Semua', date:'Hari ini', search:'' },
+    reservationFilters: { status:'Semua', source:'Semua', date:'Semua Tanggal', search:'' },
     cateringFilters: { status:'Semua', service:'Semua', date:'7 hari', search:'' },
     reportFilters: { period:'Bulan ini', channel:'Semua', dateFrom:'2026-09-01', dateTo:'2026-09-28' },
     promoFilters: { status:'Semua' },
@@ -2027,6 +2033,21 @@ $(function () {
         renderReportPage();
       } catch (err) {
         console.warn('Gagal memuat ulang data pesanan.', err);
+      }
+    });
+
+    // Reservasi baru dari Landing Page (tab/jendela lain) → muat ulang tanpa refresh
+    window.addEventListener('storage', function (e) {
+      if (e.key !== 'lamak-bana-reservation-data' || !e.newValue) return;
+      try {
+        const fresh = JSON.parse(e.newValue);
+        if (!Array.isArray(fresh)) return;
+        const before = RESERVATION_DATA.length;
+        RESERVATION_DATA = fresh;
+        renderReservationPage();
+        if (fresh.length > before) showToast('Reservasi baru dari website masuk.');
+      } catch (err) {
+        console.warn('Gagal memuat ulang data reservasi.', err);
       }
     });
 

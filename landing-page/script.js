@@ -551,3 +551,199 @@ revealEls.forEach((el) => revealObserver.observe(el));
     });
 
 })();
+
+// ==========================================
+// RESERVASI DARI LANDING PAGE KE RESERVASI ADMIN (localStorage)
+// ==========================================
+(function reservationFromLanding() {
+
+    const RESERVATION_KEY = 'lamak-bana-reservation-data';
+    const SETTINGS_KEY    = 'lamak-bana-settings';
+    const AREAS = ['Ruang Utama', 'Area Jendela', 'Area Keluarga', 'Private Room'];
+
+    const modal = document.getElementById('reservationModal');
+    const form  = document.getElementById('reservationForm');
+    if (!modal || !form) return;
+
+    const formView = document.getElementById('reservationFormView');
+    const doneView = document.getElementById('resDoneView');
+    const doneId   = document.getElementById('resDoneId');
+    const errorEl  = document.getElementById('resError');
+
+    const nameEl     = document.getElementById('resCustomer');
+    const phoneEl    = document.getElementById('resPhone');
+    const dateEl     = document.getElementById('resDate');
+    const timeEl     = document.getElementById('resTime');
+    const paxEl      = document.getElementById('resPax');
+    const areaEl     = document.getElementById('resArea');
+    const occasionEl = document.getElementById('resOccasion');
+    const noteEl     = document.getElementById('resNote');
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function todayISO() {
+        const d = new Date();
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    }
+
+    function nowHHMM() {
+        const d = new Date();
+        return pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    function cleanText(value, max) {
+        // buang <> supaya gak jadi HTML di dashboard admin
+        return String(value || '').replace(/[<>]/g, '').trim().slice(0, max);
+    }
+
+    function showError(message) {
+        errorEl.textContent = message;
+        errorEl.hidden = !message;
+    }
+
+    // jam buka mengikuti Pengaturan admin (default sama dengan SETTINGS_DEFAULT di admin)
+    function getOpeningHours(dateIso) {
+        let s = {};
+        try { s = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch (e) { s = {}; }
+
+        const p = dateIso.split('-').map(Number);
+        const day = new Date(p[0], p[1] - 1, p[2]).getDay();
+        const weekend = day === 0 || day === 6;
+
+        return weekend
+            ? { open: s.weekendOpen || '08:00', close: s.weekendClose || '23:00' }
+            : { open: s.weekdayOpen || '09:00', close: s.weekdayClose || '22:00' };
+    }
+
+    function readReservations() {
+        try {
+            const saved = localStorage.getItem(RESERVATION_KEY);
+            const parsed = saved ? JSON.parse(saved) : [];
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    // format ID sama dengan admin: #RS-yymm-nnn (nomor lanjut dari angka terbesar)
+    function generateReservationId(list) {
+        let max = 0;
+        list.forEach(function (r) {
+            const match = String(r.id || '').match(/(\d+)$/);
+            if (match) max = Math.max(max, Number(match[1]) || 0);
+        });
+        const now = new Date();
+        const yy = String(now.getFullYear()).slice(-2);
+        const mm = pad(now.getMonth() + 1);
+        return '#RS-' + yy + mm + '-' + String(max + 1).padStart(3, '0');
+    }
+
+    function openModal() {
+        form.reset();
+        showError('');
+
+        const today = todayISO();
+        dateEl.min = today;
+        dateEl.value = today;
+        timeEl.value = '12:00';
+        paxEl.value = '2';
+
+        formView.hidden = false;
+        doneView.hidden = true;
+
+        modal.classList.add('open');
+        document.body.classList.add('modal-open');
+        nameEl.focus();
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        document.body.classList.remove('modal-open');
+    }
+
+    function submitReservation() {
+        const customer = cleanText(nameEl.value, 60);
+        const phone    = cleanText(phoneEl.value, 20);
+        const date     = dateEl.value;
+        const time     = timeEl.value;
+        const pax      = parseInt(paxEl.value, 10);
+        const area     = AREAS.indexOf(areaEl.value) !== -1 ? areaEl.value : AREAS[0];
+        const occasion = cleanText(occasionEl.value, 60);
+        const note     = cleanText(noteEl.value, 220);
+
+        if (!customer) { showError('Nama wajib diisi.'); return; }
+        if (!/^[0-9+\-\s]{8,20}$/.test(phone)) { showError('Nomor WhatsApp tidak valid.'); return; }
+        if (!date) { showError('Tanggal wajib diisi.'); return; }
+        if (date < todayISO()) { showError('Tanggal reservasi tidak boleh sudah lewat.'); return; }
+        if (!time) { showError('Jam wajib diisi.'); return; }
+
+        const hours = getOpeningHours(date);
+        if (time < hours.open || time > hours.close) {
+            showError('Jam reservasi harus antara ' + hours.open + ' dan ' + hours.close + ' pada hari tersebut.');
+            return;
+        }
+        if (date === todayISO() && time <= nowHHMM()) {
+            showError('Jam reservasi hari ini harus lebih dari jam sekarang.');
+            return;
+        }
+        if (!pax || pax < 1 || pax > 30) { showError('Jumlah tamu 1 sampai 30 orang.'); return; }
+        showError('');
+
+        const list = readReservations();
+        const id = generateReservationId(list);
+
+        const now = new Date();
+        const createdAt = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+            + ' · ' + nowHHMM();
+
+        // struktur sama persis dengan RESERVATION_DATA di admin
+        list.push({
+            id: id,
+            customer: customer,
+            phone: phone,
+            date: date,
+            time: time,
+            pax: pax,
+            table: '',
+            area: area,
+            source: 'Website',
+            status: 'Menunggu',
+            occasion: occasion || 'Reservasi meja',
+            note: note || 'Tidak ada catatan khusus.',
+            createdAt: createdAt
+        });
+
+        try {
+            localStorage.setItem(RESERVATION_KEY, JSON.stringify(list));
+        } catch (e) {
+            showError('Reservasi gagal disimpan di browser ini. Coba lagi.');
+            return;
+        }
+
+        doneId.textContent = id;
+        formView.hidden = true;
+        doneView.hidden = false;
+    }
+
+    document.querySelectorAll('[data-open-reservation]').forEach(function (el) {
+        el.addEventListener('click', function (event) {
+            event.preventDefault();
+            openModal();
+        });
+    });
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        submitReservation();
+    });
+
+    document.getElementById('reservationModalClose').addEventListener('click', closeModal);
+    document.getElementById('resDoneClose').addEventListener('click', closeModal);
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+
+})();

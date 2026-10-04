@@ -1554,3 +1554,64 @@ body.modal-open { overflow: hidden; }
     .order-modal-panel { padding: 22px 18px; }
     .order-grid-2 { grid-template-columns: 1fr; gap: 0; }
 }
+
+button.btn-solid-red,
+button.btn-cream {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    border: none;
+    cursor: pointer;
+}
+
+/* Tombol di section Reservasi: samakan ukuran, font, dan border */
+.reservasi-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+}
+
+.reservasi-actions .btn-solid-red,
+.reservasi-actions .btn-cream {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 48px;
+    padding: 0 28px;
+    border-radius: 999px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    border: 2px solid #8B1E1E;
+    box-shadow: none;
+    outline: none;
+}
+
+.reservasi-actions .btn-solid-red {
+    background: #8B1E1E;
+    color: #fff;
+}
+
+.reservasi-actions .btn-cream {
+    background: #fff;
+    color: #000;
+    border: 2px solid transparent;
+    transition: background .2s ease, color .2s ease;
+}
+
+.reservasi-actions .btn-cream:hover {
+    background: #8B1E1E;
+    color: #fff;
+    filter: none;
+}
+
+.reservasi-actions .btn-solid-red:focus-visible,
+.reservasi-actions .btn-cream:focus-visible {
+    outline: 3px solid rgba(139, 30, 30, .35);
+    outline-offset: 2px;
+}
