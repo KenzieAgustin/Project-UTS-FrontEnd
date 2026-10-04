@@ -9,6 +9,51 @@ $(function () {
     return;
   }
 
+  /* ---------------- Logout ---------------- */
+  const LOGIN_PAGE = '../security-check/index.html';
+  let logoutLastFocus = null;
+
+  function openLogoutConfirm() {
+    logoutLastFocus = document.activeElement;
+    $('#logout-confirm').removeClass('hidden-page');
+    $('#logout-cancel').trigger('focus');
+  }
+
+  function closeLogoutConfirm() {
+    if ($('#logout-confirm').hasClass('hidden-page')) return;
+    $('#logout-confirm').addClass('hidden-page');
+    if (logoutLastFocus && logoutLastFocus.focus) logoutLastFocus.focus();
+  }
+
+  function logoutAdmin() {
+    try { localStorage.removeItem(ADMIN_AUTH_KEY); } catch (e) {}
+    window.location.replace(LOGIN_PAGE);
+  }
+
+  $(document)
+    .on('click', '#btn-logout', openLogoutConfirm)
+    .on('click', '#logout-cancel', closeLogoutConfirm)
+    .on('click', '#logout-confirm-btn', logoutAdmin)
+    .on('click', '#logout-confirm', function (e) { if (e.target === this) closeLogoutConfirm(); })
+    .on('keydown', function (e) {
+      if ($('#logout-confirm').hasClass('hidden-page')) return;
+      if (e.key === 'Escape') { closeLogoutConfirm(); return; }
+      if (e.key !== 'Tab') return;
+      const $btns = $('#logout-cancel, #logout-confirm-btn');
+      const first = $btns[0], last = $btns[$btns.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+
+  window.addEventListener('storage', function (e) {
+    if ((e.key === ADMIN_AUTH_KEY || e.key === null) && localStorage.getItem(ADMIN_AUTH_KEY) !== 'true') {
+      window.location.replace(LOGIN_PAGE);
+    }
+  });
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted && localStorage.getItem(ADMIN_AUTH_KEY) !== 'true') window.location.replace(LOGIN_PAGE);
+  });
+
   /* ---------------- Data ---------------- */
   const NAV_UTAMA = [
     ['Dashboard', 'layout-dashboard'], ['Pesanan', 'receipt'], ['Menu Makanan', 'utensils'],

@@ -48,6 +48,9 @@
           <p class="u-text-xs fw-medium u-leading-4 u-tracking-0-24px ink60">LAINNYA</p>
         </div>
         <div id="nav-lainnya" class="d-flex w-100 flex-column u-gap-1"></div>
+        <button type="button" id="btn-logout" class="app-nav-item logout-item d-flex w-100 align-items-center u-gap-3 u-rounded-lg u-px-3 u-py-2 text-start u-text-sm fw-medium u-leading-5 u-transition-colors">
+          <i data-lucide="log-out" class="u-size-5 flex-shrink-0"></i><span>Keluar</span>
+        </button>
       </div>
     </aside>
 
@@ -1150,6 +1153,19 @@
 
     <!-- Dropdown background overlay (20% black) -->
     <div id="overlay" class="hidden-page position-fixed u-inset-0 u-z-40" style="background: rgba(0,0,0,.2)"></div>
+
+    <!-- Logout confirmation modal -->
+    <div id="logout-confirm" class="logout-confirm hidden-page position-fixed u-inset-0 u-z-60 d-flex align-items-center justify-content-center" role="dialog" aria-modal="true" aria-labelledby="logout-confirm-title" aria-describedby="logout-confirm-desc">
+      <div class="logout-confirm-box">
+        <span class="logout-confirm-icon"><i data-lucide="log-out"></i></span>
+        <p id="logout-confirm-title" class="logout-confirm-title">Keluar dari dashboard?</p>
+        <p id="logout-confirm-desc" class="logout-confirm-desc">Sesi admin akan diakhiri. Silahkan login kembali untuk membuka Dashboard.</p>
+        <div class="logout-confirm-actions">
+          <button type="button" id="logout-cancel" class="logout-cancel">Batal</button>
+          <button type="button" id="logout-confirm-btn" class="logout-submit">Keluar</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Notification modal -->
     <div id="notif" class="hidden-page position-fixed u-inset-0 u-z-60 d-flex justify-content-end" style="background: rgba(0,0,0,.2)">
