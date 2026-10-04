@@ -747,3 +747,152 @@ revealEls.forEach((el) => revealObserver.observe(el));
     });
 
 })();
+
+// ==========================================
+// RENDER PROMO LANDING PAGE DARI localStorage (data dari Admin)
+// ==========================================
+(function renderPromoFromAdmin() {
+
+    const PROMO_KEY = 'lamak-bana-promo-data';
+    const MAX_PROMO = 3;
+
+    const grid = document.querySelector('.promo-section .promo-grid');
+    if (!grid) return;
+    const colLeft  = grid.querySelector('.promo-col-left');
+    const colRight = grid.querySelector('.promo-col-right');
+    if (!colLeft || !colRight) return;
+
+    // gaya tiap slot kartu (urutan sama dengan desain awal)
+    const SLOTS = [
+        { col: 'left',  card: 'card-yellow', title: 'text-black', btn: 'btn btn-red',     badge: 'badge-red',                   circle: 'circle-small', desc: false },
+        { col: 'left',  card: 'card-red',    title: 'text-light', btn: 'btn btn-outline', badge: 'badge-white',                 circle: 'circle-small', desc: false },
+        { col: 'right', card: 'card-green',  title: 'text-light', btn: 'btn btn-red',     badge: 'badge-white badge-top-right', circle: 'circle-large', desc: true  }
+    ];
+
+    function todayISO() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    // null kalau admin belum pernah menyimpan data promo
+    function getAdminPromoData() {
+        try {
+            const saved = localStorage.getItem(PROMO_KEY);
+            if (saved === null) return null;
+            const data = JSON.parse(saved);
+            return Array.isArray(data) ? data : null;
+        } catch (error) {
+            console.warn('Gagal membaca promo admin:', error);
+            return null;
+        }
+    }
+
+    // sama dengan promoStatus() di admin: Aktif = aktif + periode mencakup hari ini
+    function isRunning(promo, today) {
+        if (promo.active === false || promo.website === false) return false;
+        if (promo.start && promo.start > today) return false;
+        if (promo.end && promo.end < today) return false;
+        return true;
+    }
+
+    function badgeLines(promo) {
+        const value = String(promo.value || '').trim();
+        if (promo.type === 'Diskon Persen') return value ? ['HEMAT', value] : ['HEMAT'];
+        if (promo.type === 'Gratis Ongkir') return ['GRATIS'];
+        if (promo.type === 'Harga Spesial') return value ? ['HANYA', value] : ['PROMO'];
+        return value ? ['PROMO', value] : ['PROMO'];
+    }
+
+    function createPromoCard(promo, slot) {
+        const card = document.createElement('div');
+        card.className = 'promo-card ' + slot.card + ' reveal';
+        card.dataset.promoId = promo.id || '';
+
+        const content = document.createElement('div');
+        content.className = 'card-content';
+
+        const title = document.createElement('h3');
+        title.className = 'card-title ' + slot.title;
+        title.textContent = String(promo.name || '').toUpperCase();
+        content.appendChild(title);
+
+        if (slot.desc && promo.desc) {
+            const desc = document.createElement('p');
+            desc.className = 'card-desc text-light';
+            desc.textContent = promo.desc;
+            content.appendChild(desc);
+        }
+
+        const btn = document.createElement('a');
+        btn.className = slot.btn;
+        btn.href = '#menu';
+        btn.textContent = 'Pesan Sekarang';
+        content.appendChild(btn);
+
+        const badge = document.createElement('div');
+        badge.className = 'card-badge ' + slot.badge;
+        badgeLines(promo).forEach(function (line, i) {
+            if (i > 0) badge.appendChild(document.createElement('br'));
+            badge.appendChild(document.createTextNode(line));
+        });
+
+        const circle = document.createElement('div');
+        circle.className = 'card-circle ' + slot.circle;
+        const span = document.createElement('span');
+        span.textContent = 'FOTO';
+        circle.appendChild(span);
+
+        card.appendChild(content);
+        card.appendChild(badge);
+        card.appendChild(circle);
+        return card;
+    }
+
+    function renderPromoCards() {
+        const data = getAdminPromoData();
+
+        // admin belum pernah menyimpan apa pun, pakai kartu HTML asli
+        if (data === null) return;
+
+        const today = todayISO();
+        let shown = data.filter(function (p) { return isRunning(p, today); }).slice(0, MAX_PROMO);
+
+        // Gratis Ongkir ditaruh di kartu hijau besar kalau ada 3 promo
+        if (shown.length === MAX_PROMO) {
+            const idx = shown.findIndex(function (p) { return p.type === 'Gratis Ongkir'; });
+            if (idx !== -1) shown.push(shown.splice(idx, 1)[0]);
+        }
+
+        colLeft.innerHTML = '';
+        colRight.innerHTML = '';
+
+        if (!shown.length) {
+            grid.style.gridTemplateColumns = '1fr';
+            const empty = document.createElement('p');
+            empty.className = 'promo-subtitle';
+            empty.style.textAlign = 'center';
+            empty.textContent = 'Belum ada promo aktif saat ini. Cek kembali sebentar lagi.';
+            colLeft.appendChild(empty);
+            return;
+        }
+
+        shown.forEach(function (promo, i) {
+            const slot = SLOTS[i];
+            const card = createPromoCard(promo, slot);
+            (slot.col === 'left' ? colLeft : colRight).appendChild(card);
+            // wajib didaftarkan ke observer, kalau tidak kartu tetap opacity 0
+            revealObserver.observe(card);
+        });
+
+        // kolom kanan kosong (kurang dari 3 promo), kolom kiri dibuat selebar penuh
+        grid.style.gridTemplateColumns = colRight.children.length ? '' : '1fr';
+    }
+
+    renderPromoCards();
+
+    // update otomatis kalau admin mengubah promo di tab lain
+    window.addEventListener('storage', function (event) {
+        if (event.key === PROMO_KEY) renderPromoCards();
+    });
+
+})();
