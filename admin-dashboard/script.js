@@ -1488,49 +1488,6 @@ $(function () {
   }
 
   /* ---------------- Laporan ---------------- */
-  const REPORT_BASE = {
-    revenue: 89400000,
-    orders: 1248,
-    completion: .92,
-    channels: [
-      { name:'Makan di Tempat', revenue:48200000, orders:648, color:'#8b1e1e' },
-      { name:'Ojek Online', revenue:26700000, orders:424, color:'#d69223' },
-      { name:'Katering', revenue:14500000, orders:176, color:'#2f5d3a' },
-    ],
-    statuses: [
-      { name:'Selesai', count:1148, color:'#2f5d3a' },
-      { name:'Diproses', count:46, color:'#d69223' },
-      { name:'Baru', count:22, color:'#8b1e1e' },
-      { name:'Siap', count:12, color:'#265f87' },
-      { name:'Dibatalkan', count:20, color:'#a45a5a' },
-    ],
-    menus: [
-      { name:'Rendang Daging', qty:312, revenue:8736000 },
-      { name:'Ayam Pop', qty:246, revenue:6150000 },
-      { name:'Dendeng Batokok', qty:198, revenue:5940000 },
-      { name:'Gulai Tunjang', qty:174, revenue:4698000 },
-      { name:'Telur Balado', qty:151, revenue:2265000 },
-    ],
-    daily: [
-      { date:'22 Sep', orders:39, revenue:2740000 },
-      { date:'23 Sep', orders:43, revenue:3180000 },
-      { date:'24 Sep', orders:36, revenue:2510000 },
-      { date:'25 Sep', orders:48, revenue:3520000 },
-      { date:'26 Sep', orders:45, revenue:3270000 },
-      { date:'27 Sep', orders:51, revenue:3890000 },
-      { date:'28 Sep', orders:57, revenue:4260000 },
-    ]
-  };
-
-  // angka laporan dihitung
-  function reportChannelFactor() {
-    const ch = state.reportFilters.channel;
-    if (ch === 'Makan di Tempat') return 48200000 / REPORT_BASE.revenue;
-    if (ch === 'Ojek Online') return 26700000 / REPORT_BASE.revenue;
-    if (ch === 'Katering') return 14500000 / REPORT_BASE.revenue;
-    return 1;
-  }
-
   function reportRupiah(v, compact) {
     v = Number(v || 0);
     if (compact) {
@@ -1541,7 +1498,7 @@ $(function () {
     return 'Rp' + Math.round(v).toLocaleString('id-ID');
   }
 
-  const REPORT_CHANNEL_COLORS = { 'Makan di Tempat':'#8b1e1e', 'Ojek Online':'#d69223', 'Katering':'#2f5d3a', 'Take Away':'#265f87' };
+  const REPORT_CHANNEL_COLORS = { 'Makan di Tempat':'#8b1e1e', 'Ojek Online':'#d69223', 'Katering':'#2f5d3a', 'Ambil Sendiri':'#265f87' };
   const REPORT_STATUS_ORDER = [
     { name:'Selesai', color:'#2f5d3a' }, { name:'Diproses', color:'#d69223' }, { name:'Baru', color:'#8b1e1e' },
     { name:'Siap', color:'#265f87' }, { name:'Dibatalkan', color:'#a45a5a' }
@@ -1616,6 +1573,9 @@ $(function () {
     $('#report-kpi-completion').text(Math.round(m.completion * 100) + '%');
     $('#report-kpi-completion-note').text(m.completed.toLocaleString('id-ID') + ' pesanan selesai');
     $('#report-chart-subtitle').text(reportPeriodText() + ' · ' + dropdownLabel('report-channel', f.channel));
+    const pr = reportPrevRange(), pm = reportSum(reportOrders(pr.from, pr.to, f.channel));
+    reportDelta($('#report-kpi-revenue-note'), m.revenue, pm.revenue);
+    reportDelta($('#report-kpi-orders-note'), m.orders, pm.orders);
     $('#report-custom-range').toggleClass('hidden-page', f.period !== 'Rentang tanggal');
     $('#report-date-from').val(f.dateFrom); $('#report-date-to').val(f.dateTo);
 
@@ -1675,8 +1635,249 @@ $(function () {
     });
     $('#report-daily-rows').closest('.report-panel').find('.report-mini-total').text(reportDateLabel(today));
 
-    if (state.page === 'Laporan') requestAnimationFrame(function(){ buildLineChart('#linechart'); });
+    if (state.page === 'Laporan') requestAnimationFrame(function(){ buildReportChart('#linechart'); });
     lucide.createIcons();
+  }
+
+  function reportDayDiff(a, b) { return Math.round((startOfDay(b) - startOfDay(a)) / 86400000); }
+
+  function reportPrevRange() {
+    const f = state.reportFilters, r = reportRange();
+    if (f.period === 'Bulan ini') return { from:new Date(r.from.getFullYear(), r.from.getMonth() - 1, 1), to:endOfDay(new Date(r.from.getFullYear(), r.from.getMonth(), 0)) };
+    if (f.period === 'Tahun ini') return { from:new Date(r.from.getFullYear() - 1, 0, 1), to:endOfDay(new Date(r.from.getFullYear() - 1, 11, 31)) };
+    const days = reportDayDiff(r.from, r.to) + 1;
+    const from = startOfDay(r.from); from.setDate(from.getDate() - days);
+    const to = startOfDay(r.from); to.setDate(to.getDate() - 1);
+    return { from:from, to:endOfDay(to) };
+  }
+
+  function reportDelta($el, current, previous) {
+    $el.removeClass('positive negative');
+    if (!previous) { $el.text(current ? 'Belum ada data pembanding' : 'Belum ada data'); return; }
+    const pct = Math.round((current - previous) / previous * 100);
+    $el.text((pct >= 0 ? '↑ ' : '↓ ') + Math.abs(pct) + '% vs periode sebelumnya').addClass(pct >= 0 ? 'positive' : 'negative');
+  }
+
+  function reportNiceMax(v) {
+    if (v <= 0) return 100000;
+    const pow = Math.pow(10, Math.floor(Math.log10(v)));
+    const n = v / pow;
+    const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10;
+    return step * pow;
+  }
+
+  function reportChartSeries() {
+    const f = state.reportFilters, r = reportRange(), pr = reportPrevRange(), now = new Date();
+    const days = reportDayDiff(r.from, r.to) + 1;
+    const monthly = f.period === 'Tahun ini' || days > 92;
+    const count = monthly
+      ? (r.to.getFullYear() - r.from.getFullYear()) * 12 + r.to.getMonth() - r.from.getMonth() + 1
+      : days;
+    const bucketAt = function (base, i) {
+      return monthly
+        ? { from:new Date(base.getFullYear(), base.getMonth() + i, 1), to:endOfDay(new Date(base.getFullYear(), base.getMonth() + i + 1, 0)) }
+        : { from:new Date(base.getFullYear(), base.getMonth(), base.getDate() + i), to:endOfDay(new Date(base.getFullYear(), base.getMonth(), base.getDate() + i)) };
+    };
+    const prevCount = monthly
+      ? (pr.to.getFullYear() - pr.from.getFullYear()) * 12 + pr.to.getMonth() - pr.from.getMonth() + 1
+      : reportDayDiff(pr.from, pr.to) + 1;
+    const indexOf = function (base, ts) {
+      return monthly
+        ? (ts.getFullYear() - base.getFullYear()) * 12 + ts.getMonth() - base.getMonth()
+        : reportDayDiff(base, ts);
+    };
+    const fill = function (range, size, base) {
+      const sums = [];
+      for (let i = 0; i < size; i++) sums.push(0);
+      reportOrders(range.from, range.to, f.channel).forEach(function (o) {
+        if (o.status === 'Dibatalkan') return;
+        const idx = indexOf(base, orderTimestamp(o));
+        if (idx >= 0 && idx < size) sums[idx] += rupiahNumber(o.total);
+      });
+      return sums;
+    };
+    const mainSums = fill(r, count, r.from);
+    const prevSums = fill(pr, prevCount, pr.from);
+    const label = function (b) {
+      return monthly ? b.from.toLocaleDateString('id-ID', { month:'short', year:'numeric' }) : reportDateLabel(b.from);
+    };
+    const points = [];
+    for (let i = 0; i < count; i++) {
+      const cb = bucketAt(r.from, i), pb = bucketAt(pr.from, i);
+      points.push({
+        axis: monthly ? cb.from.toLocaleDateString('id-ID', { month:'short' }) : (count > 31 ? cb.from.toLocaleDateString('id-ID', { day:'numeric', month:'short' }) : String(cb.from.getDate()).padStart(2, '0')),
+        mainLabel: label(cb),
+        prevLabel: label(pb),
+        main: cb.from > now ? null : mainSums[i],
+        prev: i < prevCount && pb.from <= endOfDay(now) ? prevSums[i] : null,
+      });
+    }
+    return points;
+  }
+
+  function buildReportChart(sel) {
+    const $mount = $(sel);
+    if (!$mount.length) return;
+    const data = reportChartSeries();
+    const N = data.length;
+    const W = $mount[0].clientWidth || 900;
+    let H = Math.round($mount[0].clientHeight);
+    if (!H || H < 80) H = 390;
+    const padL = 72, padR = 24, padT = 24, padB = 40;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const SVGNS = 'http://www.w3.org/2000/svg';
+    const peak = data.reduce(function (m, d) { return Math.max(m, d.main || 0, d.prev || 0); }, 0);
+    const MAX = reportNiceMax(peak);
+    const STEPS = 5;
+
+    const xFor = function (i) { return N > 1 ? padL + (i / (N - 1)) * plotW : padL + plotW / 2; };
+    const yFor = function (v) { return padT + (1 - v / MAX) * plotH; };
+    const mk = function (tag, attrs, cls) {
+      const $el = $(document.createElementNS(SVGNS, tag));
+      if (cls) $el.attr('class', cls);
+      return $el.attr(attrs || {});
+    };
+    const pointsOf = function (key) {
+      const out = [];
+      data.forEach(function (d, i) { if (d[key] !== null) out.push(xFor(i) + ',' + yFor(d[key])); });
+      return out;
+    };
+
+    $mount.empty();
+    const $svg = mk('svg', { viewBox:'0 0 ' + W + ' ' + H, preserveAspectRatio:'none' }, 'lc-svg');
+
+    mk('defs').html(
+      '<linearGradient id="lcFillReport" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#111" stop-opacity="0.08"/>' +
+      '<stop offset="100%" stop-color="#111" stop-opacity="0"/></linearGradient>'
+    ).appendTo($svg);
+
+    for (let k = 0; k <= STEPS; k++) {
+      const v = MAX / STEPS * k, y = yFor(v);
+      $svg.append(mk('line', { x1:padL, y1:y, x2:W - padR, y2:y }, 'lc-grid'));
+      $svg.append(mk('text', { x:padL - 12, y:y + 4, 'text-anchor':'end' }, 'lc-ylabel').text(v === 0 ? '0' : reportRupiah(v, true)));
+    }
+
+    const maxLabels = Math.max(2, Math.floor(plotW / 64));
+    const every = Math.max(1, Math.ceil(N / maxLabels));
+    data.forEach(function (d, i) {
+      if (i % every !== 0 && i !== N - 1) return;
+      if (i !== N - 1 && N - 1 - i < every / 2 && N > 1) return;
+      $svg.append(mk('text', { x:xFor(i), y:H - 14, 'text-anchor':'middle' }, 'lc-xlabel').text(d.axis));
+    });
+
+    const ptsMain = pointsOf('main'), ptsPrev = pointsOf('prev');
+    const lastMainIdx = data.reduce(function (m, d, i) { return d.main !== null ? i : m; }, 0);
+
+    const $area = mk('path', {
+      d: ptsMain.length
+        ? 'M ' + xFor(0) + ',' + yFor(0) + ' L ' + ptsMain.join(' L ') + ' L ' + xFor(lastMainIdx) + ',' + yFor(0) + ' Z'
+        : '',
+      fill:'url(#lcFillReport)', stroke:'none',
+    }).appendTo($svg);
+
+    const $linePrev = mk('polyline', { points:ptsPrev.join(' ') }, 'lc-line-comp').appendTo($svg);
+    const $lineMain = mk('polyline', { points:ptsMain.join(' ') }, 'lc-line-main').appendTo($svg);
+
+    const $cross = mk('line', { x1:0, y1:padT, x2:0, y2:H - padB }, 'lc-crosshair').appendTo($svg);
+    const $dotPrev = mk('circle', { r:4.5, fill:'#8f8f8f', stroke:'#fff', 'stroke-width':2 }, 'lc-dot').appendTo($svg);
+    const $dotMain = mk('circle', { r:4.5, fill:'#111', stroke:'#fff', 'stroke-width':2 }, 'lc-dot').appendTo($svg);
+    const $hit = mk('rect', { x:padL, y:padT, width:plotW, height:plotH, fill:'transparent' }).css('cursor', 'crosshair').appendTo($svg);
+
+    $mount.append($svg);
+
+    if (peak === 0) {
+      $('<p>', { class:'u-text-xs ink60', text:'Belum ada pesanan pada periode ini.' })
+        .css({ position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-50%)', pointerEvents:'none', margin:0 })
+        .appendTo($mount);
+    }
+
+    const $tipMain = $('<div>', { class:'lc-tip lc-tip-main' }).appendTo($mount);
+    const $tipPrev = $('<div>', { class:'lc-tip lc-tip-comp' }).appendTo($mount);
+
+    if (!reduceMotion && ptsMain.length > 1) {
+      const len = $lineMain[0].getTotalLength();
+      $lineMain.css({ strokeDasharray:String(len), strokeDashoffset:String(len), transition:'stroke-dashoffset 700ms var(--ease-out)' });
+      requestAnimationFrame(function () {
+        $lineMain.css('strokeDashoffset', '0');
+        setTimeout(function () { $lineMain.css({ strokeDasharray:'none', transition:'none' }); }, 750);
+      });
+      $linePrev.css({ opacity:'0', transition:'opacity 600ms var(--ease-out) 200ms' });
+      requestAnimationFrame(function () { $linePrev.css('opacity', '1'); });
+    }
+
+    let targetIdx = -1;
+    const cur = { x:xFor(0), ym:yFor(0), yp:yFor(0) };
+    let raf = null, active = false;
+
+    const valueOf = function (v) { return v === null ? '-' : reportRupiah(v, false); };
+    const yOf = function (v) { return yFor(v === null ? 0 : v); };
+
+    function tipLeft($tip, x) {
+      const tw = $tip[0].offsetWidth;
+      let left = x + 16;
+      if (left + tw > W) left = x - 16 - tw;
+      return left;
+    }
+
+    function paint() {
+      $cross.attr({ x1:cur.x, x2:cur.x });
+      $dotMain.attr({ cx:cur.x, cy:cur.ym });
+      $dotPrev.attr({ cx:cur.x, cy:cur.yp });
+      const thM = $tipMain[0].offsetHeight, thP = $tipPrev[0].offsetHeight;
+      const clamp = function (t, th) { return Math.max(4, Math.min(H - th - 4, t)); };
+      let topM = clamp(cur.ym - thM / 2, thM), topP = clamp(cur.yp - thP / 2, thP);
+      const mainAbove = cur.ym <= cur.yp;
+      const upperTh = mainAbove ? thM : thP;
+      const upperTop = mainAbove ? topM : topP, lowerTop = mainAbove ? topP : topM;
+      const need = upperTop + upperTh + 6 - lowerTop;
+      if (need > 0) {
+      let nu = upperTop - need / 2, nl = lowerTop + need / 2;
+      const lowerTh = mainAbove ? thP : thM;
+      if (nl + lowerTh > H - 4) { nl = H - 4 - lowerTh; nu = nl - upperTh - 6; }
+      if (nu < 4) { nu = 4; nl = nu + upperTh + 6; }
+      if (mainAbove) { topM = nu; topP = nl; } else { topP = nu; topM = nl; }
+      }
+      $tipMain.css({ left:tipLeft($tipMain, cur.x) + 'px', top:topM + 'px' });
+      $tipPrev.css({ left:tipLeft($tipPrev, cur.x) + 'px', top:topP + 'px' });
+    }
+    function frame() {
+      const d = data[targetIdx];
+      const tx = xFor(targetIdx), tym = yOf(d.main), typ = yOf(d.prev);
+      const k = 0.22;
+      cur.x += (tx - cur.x) * k;
+      cur.ym += (tym - cur.ym) * k;
+      cur.yp += (typ - cur.yp) * k;
+      paint();
+      const settled = Math.abs(tx - cur.x) < 0.4 && Math.abs(tym - cur.ym) < 0.4 && Math.abs(typ - cur.yp) < 0.4;
+      if (!settled && active) raf = requestAnimationFrame(frame);
+      else raf = null;
+    }
+    function setIndex(i) {
+      if (i === targetIdx) return;
+      targetIdx = i;
+      const d = data[i];
+      $dotMain.css('opacity', d.main === null ? 0 : 1);
+      $dotPrev.css('opacity', d.prev === null ? 0 : 1);
+      $tipMain.html('<div class="lc-tip-time">' + d.mainLabel + '</div><div class="lc-tip-val">' + valueOf(d.main) + '</div>');
+      $tipPrev.html('<div class="lc-tip-time">' + d.prevLabel + '</div><div class="lc-tip-val">' + valueOf(d.prev) + '</div>');
+      if (reduceMotion) {
+        cur.x = xFor(i); cur.ym = yOf(d.main); cur.yp = yOf(d.prev);
+        paint();
+        return;
+      }
+      if (!raf) raf = requestAnimationFrame(frame);
+    }
+    function idxFromEvent(e) {
+      const r = $svg[0].getBoundingClientRect();
+      const px = (e.clientX - r.left) * (W / r.width);
+      if (N < 2) return 0;
+      const i = Math.round(((px - padL) / plotW) * (N - 1));
+      return Math.max(0, Math.min(N - 1, i));
+    }
+    function onMove(e) { active = true; $mount.addClass('lc-hot'); setIndex(idxFromEvent(e)); }
+    function onLeave() { active = false; $mount.removeClass('lc-hot'); if (raf) { cancelAnimationFrame(raf); raf = null; } }
+    $hit.on('pointermove pointerenter', onMove).on('pointerleave', onLeave);
   }
 
   function exportReportExcel() {
@@ -2486,7 +2687,7 @@ $(function () {
   let lcTween = null;
   function setChartYear(year) {
     const target = dataForYear(year);
-    const mounts = $.map(['#linechart-dash', '#linechart'], function (s) {
+    const mounts = $.map(['#linechart-dash'], function (s) {
       const $m = $(s);
       return $m.length && $m.data('lc') ? $m : null;
     });
@@ -2514,9 +2715,8 @@ $(function () {
     const $mount = $(sel);
     if (!$mount.length) return;
     const W = $mount[0].clientWidth || 900;
-    const reportScale = sel === '#linechart' ? reportChannelFactor() : 1;
-    const chartMain = LC.main.map(function(v){ return Math.round(v * reportScale); });
-    const chartComp = LC.comp.map(function(v){ return Math.round(v * reportScale); });
+    const chartMain = LC.main.slice();
+    const chartComp = LC.comp.slice();
     let H = Math.round($mount[0].clientHeight);
     if (!H || H < 80) H = 460; // fallback (kartu Laporan tinggi tetap)
     const N = chartMain.length;
@@ -2653,10 +2853,6 @@ $(function () {
     // Pembaruan data saja (tanpa render ulang) supaya perubahan tahun mulus.
     $mount.data('lc', {
       apply: function (mainArr, compArr) {
-        if (sel === '#linechart') {
-          mainArr = mainArr.map(function(v){ return Math.round(v * reportScale); });
-          compArr = compArr.map(function(v){ return Math.round(v * reportScale); });
-        }
         for (let i=0;i<mainArr.length;i++) chartMain[i]=mainArr[i];
         for (let i=0;i<compArr.length;i++) chartComp[i]=compArr[i];
         const pm = mainArr.map(function (v, i) { return xFor(i) + ',' + yFor(v); });
@@ -2679,7 +2875,7 @@ $(function () {
     clearTimeout(lcResizeTimer);
     lcResizeTimer = setTimeout(function () {
       if (state.page === 'Dashboard') buildLineChart('#linechart-dash');
-      else if (state.page === 'Laporan') buildLineChart('#linechart');
+      else if (state.page === 'Laporan') buildReportChart('#linechart');
     }, 150);
   });
 
