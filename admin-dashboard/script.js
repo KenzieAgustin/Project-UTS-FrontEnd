@@ -260,7 +260,10 @@ $(function () {
 
 
   /* ---------------- Promo data ---------------- */
-  const PROMO_TODAY = '2026-09-28';
+    const PROMO_TODAY = (function () {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  })();
   const PROMO_DATA_DEFAULT = [
     { id:'PR-001', name:'Paket Hemat Nasi Rendang', type:'Diskon Persen', value:'20%', start:'2026-09-23', end:'2026-10-04', active:true, website:true, desc:'Hemat 20% untuk paket nasi rendang pilihan.' },
     { id:'PR-002', name:'Gratis Ongkir', type:'Gratis Ongkir', value:'Min. Rp100rb', start:'2026-09-20', end:'2026-10-05', active:true, website:true, desc:'Gratis ongkir untuk pengantaran area Jakarta dengan minimum transaksi Rp100.000.' },
@@ -276,6 +279,9 @@ $(function () {
       return PROMO_DATA_DEFAULT.map(function (x) { return Object.assign({}, x); });
     }
   })();
+    try {
+    if (localStorage.getItem('lamak-bana-promo-data') === null) savePromoData();
+  } catch (e) {}
 
   const DROPDOWN_OPTIONS = {
     status: ['Semua','Selesai','Diproses','Dibatalkan'],
