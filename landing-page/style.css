@@ -298,16 +298,25 @@ body {
 }
 
 .kategori-box {
+    position: relative;
     width: 176px;
     height: 176px;
     background-color: var(--yellow);
-    border-radius: 16px;
-    opacity: 0.25;
-    transition: all 0.3s ease;
-}
-.kategori-box {
     background-size: cover;
     background-position: center;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.kategori-box::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--cream);
+    opacity: 0.72;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
 .box-rendang { background-image: url('images/menu/rendang.jpg'); }
@@ -321,7 +330,10 @@ body {
 .kategori-name { color: black; font-size: 16px; transition: font-weight 0.3s ease; }
 
 .kategori-item.active .kategori-box,
-.kategori-item:hover .kategori-box { opacity: 1; border: 2px solid var(--maroon); }
+.kategori-item:hover .kategori-box { box-shadow: inset 0 0 0 2px var(--maroon); }
+
+.kategori-item.active .kategori-box::after,
+.kategori-item:hover .kategori-box::after { opacity: 0; }
 
 .kategori-item.active .kategori-name,
 .kategori-item:hover .kategori-name { font-weight: 600; }
@@ -816,6 +828,7 @@ body {
         radial-gradient(circle at 78% 40%, #FBC95F 0%, rgba(251, 201, 95, 0) 42%),
         var(--yellow);
     overflow-x: clip;
+    z-index: 3; 
 }
 
 .reservasi-content { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
@@ -871,7 +884,7 @@ body {
     position: absolute;
     z-index: 2;
     right: 8%;
-    top: 70px;
+    bottom: -40px; 
     width: 540px;
     height: 540px;
     border-radius: 50%;
@@ -884,8 +897,8 @@ body {
 .reservasi-circle-small {
     position: absolute;
     z-index: 2;
-    right: -70px;
-    bottom: -60px;
+    right: -90px;
+    bottom: -70px;
     width: 200px;
     height: 200px;
     border-radius: 50%;
@@ -902,7 +915,7 @@ body {
     position: relative;
     width: 100%;
     background-color: var(--maroon);
-    padding: 130px 20px 0 20px; 
+    padding: 150px 20px 0 20px; 
     margin-bottom: 0 !important; 
     overflow: hidden;
 }
@@ -1078,11 +1091,13 @@ body {
         position: relative;
         right: auto;
         top: auto;
+        bottom: auto;
         width: 400px;
         height: 400px;
         margin: 48px auto -170px auto;
     }
     .reservasi-circle-small { display: none; }
+    .footer-section { padding-top: 180px; } 
     .footer-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 40px 24px;
@@ -1098,7 +1113,7 @@ body {
     .reservasi-actions .btn-solid-red,
     .reservasi-actions .btn-cream { flex: 1; }
     .reservasi-circle { width: 280px; height: 280px; margin-bottom: -120px; }
-    .footer-section { padding: 110px 16px 0 16px; } /* ruang untuk lingkaran foto Reservasi yang menjorok ke footer */
+    .footer-section { padding: 140px 16px 0 16px; } /* ruang untuk lingkaran foto Reservasi yang menjorok ±80px ke footer */
     .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px 20px; padding-bottom: 40px; }
     .footer-desc { max-width: none; }
     .footer-bottom { flex-direction: column-reverse; align-items: flex-start; gap: 24px; }
@@ -1382,10 +1397,7 @@ body {
 }
 
 @supports (animation-timeline: view()) {
-    section :is(h1, h2, h3, p, a,
-                .menu-card, .promo-card, .katering-card,
-                .kategori-item, .kenapa-item,
-                .reservasi-circle, .reservasi-circle-small) {
+    section :is(h1, h2, h3, p):not(:is(.menu-card, .promo-card, .katering-card, .kategori-item) *) {
         animation: fadeUnderNavbar linear forwards;
         animation-timeline: view(block 96px 0px);
         animation-range: exit 0% exit 100%;
@@ -1756,4 +1768,18 @@ button.btn-cream {
 @keyframes heroFloat {
     0%, 100% { translate: 0 0; }
     50%      { translate: 0 -10px; }
+}
+
+.reservasi-section::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 120px;
+    background-image: url('images/hero/OrnamenBatik.png');
+    background-size: var(--batik-size) auto;
+    background-position: center calc(100% - 1px);
+    background-repeat: repeat-y;
+    pointer-events: none;
 }
