@@ -1296,3 +1296,78 @@ revealEls.forEach((el) => revealObserver.observe(el));
     });
 
 })();
+// HERO: foto di lingkaran berganti otomatis
+// ==========================================
+(function heroPhotoRotator() {
+
+    const INTERVAL = 5000;  // ganti foto tiap 5 detik
+    const STAGGER  = 1500;  // jeda antar lingkaran (kiri → tengah → kanan)
+    const FADE     = 900;   // lama transisi pudar (samakan dengan CSS)
+
+    // slide pertama = foto asli di CSS; sisanya foto cadangan
+    const CONFIG = [
+        { sel: '.circle-left', slides: [
+            { src: 'images/hero/rendang.jpg',      size: 'cover', pos: 'center',  label: 'Rendang daging sapi dalam mangkuk kayu, ditaburi irisan cabai merah' },
+            { src: 'images/menu/dendengbalado.jpg', size: 'cover', pos: 'center',  label: 'Dendeng balado' },
+            { src: 'images/menu/gulaitunjang.jpg',  size: 'cover', pos: 'center',  label: 'Gulai tunjang' }
+        ]},
+        { sel: '.circle-center', slides: [
+            { src: 'images/hero/nasipadang.jpg',    size: '110%',  pos: 'center',  label: 'Sepiring nasi Padang dengan rendang, daun singkong, dan sambal' },
+            { src: 'images/menu/gulaiikan.jpg',     size: 'cover', pos: 'center',  label: 'Gulai ikan' },
+            { src: 'images/menu/telurbalado.jpg',   size: 'cover', pos: 'center',  label: 'Telur balado' }
+        ]},
+        { sel: '.circle-right', slides: [
+            { src: 'images/hero/ayampop.jpg',       size: 'cover', pos: '30% center', label: 'Ayam pop dengan sambal oranye di atas daun pisang' },
+            { src: 'images/menu/ayambakar.jpg',     size: 'cover', pos: 'center',  label: 'Ayam bakar' },
+            { src: 'images/menu/perkedel.jpg',      size: 'cover', pos: 'center',  label: 'Perkedel' }
+        ]}
+    ];
+
+    // pengguna yang mematikan animasi: biarkan foto diam
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    function makeLayer(slide) {
+        const layer = document.createElement('div');
+        layer.className = 'hero-layer';
+        layer.style.backgroundImage = "url('" + slide.src + "')";
+        layer.style.backgroundSize = slide.size;
+        layer.style.backgroundPosition = slide.pos;
+        return layer;
+    }
+
+    CONFIG.forEach(function (cfg, index) {
+        const circle = document.querySelector(cfg.sel);
+        if (!circle) return;
+
+        // muat semua foto di awal supaya tidak berkedip saat ganti
+        cfg.slides.forEach(function (s) { const img = new Image(); img.src = s.src; });
+
+        let current = 0;
+        let activeLayer = makeLayer(cfg.slides[0]);
+        activeLayer.classList.add('is-active');
+        circle.appendChild(activeLayer);
+
+        function showNext() {
+            if (document.hidden) return; // tab tidak terlihat, jangan ganti
+
+            current = (current + 1) % cfg.slides.length;
+            const slide = cfg.slides[current];
+
+            const incoming = makeLayer(slide);
+            circle.appendChild(incoming);
+            void incoming.offsetWidth;            // paksa reflow supaya transisi jalan
+            incoming.classList.add('is-active');
+            circle.setAttribute('aria-label', slide.label);
+
+            const outgoing = activeLayer;
+            activeLayer = incoming;
+            setTimeout(function () { outgoing.remove(); }, FADE + 100);
+        }
+
+        // mulai dengan jeda berbeda tiap lingkaran
+        setTimeout(function () {
+            setInterval(showNext, INTERVAL);
+        }, index * STAGGER);
+    });
+
+})();
