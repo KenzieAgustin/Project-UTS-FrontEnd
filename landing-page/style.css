@@ -2311,3 +2311,29 @@ button.kategori-item:focus-visible .kategori-box {
     object-fit: cover;
 }
 .card-circle.has-photo span { display: none; }
+
+/* Foto Katering Section */
+.katering-card img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale 0.5s ease;
+}
+.katering-card:hover img { scale: 1.1; }
+
+/* Foto Tentang Kami Section */
+.tentang-arch { overflow: hidden; }
+.tentang-arch img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .katering-card img { transition: none; }
+    .katering-card:hover img { scale: 1; }
+}
