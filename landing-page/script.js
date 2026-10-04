@@ -1371,3 +1371,61 @@ revealEls.forEach((el) => revealObserver.observe(el));
     });
 
 })();
+
+// ==========================================
+// HERO: judul kata per kata + parallax kursor
+// ==========================================
+(function heroMotion() {
+    const hero  = document.querySelector('.hero');
+    const title = document.querySelector('.hero-title');
+    if (!hero || !title) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    // bungkus tiap kata supaya muncul bergantian
+    let i = 0;
+    title.setAttribute('aria-label', title.textContent.replace(/\s+/g, ' ').trim());
+
+    Array.from(title.childNodes).forEach(function (node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const frag = document.createDocumentFragment();
+            node.textContent.split(/(\s+)/).forEach(function (tok) {
+                if (!tok) return;
+                if (/^\s+$/.test(tok)) { frag.appendChild(document.createTextNode(' ')); return; }
+                const w = document.createElement('span');
+                w.className = 'hero-word';
+                w.style.setProperty('--i', i++);
+                w.textContent = tok;
+                frag.appendChild(w);
+            });
+            title.replaceChild(frag, node);
+        } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'BR') {
+            const w = document.createElement('span');   // kata "HATI"
+            w.className = 'hero-word';
+            w.style.setProperty('--i', i++);
+            title.insertBefore(w, node);
+            w.appendChild(node);
+        }
+    });
+    title.classList.add('title-split');
+
+    // parallax mengikuti kursor (hanya perangkat dengan mouse)
+    if (!window.matchMedia('(hover: hover)').matches) return;
+
+    let raf = null, x = 0, y = 0;
+    hero.addEventListener('mousemove', function (e) {
+        const r = hero.getBoundingClientRect();
+        x = ((e.clientX - r.left) / r.width)  * 2 - 1;
+        y = ((e.clientY - r.top)  / r.height) * 2 - 1;
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+            hero.style.setProperty('--mx', x.toFixed(3));
+            hero.style.setProperty('--my', y.toFixed(3));
+            raf = null;
+        });
+    });
+    hero.addEventListener('mouseleave', function () {
+        hero.style.setProperty('--mx', 0);
+        hero.style.setProperty('--my', 0);
+    });
+})();
