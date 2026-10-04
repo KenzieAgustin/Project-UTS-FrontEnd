@@ -526,6 +526,35 @@ revealEls.forEach((el) => revealObserver.observe(el));
         return card;
     }
 
+    // kartu teaser "Segera Hadir" (bukan menu, tidak bisa dipesan)
+    function createSoonCard() {
+        const card = document.createElement('div');
+        card.className = 'menu-card-soon reveal';
+
+        const icon = document.createElement('span');
+        icon.className = 'soon-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = '🍲';
+
+        const pill = document.createElement('span');
+        pill.className = 'soon-pill';
+        pill.textContent = 'Segera Hadir';
+
+        const title = document.createElement('h3');
+        title.className = 'soon-title';
+        title.textContent = 'MENU BARU';
+
+        const desc = document.createElement('p');
+        desc.className = 'soon-desc';
+        desc.textContent = 'Kami sedang menyiapkan hidangan Minang baru. Nantikan segera!';
+
+        card.appendChild(icon);
+        card.appendChild(pill);
+        card.appendChild(title);
+        card.appendChild(desc);
+        return card;
+    }
+
     // 3 Menu Andalan tampil duluan, sisanya disembunyikan sampai "Lihat Semua Menu" diklik
     function sortForDisplay(list) {
         const featured = list.filter(function (m) { return m.featured; }).slice(0, HIGHLIGHT_COUNT);
@@ -559,6 +588,11 @@ revealEls.forEach((el) => revealObserver.observe(el));
                 if (!wrap || !title || wrap.classList.contains('has-photo')) return;
                 setCardPhoto(wrap, menuImage({ name: title.textContent }), title.textContent.trim());
             });
+            if (!grid.querySelector('.menu-card-soon')) {
+                const soon = createSoonCard();
+                grid.appendChild(soon);
+                revealObserver.observe(soon);
+            }
             applyToggle();
             return;
         }
@@ -587,7 +621,9 @@ revealEls.forEach((el) => revealObserver.observe(el));
             // wajib daftarin  ke observer, kalo gak kartu tetap opacity 0
             revealObserver.observe(card);
         });
-
+        const soon = createSoonCard();
+        grid.appendChild(soon);
+        revealObserver.observe(soon);
         applyToggle();
     }
 
