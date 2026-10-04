@@ -295,6 +295,40 @@ revealEls.forEach((el) => revealObserver.observe(el));
     const infoWrap  = document.getElementById('orderInfoWrap');
 
     let menuOptions = [];
+    let activePromo = null; // promo yang sedang dipakai (dari tombol di section Promo)
+
+    // "20%" -> 20. Hanya tipe Diskon Persen yang dihitung otomatis
+    function promoPercent(promo) {
+        if (!promo || promo.type !== 'Diskon Persen') return 0;
+        const n = parseFloat(String(promo.value || '').replace(',', '.'));
+        return n > 0 && n <= 90 ? n : 0;
+    }
+
+    function calcTotals(items) {
+        const subtotal = items.reduce(function (sum, it) { return sum + it.menu.price * it.qty; }, 0);
+        const discount = Math.round(subtotal * promoPercent(activePromo) / 100);
+        return { subtotal: subtotal, discount: discount, total: subtotal - discount };
+    }
+
+    function renderPromoBanner() {
+        const banner = document.getElementById('orderPromoBanner');
+        if (!banner) return;
+        if (!activePromo) { banner.hidden = true; banner.textContent = ''; return; }
+
+        const pct = promoPercent(activePromo);
+        const info = pct
+            ? 'Diskon ' + pct + '% otomatis dipotong dari total.'
+            : 'Harga promo ' + (activePromo.value || '') + ' dikonfirmasi kasir saat pembayaran.';
+
+        banner.innerHTML = '';
+        const strong = document.createElement('strong');
+        strong.textContent = 'Promo: ' + activePromo.name;
+        const small = document.createElement('small');
+        small.textContent = info;
+        banner.appendChild(strong);
+        banner.appendChild(small);
+        banner.hidden = false;
+    }
 
     function formatRupiah(value) {
         return 'Rp' + Number(value || 0).toLocaleString('id-ID');
@@ -386,8 +420,15 @@ revealEls.forEach((el) => revealObserver.observe(el));
     }
 
     function updateTotal() {
-        const total = readItems().reduce(function (sum, it) { return sum + it.menu.price * it.qty; }, 0);
-        totalEl.textContent = formatRupiah(total);
+        const t = calcTotals(readItems());
+        totalEl.textContent = formatRupiah(t.total);
+
+        const row = document.getElementById('orderDiscountRow');
+        if (row) {
+            row.hidden = !t.discount;
+            document.getElementById('orderDiscountLabel').textContent = 'Diskon ' + (activePromo ? activePromo.name : 'promo');
+            document.getElementById('orderDiscount').textContent = '-' + formatRupiah(t.discount);
+        }
     }
 
     function showError(message) {
@@ -399,7 +440,8 @@ revealEls.forEach((el) => revealObserver.observe(el));
         infoWrap.hidden = channelEl.value !== 'Makan di Tempat';
     }
 
-    function openModal(menuId, menuName) {
+    function openModal(menuId, menuName, promo) {
+        activePromo = promo || null;
         menuOptions = loadMenuOptions();
         if (!menuOptions.length) {
             alert('Maaf, belum ada menu yang tersedia untuk dipesan.');
@@ -411,10 +453,21 @@ revealEls.forEach((el) => revealObserver.observe(el));
         showError('');
 
         const target = String(menuName || '').toLowerCase().trim();
-        const preselect = menuOptions.find(function (m) {
+        let preselect = menuOptions.find(function (m) {
             return (menuId && m.id === menuId) || m.name.toLowerCase() === target;
         });
+
+        // dari promo pilih menu yang namanya disebut di judul promo (mis. "Nasi Rendang" -> Rendang Daging)
+        if (!preselect && activePromo) {
+            const promoName = String(activePromo.name || '').toLowerCase();
+            preselect = menuOptions.find(function (m) {
+                return m.name.toLowerCase().split(/\s+/).some(function (word) {
+                    return word.length > 3 && promoName.indexOf(word) !== -1;
+                });
+            });
+        }
         addItemRow(preselect ? preselect.id : menuOptions[0].id, 1);
+        renderPromoBanner();
 
         toggleInfoField();
         updateTotal();
@@ -467,8 +520,10 @@ revealEls.forEach((el) => revealObserver.observe(el));
         const now  = new Date();
         const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
         const date = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-        const total = items.reduce(function (sum, it) { return sum + it.menu.price * it.qty; }, 0);
+        const totals = calcTotals(items);
+        const total = totals.total;
         const id = generateOrderId(orders);
+        const promoNote = activePromo ? 'Promo: ' + activePromo.name + (activePromo.value ? ' (' + activePromo.value + ')' : '') + '. ' : '';
 
         const order = {
             id: id,
@@ -481,12 +536,13 @@ revealEls.forEach((el) => revealObserver.observe(el));
             time: time,
             date: date,
             total: formatRupiah(total),
-            subtotal: formatRupiah(total),
-            discount: 'Rp0',
+            subtotal: formatRupiah(totals.subtotal),
+            discount: formatRupiah(totals.discount),
+            promo: activePromo ? activePromo.name : '',
             status: 'Baru',
             payment: 'Bayar di Tempat',
             paymentStatus: 'BELUM DIBAYAR',
-            note: note || 'Tidak ada catatan khusus.',
+            note: (promoNote + (note || '')).trim() || 'Tidak ada catatan khusus.',
             timeline: [[time, 'Pesanan diterima']],
             source: 'Website'
         };
@@ -540,6 +596,9 @@ revealEls.forEach((el) => revealObserver.observe(el));
         event.preventDefault();
         submitOrder();
     });
+
+    // dipakai tombol di section Promo
+    window.lamakOpenOrder = openModal;
 
     document.getElementById('orderModalClose').addEventListener('click', closeModal);
     document.getElementById('orderDoneClose').addEventListener('click', closeModal);
@@ -893,6 +952,347 @@ revealEls.forEach((el) => revealObserver.observe(el));
     // update otomatis kalau admin mengubah promo di tab lain
     window.addEventListener('storage', function (event) {
         if (event.key === PROMO_KEY) renderPromoCards();
+    });
+
+})();
+
+// ==========================================
+// PESAN KATERING DARI LANDING PAGE KE KATERING ADMIN (localStorage)
+// ==========================================
+(function cateringFromLanding() {
+
+    const CATERING_KEY = 'lamak-bana-catering-data';
+
+    // nilai harus sama dengan pilihan <select> di editor katering admin
+    const EVENTS   = ['Acara Kantor', 'Pernikahan', 'Arisan & Syukuran', 'Lainnya'];
+    const SERVICES = {
+        'Nasi Kotak': {
+            minPax: 20,
+            packages: [
+                { name: 'Nasi Kotak Ayam Pop',           price: 30000, desc: 'Nasi, ayam pop, sayur nangka, sambal ijo, kerupuk.' },
+                { name: 'Nasi Kotak Rendang Komplit',    price: 35000, desc: 'Nasi, rendang daging, sayur nangka, sambal ijo, kerupuk.' },
+                { name: 'Nasi Kotak Dendeng',            price: 35000, desc: 'Nasi, dendeng balado, daun singkong, sambal, kerupuk.' },
+                { name: 'Nasi Kotak Rendang + Ayam Pop', price: 36000, desc: 'Dua lauk: rendang dan ayam pop, plus sayur dan sambal.' }
+            ]
+        },
+        'Prasmanan': {
+            minPax: 30,
+            packages: [
+                { name: 'Paket Prasmanan Minang A', price: 80000, desc: '4 lauk, 2 sayur, sambal, kerupuk, air mineral.' },
+                { name: 'Paket Prasmanan Keluarga', price: 90000, desc: '5 lauk termasuk rendang & gulai, 2 sayur, dessert.' },
+                { name: 'Paket Pernikahan Minang',  price: 90000, desc: '6 lauk pilihan, 2 sayur, dessert, gubukan teh talua.' }
+            ]
+        }
+    };
+    const MAX_PAX       = 1000;
+    const MIN_LEAD_DAYS = 3;        // pesan paling cepat H-3
+    const OPEN_TIME     = '07:00';  // jam antar paling pagi
+    const CLOSE_TIME    = '20:00';  // jam antar paling malam
+
+    const modal = document.getElementById('cateringModal');
+    const form  = document.getElementById('cateringForm');
+    if (!modal || !form) return;
+
+    const formView = document.getElementById('cateringFormView');
+    const doneView = document.getElementById('catDoneView');
+    const doneId   = document.getElementById('catDoneId');
+    const doneSum  = document.getElementById('catDoneSummary');
+    const errorEl  = document.getElementById('catError');
+
+    const picEl      = document.getElementById('catPic');
+    const phoneEl    = document.getElementById('catPhone');
+    const companyEl  = document.getElementById('catCompany');
+    const eventEl    = document.getElementById('catEvent');
+    const paxEl      = document.getElementById('catPax');
+    const paxHintEl  = document.getElementById('catPaxHint');
+    const dateEl     = document.getElementById('catDate');
+    const timeEl     = document.getElementById('catTime');
+    const addressEl  = document.getElementById('catAddress');
+    const packageEl  = document.getElementById('catPackage');
+    const packDescEl = document.getElementById('catPackageDesc');
+    const noteEl     = document.getElementById('catNote');
+    const estimateEl = document.getElementById('catEstimate');
+    const estDetail  = document.getElementById('catEstimateDetail');
+    const serviceEls = form.querySelectorAll('input[name="catService"]');
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function toISO(d) {
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    }
+
+    function minDateISO() {
+        const d = new Date();
+        d.setDate(d.getDate() + MIN_LEAD_DAYS);
+        return toISO(d);
+    }
+
+    function formatRupiah(value) {
+        return 'Rp' + Number(value || 0).toLocaleString('id-ID');
+    }
+
+    function cleanText(value, max) {
+        // buang <> supaya gak jadi HTML di dashboard admin
+        return String(value || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, max);
+    }
+
+    function showError(message) {
+        errorEl.textContent = message;
+        errorEl.hidden = !message;
+    }
+
+    function currentService() {
+        const checked = form.querySelector('input[name="catService"]:checked');
+        return checked && SERVICES[checked.value] ? checked.value : 'Nasi Kotak';
+    }
+
+    function currentPackage() {
+        const list = SERVICES[currentService()].packages;
+        return list.find(function (p) { return p.name === packageEl.value; }) || list[0];
+    }
+
+    // isi ulang pilihan paket sesuai layanan yang dipilih
+    function renderPackages() {
+        const service = SERVICES[currentService()];
+        packageEl.innerHTML = '';
+        service.packages.forEach(function (p) {
+            const opt = document.createElement('option');
+            opt.value = p.name;
+            opt.textContent = p.name + ' — ' + formatRupiah(p.price) + '/porsi';
+            packageEl.appendChild(opt);
+        });
+
+        paxEl.min = String(service.minPax);
+        paxHintEl.textContent = 'Minimal ' + service.minPax + ' porsi';
+        if ((parseInt(paxEl.value, 10) || 0) < service.minPax) paxEl.value = String(service.minPax);
+
+        updatePackageInfo();
+    }
+
+    function updatePackageInfo() {
+        const pack = currentPackage();
+        packDescEl.textContent = pack.desc;
+
+        const pax = parseInt(paxEl.value, 10) || 0;
+        estDetail.textContent = pax + ' porsi × ' + formatRupiah(pack.price);
+        estimateEl.textContent = formatRupiah(pax * pack.price);
+    }
+
+    function readCatering() {
+        try {
+            const saved = localStorage.getItem(CATERING_KEY);
+            const parsed = saved ? JSON.parse(saved) : [];
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    // format ID sama dengan admin: #KT-yymm-nnn (nomor lanjut dari angka terbesar)
+    function generateCateringId(list) {
+        let max = 0;
+        list.forEach(function (c) {
+            const match = String(c.id || '').match(/(\d+)$/);
+            if (match) max = Math.max(max, Number(match[1]) || 0);
+        });
+        const now = new Date();
+        return '#KT-' + String(now.getFullYear()).slice(-2) + pad(now.getMonth() + 1) + '-' + String(max + 1).padStart(3, '0');
+    }
+
+    function openModal(presetEvent) {
+        form.reset();
+        showError('');
+
+        const minDate = minDateISO();
+        dateEl.min = minDate;
+        dateEl.value = minDate;
+        timeEl.min = OPEN_TIME;
+        timeEl.max = CLOSE_TIME;
+        timeEl.value = '11:00';
+        paxEl.max = String(MAX_PAX);
+
+        if (presetEvent && EVENTS.indexOf(presetEvent) !== -1) eventEl.value = presetEvent;
+        // pernikahan biasanya prasmanan
+        if (eventEl.value === 'Pernikahan') {
+            form.querySelector('input[name="catService"][value="Prasmanan"]').checked = true;
+        }
+
+        renderPackages();
+
+        formView.hidden = false;
+        doneView.hidden = true;
+
+        modal.classList.add('open');
+        document.body.classList.add('modal-open');
+        picEl.focus();
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        document.body.classList.remove('modal-open');
+    }
+
+    function submitCatering() {
+        const pic      = cleanText(picEl.value, 60);
+        const phone    = cleanText(phoneEl.value, 20);
+        const company  = cleanText(companyEl.value, 60);
+        const event    = EVENTS.indexOf(eventEl.value) !== -1 ? eventEl.value : 'Lainnya';
+        const service  = currentService();
+        const pack     = currentPackage();
+        const pax      = parseInt(paxEl.value, 10);
+        const date     = dateEl.value;
+        const time     = timeEl.value;
+        const address  = cleanText(addressEl.value, 200);
+        const note     = cleanText(noteEl.value, 300);
+        const minPax   = SERVICES[service].minPax;
+
+        if (!pic) { showError('Nama pemesan wajib diisi.'); picEl.focus(); return; }
+        if (!/^[0-9+\-\s]{8,20}$/.test(phone)) { showError('Nomor WhatsApp tidak valid.'); phoneEl.focus(); return; }
+        if (!pax || pax < minPax || pax > MAX_PAX) {
+            showError('Jumlah porsi ' + service + ' antara ' + minPax + ' sampai ' + MAX_PAX + '.');
+            paxEl.focus();
+            return;
+        }
+        if (!date) { showError('Tanggal acara wajib diisi.'); dateEl.focus(); return; }
+        if (date < minDateISO()) {
+            showError('Katering perlu dipesan paling cepat ' + MIN_LEAD_DAYS + ' hari sebelum acara.');
+            dateEl.focus();
+            return;
+        }
+        if (!time) { showError('Jam makanan tiba wajib diisi.'); timeEl.focus(); return; }
+        if (time < OPEN_TIME || time > CLOSE_TIME) {
+            showError('Jam makanan tiba harus antara ' + OPEN_TIME + ' dan ' + CLOSE_TIME + '.');
+            timeEl.focus();
+            return;
+        }
+        if (address.length < 10) { showError('Alamat lokasi acara wajib diisi dengan lengkap.'); addressEl.focus(); return; }
+        showError('');
+
+        const list = readCatering();
+        const id = generateCateringId(list);
+        const total = pax * pack.price;
+
+        const now = new Date();
+        const createdAt = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+            + ' · ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+
+        // struktur sama persis dengan CATERING_DATA di admin
+        list.push({
+            id: id,
+            customer: company || pic,
+            pic: pic,
+            phone: phone,
+            date: date,
+            time: time,
+            pax: pax,
+            event: event,
+            service: service,
+            package: pack.name,
+            address: address,
+            total: total,          // estimasi, admin bisa ubah saat kirim penawaran
+            dp: 0,
+            source: 'Website',
+            status: 'Menunggu',
+            note: note || 'Tidak ada catatan khusus.',
+            createdAt: createdAt
+        });
+
+        try {
+            localStorage.setItem(CATERING_KEY, JSON.stringify(list));
+        } catch (e) {
+            showError('Pesanan katering gagal disimpan di browser ini. Coba lagi.');
+            return;
+        }
+
+        doneId.textContent = id;
+        doneSum.textContent = service + ' · ' + pack.name + ' · ' + pax + ' porsi · estimasi ' + formatRupiah(total);
+        formView.hidden = true;
+        doneView.hidden = false;
+    }
+
+    // tombol "Pesan Katering" + kartu katering (Pernikahan / Acara Kantor / Arisan)
+    document.querySelectorAll('[data-open-catering]').forEach(function (el) {
+        el.addEventListener('click', function (event) {
+            event.preventDefault();
+            openModal(el.dataset.cateringEvent || '');
+        });
+    });
+
+    serviceEls.forEach(function (el) { el.addEventListener('change', renderPackages); });
+    packageEl.addEventListener('change', updatePackageInfo);
+    // pesan error hilang begitu pengguna mulai memperbaiki isian
+    form.addEventListener('input', function () { if (!errorEl.hidden) showError(''); });
+    paxEl.addEventListener('input', updatePackageInfo);
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        submitCatering();
+    });
+
+    document.getElementById('cateringModalClose').addEventListener('click', closeModal);
+    document.getElementById('catDoneClose').addEventListener('click', closeModal);
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+
+})();
+
+// ==========================================
+// TOMBOL "PESAN SEKARANG" DI SECTION PROMO
+// ==========================================
+(function promoButtons() {
+
+    const PROMO_KEY = 'lamak-bana-promo-data';
+    const WA_NUMBER = '6281234567890';
+
+    const grid = document.querySelector('.promo-section .promo-grid');
+    if (!grid) return;
+
+    // ambil data promo: dari admin (pakai data-promo-id) atau dari atribut kartu HTML awal
+    function getPromo(card) {
+        const id = card.dataset.promoId;
+        if (id) {
+            try {
+                const list = JSON.parse(localStorage.getItem(PROMO_KEY)) || [];
+                const found = list.find(function (p) { return p.id === id; });
+                if (found) return found;
+            } catch (e) { /* lanjut ke atribut */ }
+        }
+        const title = card.querySelector('.card-title');
+        return {
+            name:  card.dataset.promoName || (title ? title.textContent.trim() : 'Promo'),
+            type:  card.dataset.promoType || '',
+            value: card.dataset.promoValue || ''
+        };
+    }
+
+    // delegasi: tetap jalan untuk kartu yang dirender ulang dari data admin
+    grid.addEventListener('click', function (event) {
+        const btn = event.target.closest('.card-content .btn');
+        if (!btn) return;
+        event.preventDefault();
+
+        const card = btn.closest('.promo-card');
+        if (!card) return;
+        const promo = getPromo(card);
+
+        // Gratis Ongkir = pesan antar, website belum punya pengantaran -> lanjut ke WhatsApp
+        if (promo.type === 'Gratis Ongkir') {
+            const text = 'Halo Lamak Bana, saya mau pesan antar dengan promo ' + promo.name
+                + (promo.value ? ' (' + promo.value + ')' : '') + '.\n\nNama: \nAlamat: \nPesanan: ';
+            window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+            return;
+        }
+
+        // Diskon Persen / Harga Spesial -> buka form Pesan Menu dengan promo terpasang
+        if (typeof window.lamakOpenOrder === 'function') {
+            window.lamakOpenOrder('', '', promo);
+        } else {
+            document.getElementById('menu').scrollIntoView({ behavior: 'smooth' });
+        }
     });
 
 })();
