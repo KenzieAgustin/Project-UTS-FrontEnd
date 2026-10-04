@@ -1691,9 +1691,44 @@ $(function () {
   }
 
 
-  /* ---------------- Render: Promo ---------------- */
+  /* Render: Promo */
+  // return false kalau gagal (mis. penyimpanan browser penuh karena foto upload)
   function savePromoData() {
-    try { localStorage.setItem('lamak-bana-promo-data', JSON.stringify(PROMO_DATA)); } catch (e) {}
+    try { localStorage.setItem('lamak-bana-promo-data', JSON.stringify(PROMO_DATA)); return true; } catch (e) { return false; }
+  }
+
+  // Foto promo
+  // promo bawaan yang belum punya field "image" otomatis memakai foto sesuai namanya
+  const PROMO_PHOTO_BY_NAME = {
+    'paket hemat nasi rendang': 'images/hero/rendang.jpg',
+    'hidang keluarga':          'images/hero/nasipadang.jpg',
+    'gratis ongkir':            'images/menu/ayambakar.jpg'
+  };
+
+  function promoImage(p) {
+    if (!p) return '';
+    if (typeof p.image === 'string') return p.image;          // sudah diatur admin ('' = tanpa foto)
+    return PROMO_PHOTO_BY_NAME[String(p.name || '').toLowerCase().trim()] || '';
+  }
+
+  // foto hasil upload yang sedang diedit (data URL), dipakai kalau dropdown = "upload"
+  let promoUploadedImage = '';
+
+  function currentPromoImage() {
+    const v = $('#promo-form-image').val();
+    return v === 'upload' ? promoUploadedImage : (v || '');
+  }
+
+  function renderPromoPhotoPreview() {
+    const img = currentPromoImage();
+    const $box = $('#promo-photo-preview');
+    if (img) {
+      $box.addClass('has-photo').css('background-image', "url('" + photoUrl(img) + "')").empty();
+    } else {
+      $box.removeClass('has-photo').css('background-image', '')
+        .html('<div class="menu-photo-placeholder"><i data-lucide="image" class="u-size-6"></i><span>Belum ada foto</span></div>');
+      lucide.createIcons();
+    }
   }
 
   function promoStatus(p) {
@@ -1732,7 +1767,10 @@ $(function () {
       const status=promoStatus(p);
       const cls=status==='Aktif'?'active':(status==='Terjadwal'?'scheduled':'off');
       $('<div>',{class:'promo-row','data-promo-id':p.id}).html(
-        '<div><p class="promo-row-title">'+resEsc(p.name)+'</p><p class="promo-row-desc">'+resEsc(p.desc||'Tidak ada deskripsi.')+'</p></div>'+
+        '<div class="promo-row-main">'+
+          '<span class="promo-row-thumb'+(promoImage(p)?' has-photo':'')+'"'+(promoImage(p)?' style="--menu-photo:url(\''+photoUrl(promoImage(p))+'\')"':'')+'></span>'+
+          '<div><p class="promo-row-title">'+resEsc(p.name)+'</p><p class="promo-row-desc">'+resEsc(p.desc||'Tidak ada deskripsi.')+'</p></div>'+
+        '</div>'+
         '<div><p class="promo-meta-label">Tipe</p><p class="promo-meta-value">'+resEsc(p.type)+'</p></div>'+
         '<div><p class="promo-meta-label">Periode</p><p class="promo-meta-value">'+promoDate(p.start)+' – '+promoDate(p.end)+'</p></div>'+
         '<div><span class="promo-value-pill">'+resEsc(p.value||'—')+'</span><div style="margin-top:7px"><span class="promo-status '+cls+'">'+status+'</span></div></div>'+
@@ -1756,6 +1794,11 @@ $(function () {
     $('#promo-form-end').val(p.end);
     $('#promo-form-desc').val(p.desc||'');
     $('#promo-desc-count').text((p.desc||'').length);
+    const promoImg = promoImage(p);
+    if (/^data:/.test(promoImg)) { promoUploadedImage = promoImg; $('#promo-form-image').val('upload'); }
+    else { promoUploadedImage = ''; $('#promo-form-image').val(promoImg); }
+    $('#promo-form-file').val('');
+    renderPromoPhotoPreview();
     syncAllUnifiedSelects();
     $('#promo-form-active').prop('checked',!!p.active);
     $('#promo-form-website').prop('checked',!!p.website);
@@ -1773,12 +1816,17 @@ $(function () {
     if(end<start){showToast('Tanggal berakhir tidak boleh sebelum tanggal mulai.');return;}
     const payload={
       name:name,type:$('#promo-form-type').val(),value:$('#promo-form-value').val().trim(),start:start,end:end,
-      active:$('#promo-form-active').is(':checked'),website:$('#promo-form-website').is(':checked'),desc:$('#promo-form-desc').val().trim()
+      active:$('#promo-form-active').is(':checked'),website:$('#promo-form-website').is(':checked'),desc:$('#promo-form-desc').val().trim(),
+      image:currentPromoImage()
     };
     const id=$('#promo-form-id').val();
-    if(id){const p=getPromo(id);if(!p)return;Object.assign(p,payload);showToast('Promo berhasil diperbarui.');}
-    else{const next=PROMO_DATA.reduce(function(max,p){return Math.max(max,Number(p.id.replace(/\D/g,''))||0);},0)+1;PROMO_DATA.push(Object.assign({id:'PR-'+String(next).padStart(3,'0')},payload));showToast('Promo baru berhasil ditambahkan.');}
-    savePromoData();renderPromoPage();closePromoEditor();
+    const backup=JSON.stringify(PROMO_DATA);
+    if(id){const p=getPromo(id);if(!p)return;Object.assign(p,payload);}
+    else{const next=PROMO_DATA.reduce(function(max,p){return Math.max(max,Number(p.id.replace(/\D/g,''))||0);},0)+1;PROMO_DATA.push(Object.assign({id:'PR-'+String(next).padStart(3,'0')},payload));}
+    // gagal simpan (biasanya karena penyimpanan browser penuh) -> batalkan perubahan
+    if(!savePromoData()){PROMO_DATA=JSON.parse(backup);showToast('Gagal menyimpan: penyimpanan browser penuh. Coba pakai foto bawaan atau hapus beberapa foto upload.');return;}
+    showToast(id?'Promo berhasil diperbarui.':'Promo baru berhasil ditambahkan.');
+    renderPromoPage();closePromoEditor();
   }
 
   function deletePromoEditor(){
@@ -2350,6 +2398,18 @@ $(function () {
     $('#promo-editor-close').on('click',closePromoEditor);
     $('#promo-editor').on('click',function(e){if(e.target.id==='promo-editor')closePromoEditor();});
     $('#promo-save').on('click',savePromoEditor);
+    $('#promo-form-image').on('change', renderPromoPhotoPreview);
+    $('#promo-form-file').on('change', function () {
+      const file = this.files && this.files[0];
+      if (!file) return;
+      if (!/^image\//.test(file.type)) { showToast('Pilih file gambar (JPG/PNG/WebP).'); return; }
+      resizeMenuPhoto(file, function (dataUrl) {
+        promoUploadedImage = dataUrl;
+        $('#promo-form-image').val('upload');
+        syncUnifiedSelect($('#promo-form-image'));
+        renderPromoPhotoPreview();
+      });
+    });
     $('#promo-delete').on('click',deletePromoEditor);
     $('#promo-form-desc').on('input',function(){$('#promo-desc-count').text($(this).val().length);});
 
