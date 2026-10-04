@@ -42,7 +42,7 @@ kategoriItems.forEach((item) => {
 
     const KATEGORI_DEFAULT = [
         { id: 'KAT-001', name: 'Rendang',        image: 'images/menu/rendang.jpg',       desc: 'Daging sapi dimasak perlahan dengan santan dan rempah sampai bumbunya kering dan meresap.', taste: 'Gurih, Rempah kuat',  spicy: 1, menuId: 'MN-001', menuName: 'Rendang Daging', visible: true },
-        { id: 'KAT-002', name: 'Dendeng Balado', image: 'images/menu/dendengbalado.jpg', desc: 'Irisan daging sapi tipis digoreng kering lalu dibalut sambal cabai merah.',                taste: 'Pedas, Renyah',       spicy: 2, menuId: '',       menuName: '',               visible: true },
+        { id: 'KAT-002', name: 'Dendeng Batokok', image: 'images/menu/dendengbalado.jpg', desc: 'Irisan daging sapi tipis dipukul, dibakar atau digoreng kering, lalu disiram sambal lado mudo.', taste: 'Pedas, Renyah', spicy: 2, menuId: 'MN-003', menuName: 'Dendeng Batokok', visible: true },
         { id: 'KAT-003', name: 'Gulai Tunjang',  image: 'images/menu/gulaitunjang.jpg',  desc: 'Kikil sapi kenyal dalam kuah gulai kuning kental yang kaya rempah.',                        taste: 'Gurih, Berkuah',      spicy: 1, menuId: 'MN-004', menuName: 'Gulai Tunjang',  visible: true },
         { id: 'KAT-004', name: 'Gulai Ikan',     image: 'images/menu/gulaiikan.jpg',     desc: 'Ikan segar dimasak dalam kuah santan kuning dengan sedikit asam kandis.',                   taste: 'Gurih, Sedikit asam', spicy: 1, menuId: 'MN-005', menuName: 'Gulai Ikan',     visible: true },
         { id: 'KAT-005', name: 'Telur Balado',   image: 'images/menu/telurbalado.jpg',   desc: 'Telur rebus digoreng sebentar lalu disiram sambal balado merah.',                           taste: 'Pedas manis',         spicy: 2, menuId: 'MN-006', menuName: 'Telur Balado',   visible: true },
@@ -1803,4 +1803,79 @@ revealEls.forEach((el) => revealObserver.observe(el));
         hero.style.setProperty('--mx', 0);
         hero.style.setProperty('--my', 0);
     });
+})();
+
+// ==========================================
+// RESERVASI: foto di lingkaran besar & kecil berganti otomatis
+// ==========================================
+(function reservasiPhotoRotator() {
+
+    const INTERVAL = 4000;  // ganti foto tiap 4 detik
+    const STAGGER  = 2000;  // lingkaran kecil mulai 2 detik setelah yang besar
+    const FADE     = 900;   // samakan dengan transition di CSS
+
+    const CONFIG = [
+    { sel: '.reservasi-circle', slides: [
+        { src: 'images/reservasi/rendang.jpeg', pos: 'center 65%', alt: 'Rendang daging sapi' },
+        { src: 'images/hero/ayampop.jpg',       pos: '30% center', alt: 'Ayam pop' },
+        { src: 'images/menu/dendengbalado.jpg', pos: 'center',     alt: 'Dendeng batokok' }
+    ]},
+    { sel: '.reservasi-circle-small', slides: [
+        { src: 'images/hero/ayampop.jpg',       pos: '30% center', alt: 'Ayam pop' },
+        { src: 'images/menu/dendengbalado.jpg', pos: 'center',     alt: 'Dendeng batokok' },
+        { src: 'images/reservasi/rendang.jpeg', pos: 'center 65%', alt: 'Rendang daging sapi' }
+    ]}
+];
+
+    // pengguna yang mematikan animasi: biarkan foto diam
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    function makeLayer(slide) {
+        const img = document.createElement('img');
+        img.className = 'rsv-layer';
+        img.src = slide.src;
+        img.alt = slide.alt;
+        img.style.objectPosition = slide.pos;
+        img.decoding = 'async';
+        return img;
+    }
+
+    CONFIG.forEach(function (cfg, index) {
+        const circle = document.querySelector(cfg.sel);
+        if (!circle) return;
+
+        // layer absolut butuh induk yang punya posisi
+        if (getComputedStyle(circle).position === 'static') {
+            circle.style.position = 'relative';
+        }
+
+        // muat semua foto di awal supaya tidak berkedip
+        cfg.slides.forEach(function (s) { const im = new Image(); im.src = s.src; });
+
+        // ganti isi lingkaran (termasuk <img> lama) dengan layer slide pertama
+        circle.innerHTML = '';
+        let current = 0;
+        let activeLayer = makeLayer(cfg.slides[0]);
+        activeLayer.classList.add('is-active');
+        circle.appendChild(activeLayer);
+
+        function showNext() {
+            if (document.hidden) return;
+
+            current = (current + 1) % cfg.slides.length;
+            const incoming = makeLayer(cfg.slides[current]);
+            circle.appendChild(incoming);
+            void incoming.offsetWidth;   // paksa reflow supaya transisi jalan
+            incoming.classList.add('is-active');
+
+            const outgoing = activeLayer;
+            activeLayer = incoming;
+            setTimeout(function () { outgoing.remove(); }, FADE + 100);
+        }
+
+        setTimeout(function () {
+            setInterval(showNext, INTERVAL);
+        }, index * STAGGER);
+    });
+
 })();
