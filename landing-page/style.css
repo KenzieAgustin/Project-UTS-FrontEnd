@@ -2286,3 +2286,17 @@ button.kategori-item:focus-visible .kategori-box {
 .menu-grid .menu-card-extra { display: none; }
 .menu-grid.show-all .menu-card-extra { display: flex; }
 #menuToggleAll[hidden] { display: none; }
+
+/* FOTO KARTU MENU */
+.card-img-wrapper { overflow: hidden; }
+.menu-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale 0.5s ease;
+}
+.card-img-wrapper.has-photo .foto-placeholder { display: none; }
+.card-img-wrapper .badge-terlaris { z-index: 2; }
+.menu-card:hover .menu-card-img { scale: 1.06; }

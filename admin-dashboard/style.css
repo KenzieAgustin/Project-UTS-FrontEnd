@@ -1274,6 +1274,58 @@ button{cursor:pointer;}
 input:focus,select:focus,button:focus{outline:2px solid rgba(139,30,30,.25);outline-offset:1px}
 .metric,.amount,.number,td{font-variant-numeric:tabular-nums}
 
+/* ===== Kategori Landing Page (admin) ===== */
+.kat-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+.kat-head>div{display:flex;flex-direction:column;gap:4px;max-width:620px}
+
+.kat-list{display:flex;flex-direction:column;gap:10px}
+.kat-row{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:16px;padding:12px;border:1px solid rgba(59,31,20,.1);border-radius:14px;background:#fff;transition:border-color 160ms ease,background 160ms ease}
+.kat-row:hover{border-color:rgba(139,30,30,.25);background:#fffaf3}
+.kat-row.is-hidden{opacity:.6}
+
+.kat-thumb{display:grid;width:72px;height:72px;place-items:center;overflow:hidden;border-radius:12px;background:#f2a93b;color:#fff;font-family:'Anton',sans-serif;font-size:1.6rem}
+.kat-thumb img{width:100%;height:100%;object-fit:cover}
+
+.kat-info{display:flex;min-width:0;flex-direction:column;gap:4px}
+.kat-name{font-size:.9rem;font-weight:600;color:#3b1f14}
+.kat-name em{margin-left:6px;padding:2px 8px;border-radius:999px;background:rgba(59,31,20,.08);font-size:.62rem;font-style:normal;font-weight:500;color:rgba(59,31,20,.6)}
+.kat-desc{overflow:hidden;font-size:.75rem;line-height:1.5;color:rgba(59,31,20,.6);text-overflow:ellipsis;white-space:nowrap}
+.kat-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.kat-chips span{padding:2px 9px;border-radius:999px;background:rgba(139,30,30,.07);font-size:.65rem;font-weight:500;color:#8b1e1e}
+.kat-chips span.is-muted{background:rgba(59,31,20,.06);color:rgba(59,31,20,.5)}
+
+.kat-actions{display:flex;gap:6px}
+.kat-icon-btn{display:grid;width:34px;height:34px;place-items:center;border:1px solid rgba(59,31,20,.12);border-radius:999px;background:#fff;color:rgba(59,31,20,.7);cursor:pointer;transition:background 160ms ease,color 160ms ease}
+.kat-icon-btn:hover:not(:disabled){background:rgba(139,30,30,.06);color:#8b1e1e}
+.kat-icon-btn:disabled{opacity:.35;cursor:not-allowed}
+
+.kat-empty{padding:28px;border:1px dashed rgba(59,31,20,.2);border-radius:14px;text-align:center;font-size:.8rem;color:rgba(59,31,20,.6)}
+
+/* editor */
+.kat-photo{display:flex;flex-direction:column;gap:10px}
+.kat-photo-preview{display:grid;height:180px;place-items:center;overflow:hidden;border:1px dashed rgba(59,31,20,.2);border-radius:14px;background:#fbf8f2;color:rgba(59,31,20,.45);font-size:.75rem}
+.kat-photo-preview span{display:flex;flex-direction:column;align-items:center;gap:6px}
+.kat-photo-preview img{width:100%;height:100%;object-fit:cover}
+.kat-photo-actions{display:flex;align-items:center;gap:12px}
+.kat-upload{flex:0 0 auto}
+.kat-link{border:0;background:none;color:#8b1e1e;font-size:.78rem;font-weight:500;cursor:pointer;text-decoration:underline}
+.kat-hint{font-size:.66rem;color:rgba(59,31,20,.45)}
+
+@media (max-width:640px){
+  .kat-row{grid-template-columns:56px minmax(0,1fr);}
+  .kat-thumb{width:56px;height:56px}
+  .kat-actions{grid-column:1/-1;justify-content:flex-end}
+}
+
+/* Foto menu (pilih dari foto yang ada di landing-page/images) */
+.menu-photo-picker{display:flex;flex-direction:column;gap:12px;padding:12px;border:1px dashed rgba(59,31,20,.17);border-radius:14px;background:#fffaf3}
+.menu-photo-preview{display:grid;height:170px;place-items:center;border-radius:11px;background:#f3ebe0 center/cover no-repeat}
+.menu-photo-hint{font-size:.64rem;line-height:1.5;color:rgba(59,31,20,.5)}
+.menu-photo-hint b{font-weight:600;color:rgba(59,31,20,.7)}
+.menu-admin-photo.has-photo,.website-preview-photo.has-photo{background:var(--menu-photo) center/cover no-repeat #f1efec!important}
+.menu-admin-photo.has-photo::before{background:linear-gradient(180deg,rgba(0,0,0,.18),transparent 45%)}
+.menu-photo-upload-btn{display:inline-flex;align-self:flex-start;align-items:center;gap:.45rem;padding:.5rem .95rem;border:1px solid rgba(139,30,30,.18);border-radius:999px;background:#fff;color:#8b1e1e;font-size:.75rem;font-weight:500;cursor:pointer}
+.menu-photo-upload-btn:hover{background:rgba(139,30,30,.04)}
 /* ===== Logout ===== */
 .app-nav-item.logout-item:hover{color:#8b1e1e!important;background:rgba(139,30,30,.06)!important}
 .logout-confirm{padding:20px;background:rgba(59,31,20,.32)}

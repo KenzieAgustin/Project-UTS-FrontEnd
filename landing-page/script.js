@@ -1,3 +1,27 @@
+// MENU DEFAULT SEED
+// Kalau browser belum punya data menu (admin belum pernah dibuka di sini),
+// simpan data menu awal supaya semua fitur landing page (kartu menu, Pesan Menu,
+// pop up kategori) membaca data yang sama dengan admin dashboard.
+// Isi harus sama dengan MENU_DATA_DEFAULT di admin-dashboard/script.js
+(function seedMenuData() {
+    const MENU_KEY = 'lamak-bana-menu-data';
+    const MENU_DEFAULT = [
+        { id:'MN-001', name:'Rendang Daging', category:'Daging', price:28000, stock:12, available:true, website:true, featured:true, tone:'rendang', desc:'Daging sapi dimasak 8 jam dengan santan dan rempah Minang.' },
+        { id:'MN-002', name:'Ayam Pop', category:'Ayam', price:25000, stock:18, available:true, website:true, featured:true, tone:'ayam', desc:'Ayam kampung direbus bumbu lalu digoreng sebentar, lembut dan gurih.' },
+        { id:'MN-003', name:'Dendeng Batokok', category:'Daging', price:30000, stock:9, available:true, website:true, featured:true, tone:'dendeng', desc:'Daging tipis dipukul, dibakar, lalu disiram sambal lado mudo.' },
+        { id:'MN-004', name:'Gulai Tunjang', category:'Gulai', price:27000, stock:6, available:true, website:true, featured:false, tone:'gulai', desc:'Tunjang sapi empuk dengan kuah gulai Minang yang kaya rempah.' },
+        { id:'MN-005', name:'Gulai Ikan', category:'Gulai', price:29000, stock:14, available:true, website:true, featured:false, tone:'ikan', desc:'Ikan dengan kuah gulai santan dan rempah segar khas Minang.' },
+        { id:'MN-006', name:'Telur Balado', category:'Telur', price:15000, stock:20, available:true, website:true, featured:false, tone:'telur', desc:'Telur dengan balado merah pedas gurih khas rumah makan Minang.' },
+        { id:'MN-007', name:'Perkedel', category:'Pendamping', price:10000, stock:7, available:true, website:true, featured:false, tone:'perkedel', desc:'Perkedel kentang lembut dengan bumbu sederhana dan gurih.' },
+        { id:'MN-008', name:'Ayam Bakar', category:'Ayam', price:32000, stock:0, available:false, website:true, featured:false, tone:'bakar', desc:'Ayam bakar berbumbu Minang dengan aroma panggang yang kuat.' }
+    ];
+    try {
+        if (localStorage.getItem(MENU_KEY) === null) {
+            localStorage.setItem(MENU_KEY, JSON.stringify(MENU_DEFAULT));
+        }
+    } catch (e) { /* localStorage tidak tersedia: landing tetap pakai kartu HTML */ }
+})();
+
 // KATEGORI: klik untuk pindah item aktif 
 const kategoriItems = document.querySelectorAll('.kategori-item');
 document.documentElement.classList.add('js');
@@ -391,6 +415,36 @@ revealEls.forEach((el) => revealObserver.observe(el));
 
     let showAll = false;
 
+     // menu lama yang belum punya field "image" dari admin -> pakai foto sesuai nama
+    const MENU_PHOTO_BY_NAME = {
+        'rendang daging':  'images/menu/rendang.jpg',
+        'ayam pop':        'images/hero/ayampop.jpg',
+        'dendeng batokok': 'images/menu/dendengbalado.jpg',
+        'gulai tunjang':   'images/menu/gulaitunjang.jpg',
+        'gulai ikan':      'images/menu/gulaiikan.jpg',
+        'telur balado':    'images/menu/telurbalado.jpg',
+        'perkedel':        'images/menu/perkedel.jpg',
+        'ayam bakar':      'images/menu/ayambakar.jpg'
+    };
+
+    function menuImage(menu) {
+        if (typeof menu.image === 'string') return menu.image; // '' = admin pilih "Tanpa foto"
+        return MENU_PHOTO_BY_NAME[String(menu.name || '').toLowerCase().trim()] || '';
+    }
+
+    // pasang foto ke kartu; placeholder "FOTO" disembunyikan kalau fotonya ada
+    function setCardPhoto(imgWrap, src, alt) {
+        if (!src) return;
+        const img = document.createElement('img');
+        img.className = 'menu-card-img';
+        img.src = src;
+        img.alt = alt;
+        img.loading = 'lazy';
+        img.addEventListener('error', function () { img.remove(); imgWrap.classList.remove('has-photo'); });
+        imgWrap.insertBefore(img, imgWrap.firstChild);
+        imgWrap.classList.add('has-photo');
+    }
+
     // Kembalikan null kalo admin belom pernah nyimpen data
     function getAdminMenuData() {
         try {
@@ -427,6 +481,7 @@ revealEls.forEach((el) => revealObserver.observe(el));
         foto.className = 'foto-placeholder';
         foto.textContent = 'FOTO';
         imgWrap.appendChild(foto);
+        setCardPhoto(imgWrap, menuImage(menu), menu.name || '');
 
         const body = document.createElement('div');
         body.className = 'card-body';
@@ -496,8 +551,14 @@ revealEls.forEach((el) => revealObserver.observe(el));
     function renderMenuCards() {
         const menuData = getAdminMenuData();
 
-        // admin belum pernah nyimpen apa pun, maka pakai kartu HTML asli
+        // admin belum pernah nyimpen apa pun, maka pakai kartu HTML asli (+ foto sesuai nama)
         if (menuData === null) {
+            grid.querySelectorAll('.menu-card').forEach(function (card) {
+                const wrap = card.querySelector('.card-img-wrapper');
+                const title = card.querySelector('.menu-card-title');
+                if (!wrap || !title || wrap.classList.contains('has-photo')) return;
+                setCardPhoto(wrap, menuImage({ name: title.textContent }), title.textContent.trim());
+            });
             applyToggle();
             return;
         }

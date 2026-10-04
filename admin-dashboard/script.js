@@ -210,6 +210,39 @@ $(function () {
     if (localStorage.getItem('lamak-bana-order-data') === null) saveOrderData();
   } catch (e) {}
 
+    // ---- Foto menu (path relatif ke folder landing-page) ----
+  const MENU_PHOTO_BY_NAME = {
+    'rendang daging':  'images/menu/rendang.jpg',
+    'ayam pop':        'images/hero/ayampop.jpg',
+    'dendeng batokok': 'images/menu/dendengbalado.jpg',
+    'gulai tunjang':   'images/menu/gulaitunjang.jpg',
+    'gulai ikan':      'images/menu/gulaiikan.jpg',
+    'telur balado':    'images/menu/telurbalado.jpg',
+    'perkedel':        'images/menu/perkedel.jpg',
+    'ayam bakar':      'images/menu/ayambakar.jpg'
+  };
+
+  function menuImage(m) {
+    if (!m) return '';
+    if (typeof m.image === 'string') return m.image;          // sudah diatur admin ('' = tanpa foto)
+    return MENU_PHOTO_BY_NAME[String(m.name || '').toLowerCase().trim()] || '';
+  }
+
+  function menuImageUrl(m) {
+    return photoUrl(menuImage(m));
+  }
+
+  // foto upload dipakai apa adanya foto bawaan dikasi prefix folder landingpage
+  function photoUrl(img) {
+    if (!img) return '';
+    return /^(data:|https?:)/.test(img) ? img : '../landing-page/' + img;
+  }
+
+  function menuPhotoStyle(m) {
+    const url = menuImageUrl(m);
+    // lewat variabel CSS, karena style.css punya background
+    return url ? ' style="--menu-photo:url(\'' + url + '\')"' : '';
+  }
 
   const MENU_DATA_DEFAULT = [
     { id:'MN-001', name:'Rendang Daging', category:'Daging', price:28000, stock:12, available:true, website:true, featured:true, tone:'rendang', desc:'Daging sapi dimasak 8 jam dengan santan dan rempah Minang.' },
@@ -230,6 +263,12 @@ $(function () {
       return MENU_DATA_DEFAULT.map(function (m) { return Object.assign({}, m); });
     }
   })();
+
+  // MENU DEFAULT SEED simpan data menu awal saat admin pertama kali dibuka,
+  // supaya landing page langsung memakai data yang sama dengan admin.
+  try {
+    if (localStorage.getItem('lamak-bana-menu-data') === null) saveMenuData();
+  } catch (e) {}
 
   /* ---------------- Reservation data ---------------- */
   const RESERVATION_TODAY = '2026-09-28';
@@ -832,8 +871,9 @@ $(function () {
 
 
   /* ---------------- Render: Menu Makanan ---------------- */
+  // return false kalau gagal (mis. penyimpanan browser penuh karena foto upload)
   function saveMenuData() {
-    try { localStorage.setItem('lamak-bana-menu-data', JSON.stringify(MENU_DATA)); } catch (e) {}
+    try { localStorage.setItem('lamak-bana-menu-data', JSON.stringify(MENU_DATA)); return true; } catch (e) { return false; }
   }
 
   function menuRupiah(value) { return 'Rp' + Number(value || 0).toLocaleString('id-ID'); }
@@ -868,8 +908,8 @@ $(function () {
       const initials = m.name.split(' ').map(function (p) { return p[0]; }).join('').slice(0,2).toUpperCase();
       $('<article>', { class:'menu-admin-card', 'data-menu-id':m.id })
         .html(
-          '<div class="menu-admin-photo menu-tone-' + m.tone + '">' +
-            '<span class="menu-admin-photo-mark">' + initials + '</span>' +
+          '<div class="menu-admin-photo menu-tone-' + m.tone + (menuImage(m) ? ' has-photo' : '') + '"' + menuPhotoStyle(m) + '>' +
+            (menuImage(m) ? '' : '<span class="menu-admin-photo-mark">' + initials + '</span>') +
             (m.featured ? '<span class="menu-featured-badge"><i data-lucide="star" class="u-size-3"></i> Andalan</span>' : '') +
             '<button class="menu-card-more" type="button" data-menu-edit="' + m.id + '" aria-label="Edit ' + m.name + '"><i data-lucide="more-horizontal" class="u-size-4"></i></button>' +
           '</div>' +
@@ -904,11 +944,62 @@ $(function () {
     $('#menu-desc-count').text((m.desc || '').length);
     $('#menu-form-website').prop('checked', !!m.website);
     $('#menu-form-featured').prop('checked', !!m.featured);
+    const currentImg = menuImage(m);
+    if (/^data:/.test(currentImg)) {           // foto hasil upload
+      menuUploadedImage = currentImg;
+      $('#menu-form-image').val('upload');
+    } else {                                   // foto bawaan / tanpa foto
+      menuUploadedImage = '';
+      $('#menu-form-image').val(currentImg);
+    }
+    $('#menu-form-file').val('');
+    renderMenuPhotoPreview();
     syncAllUnifiedSelects();
     $('#menu-delete').toggleClass('hidden-page', isNew);
     $('#menu-editor').removeClass('hidden-page');
     const $panel = $('#menu-editor-panel').removeClass('anim-slide'); void $panel[0].offsetWidth; $panel.addClass('anim-slide');
     lucide.createIcons();
+  }
+
+  // foto hasil upload yang sedang diedit (data URL), dipakai kalau dropdown = "upload"
+  let menuUploadedImage = '';
+
+  function currentMenuImage() {
+    const v = $('#menu-form-image').val();
+    return v === 'upload' ? menuUploadedImage : (v || '');
+  }
+
+  // kecilkan foto (maks 600px, JPEG) supaya hemat kuota localStorage (5 MB)
+  function resizeMenuPhoto(file, done) {
+    const reader = new FileReader();
+    reader.onload = function () {
+      const img = new Image();
+      img.onload = function () {
+        const MAX = 600;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        done(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = function () { showToast('File tersebut bukan gambar yang valid.'); };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // preview foto di form Edit Menu, ikut berubah saat dropdown "Foto Menu" diganti / foto diupload
+  function renderMenuPhotoPreview() {
+    const img = currentMenuImage();
+    const $box = $('#menu-photo-preview');
+    if (img) {
+      $box.addClass('has-photo').css('background-image', "url('" + photoUrl(img) + "')").empty();
+    } else {
+      $box.removeClass('has-photo').css('background-image', '')
+        .html('<div class="menu-photo-placeholder"><i data-lucide="image" class="u-size-6"></i><span>Belum ada foto</span></div>');
+      lucide.createIcons();
+    }
   }
 
   function closeMenuEditor() { $('#menu-editor').addClass('hidden-page'); }
@@ -935,18 +1026,26 @@ $(function () {
       available:$('#menu-form-available').val() === 'true',
       website:$('#menu-form-website').is(':checked'),
       featured:$('#menu-form-featured').is(':checked'),
+      image:currentMenuImage(),
       desc:$('#menu-form-desc').val().trim(),
     };
-    if (id) {
-      const m = getMenuItem(id); Object.assign(m, payload);
-      if (!m.tone) m.tone = 'rendang';
-      showToast(m.name + ' berhasil diperbarui dan siap disinkronkan.');
-    } else {
-      const next = MENU_DATA.reduce(function (max,m) { return Math.max(max, Number(m.id.replace(/\D/g,'')) || 0); },0) + 1;
-      MENU_DATA.push(Object.assign({ id:'MN-' + String(next).padStart(3,'0'), tone:'rendang' }, payload));
-      showToast(name + ' berhasil ditambahkan.');
-    }
-    saveMenuData(); renderMenuPage(); closeMenuEditor();
+      const backup = JSON.stringify(MENU_DATA);
+      if (id) {
+        const m = getMenuItem(id); Object.assign(m, payload);
+        if (!m.tone) m.tone = 'rendang';
+      } else {
+        const next = MENU_DATA.reduce(function (max,m) { return Math.max(max, Number(m.id.replace(/\D/g,'')) || 0); },0) + 1;
+        MENU_DATA.push(Object.assign({ id:'MN-' + String(next).padStart(3,'0'), tone:'rendang' }, payload));
+      }
+
+      // gagal simpan (biasanya karena penyimpanan browser penuh) -> batalkan perubahan
+      if (!saveMenuData()) {
+        MENU_DATA = JSON.parse(backup);
+        showToast('Gagal menyimpan: penyimpanan browser penuh. Coba pakai foto bawaan atau hapus beberapa foto upload.');
+        return;
+      }
+      showToast(id ? name + ' berhasil diperbarui dan siap disinkronkan.' : name + ' berhasil ditambahkan.');
+      renderMenuPage(); closeMenuEditor();
   }
 
   function deleteMenuEditor() {
@@ -962,7 +1061,7 @@ $(function () {
     if (!data.length) $wrap.html('<div class="website-preview-empty">Belum ada Menu Andalan yang aktif di website.</div>');
     $.each(data, function (_, m) {
       $('<div>', { class:'website-preview-card' }).html(
-        '<div class="website-preview-photo menu-tone-' + m.tone + '"><span>FOTO</span></div>' +
+        '<div class="website-preview-photo menu-tone-' + m.tone + (menuImage(m) ? ' has-photo' : '') + '"' + menuPhotoStyle(m) + '>' + (menuImage(m) ? '' : '<span>FOTO</span>') + '</div>' +
         '<div class="website-preview-body"><div class="d-flex align-items-start justify-content-between u-gap-2"><strong>' + m.name.toUpperCase() + '</strong><b>' + menuRupiah(m.price) + '</b></div><p>' + m.desc + '</p><button>Pesan</button></div>'
       ).appendTo($wrap);
     });
@@ -2281,7 +2380,18 @@ $(function () {
     $('#menu-save').on('click', saveMenuEditor);
     $('#menu-delete').on('click', deleteMenuEditor);
     $('#menu-form-desc').on('input', function () { $('#menu-desc-count').text($(this).val().length); });
-    $('#btn-menu-photo').on('click', function () { showToast('Upload foto siap dihubungkan ke penyimpanan backend pada tahap integrasi website.'); });
+    $('#menu-form-image').on('change', renderMenuPhotoPreview);
+    $('#menu-form-file').on('change', function () {
+      const file = this.files && this.files[0];
+      if (!file) return;
+      if (!/^image\//.test(file.type)) { showToast('Pilih file gambar (JPG/PNG/WebP).'); return; }
+      resizeMenuPhoto(file, function (dataUrl) {
+        menuUploadedImage = dataUrl;
+        $('#menu-form-image').val('upload');
+        syncUnifiedSelect($('#menu-form-image'));
+        renderMenuPhotoPreview();
+      });
+    });
     $('#menu-preview-close').on('click', closeMenuPreview);
     $('#menu-preview').on('click', function (e) { if (e.target.id === 'menu-preview') closeMenuPreview(); });
 
