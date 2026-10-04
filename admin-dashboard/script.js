@@ -271,7 +271,11 @@ $(function () {
   } catch (e) {}
 
   /* ---------------- Reservation data ---------------- */
-  const RESERVATION_TODAY = '2026-09-28';
+  const now = new Date();
+const RESERVATION_TODAY =
+  now.getFullYear() + '-' +
+  String(now.getMonth() + 1).padStart(2, '0') + '-' +
+  String(now.getDate()).padStart(2, '0');
   const RESERVATION_STATUS_STYLE = {
     Menunggu:      { bg:'rgba(242,169,59,.20)', color:'#7a5200' },
     Dikonfirmasi:  { bg:'rgba(47,93,58,.12)', color:'#2f5d3a' },
@@ -443,6 +447,8 @@ $(function () {
   })();
 
   /* ---------------- State ---------------- */
+  const REPORT_TODAY = RESERVATION_TODAY;
+  const REPORT_MONTH_START = REPORT_TODAY.slice(0, 8) + '01';
   const state = {
     page: 'Dashboard',
     filters: { status: 'Semua', waktu: 'Hari ini', tahun: '2026' },
@@ -450,7 +456,12 @@ $(function () {
     menuFilters: { category: 'Semua', search: '' },
     reservationFilters: { status:'Semua', source:'Semua', date:'Semua Tanggal', search:'' },
     cateringFilters: { status:'Semua', service:'Semua', date:'Semua Tanggal', search:'' },
-    reportFilters: { period:'Bulan ini', channel:'Semua', dateFrom:'2026-09-01', dateTo:'2026-09-28' },
+    reportFilters: {
+     period:'Bulan ini',
+        channel:'Semua',
+    dateFrom: REPORT_MONTH_START,
+      dateTo: REPORT_TODAY
+    },
     promoFilters: { status:'Semua' },
     openDropdown: null,
   };
@@ -1981,10 +1992,22 @@ $(function () {
     });
     lucide.createIcons();
   }
+  function addDaysISO(dateString, days) {
+  const parts = dateString.split('-').map(Number);
+  const date = new Date(parts[0], parts[1] - 1, parts[2]);
+
+  date.setDate(date.getDate() + days);
+
+  return (
+    date.getFullYear() + '-' +
+    String(date.getMonth() + 1).padStart(2, '0') + '-' +
+    String(date.getDate()).padStart(2, '0')
+  );
+}
 
   function openPromoEditor(id) {
     const isNew=!id;
-    const p=isNew?{id:'',name:'',type:'Diskon Persen',value:'',start:PROMO_TODAY,end:'2026-10-05',active:true,website:true,desc:''}:getPromo(id);
+    const p=isNew?{id:'',name:'',type:'Diskon Persen',value:'',start:PROMO_TODAY,end:addDaysISO(PROMO_TODAY,7),active:true,website:true,desc:''}:getPromo(id);
     if(!p) return;
     $('#promo-editor-title').text(isNew?'Tambah Promo':'Edit Promo');
     $('#promo-form-id').val(p.id);
