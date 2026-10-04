@@ -1728,3 +1728,32 @@ button.btn-cream {
     position: relative;
     z-index: 7;
 }
+
+/* HERO: foto lingkaran berganti dengan pudar halus */
+.food-circle { overflow: hidden; }
+
+.hero-layer {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transform: scale(1.06);
+    transition: opacity 0.9s ease, transform 6s ease-out;
+}
+
+.hero-layer.is-active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .food-circle { animation: heroFloat 6s ease-in-out infinite; }
+    .circle-center { animation-delay: -2s; }
+    .circle-right  { animation-delay: -4s; }
+}
+
+@keyframes heroFloat {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 -10px; }
+}
