@@ -1954,12 +1954,6 @@ button.btn-cream {
     transform: scale(1);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .food-circle { animation: heroFloat 6s ease-in-out infinite; }
-    .circle-center { animation-delay: -2s; }
-    .circle-right  { animation-delay: -4s; }
-}
-
 @keyframes heroFloat {
     0%, 100% { translate: 0 0; }
     50%      { translate: 0 -10px; }
@@ -1977,4 +1971,86 @@ button.btn-cream {
     background-position: center calc(100% - 1px);
     background-repeat: repeat-y;
     pointer-events: none;
+}
+
+/* ================= HERO: samakan Figma + animasi ================= */
+
+/* posisi desktop mengikuti Figma (tes di lebar 1440) */
+@media (min-width: 993px) {
+    .navbar { top: 0; }
+    .circle-center { bottom: -20px; }
+    .circle-right  { bottom: 30px; }
+    .kategori { padding-top: 110px; }
+
+    /* cahaya hangat di balik lingkaran tengah */
+    .food-circles-container::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 110px;
+        width: 1000px;
+        height: 1000px;
+        translate: -50% 0;
+        border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(255,190,110,0.3) 52%, rgba(255,190,110,0) 100%);
+        clip-path: inset(0 0 230px 0);
+        pointer-events: none;
+        z-index: 3;
+    }
+}
+
+@keyframes fadeIn { from { opacity: 0; } }
+@keyframes glowPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+@keyframes spiceSwayA {
+    0%, 100% { translate: 0 0; rotate: 0deg; }
+    50%      { translate: 8px 14px; rotate: 1.2deg; }
+}
+@keyframes spiceSwayB {
+    0%, 100% { translate: 0 0; rotate: 0deg; }
+    50%      { translate: -10px 12px; rotate: -1.2deg; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    /* masuk (rise) lalu melayang, durasi beda supaya tidak gerak bareng */
+    .circle-left   { animation: rise 1s ease 0.5s both,  heroFloat 6s   ease-in-out 1.5s  infinite; }
+    .circle-center { animation: rise 1s ease 0.35s both, heroFloat 7s   ease-in-out 1.35s infinite; }
+    .circle-right  { animation: rise 1s ease 0.65s both, heroFloat 5.5s ease-in-out 1.65s infinite; }
+
+    @media (min-width: 993px) {
+        .food-circles-container::before { animation: glowPulse 5s ease-in-out infinite; }
+    }
+
+    /* rempah kiri dan kanan bergoyang pelan */
+    .hero::before { animation: fadeIn 1.2s ease both, spiceSwayA 9s  ease-in-out infinite; transform-origin: left top; }
+    .hero::after  { animation: fadeIn 1.2s ease both, spiceSwayB 11s ease-in-out infinite; transform-origin: right top; }
+}
+
+/* parallax kursor (nilai --mx / --my diisi JS) */
+.hero::before,
+.hero::after {
+    transform: translate(calc(var(--mx, 0) * -14px), calc(var(--my, 0) * -10px));
+    transition: transform 0.6s ease-out;
+}
+.hero-title {
+    transform: translate(calc(var(--mx, 0) * 6px), calc(var(--my, 0) * 4px));
+    transition: transform 0.6s ease-out;
+}
+
+/* judul muncul kata per kata (kata dibungkus oleh JS) */
+.hero-word {
+    display: inline-block;
+    animation: rise 0.7s ease both;
+    animation-delay: calc(0.25s + var(--i, 0) * 0.1s);
+}
+
+/* browser tanpa scroll-timeline: matikan rise di h1 supaya tidak dobel dengan kata */
+@supports not (animation-timeline: view()) {
+    .hero-title.title-split { animation: none; }
+}
+
+/* kembalikan animasi masuk subjudul yang tertimpa aturan fade-under-navbar */
+.hero .hero-subtitle {
+    animation: rise 0.8s ease 0.1s both;
+    animation-timeline: auto;
+    animation-range: normal;
 }
