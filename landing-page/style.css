@@ -245,6 +245,28 @@ body {
     fill: var(--cream);
 }
 
+.hero::before,
+.hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 28%;
+    height: 75%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    pointer-events: none;
+    z-index: 1;
+}
+.hero::before { left: 0;  background-image: url('images/hero/rempah.png');  background-position: left top; }
+.hero::after  { right: 0; background-image: url('images/hero/rempah2.png'); background-position: right top; }
+
+.hero {
+    background-image: url('images/hero/OrnamenBatik.png');
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+}
+
 /* KATEGORI */
 .kategori { background-color: var(--cream); padding: 220px 0 80px 0; width: 100%; }
 .kategori-header { text-align: center; margin-bottom: 50px; padding: 0 20px; }
@@ -465,7 +487,7 @@ body {
 
 /* RESPONSIVE — TABLET (576px – 992px) */
 @media (max-width: 992px) {
-    .navbar { width: 100%; border-radius: 0; padding: 15px 30px; }
+    .navbar { width: 100%; border-radius: 0; padding: 15px 30px; top: 0; }
     .btn-pesan { display: none; }
     .nav-toggle { display: flex; }
 
@@ -487,15 +509,18 @@ body {
     .nav-links li { width: 100%; text-align: center; }
     .nav-links li a { display: block; padding: 14px 20px; }
 
-    .hero { height: 760px; padding-top: 120px; }
+    .hero { height: 760px; padding-top: 110px; }
     .hero-title, .hero-subtitle { position: relative; z-index: 25; }
+    .hero-subtitle { margin-top: 60px; }
     .hero-title { font-size: 48px; }
-    .hero-bottom-curve { height: 200px; }
+    .hero-curve { height: 150px; }
 
-    .circle-left { width: 240px; height: 240px; left: -50px; bottom: 60px; }
+    .hero::before,
+    .hero::after { width: 24%; height: 60%; }
+
+    .circle-left   { width: 240px; height: 240px; left: -50px; bottom: 40px; }
     .circle-center { width: 380px; height: 380px; bottom: -140px; }
-    .circle-right { width: 240px; height: 240px; right: -40px; bottom: 0; }
-    .ornament { transform: scale(0.7); }
+    .circle-right  { width: 240px; height: 240px; right: -40px; bottom: 40px; }
 
     .kategori { padding: 180px 0 60px 0; }
     .kategori-list { padding: 20px; }
@@ -510,10 +535,18 @@ body {
 
 /* RESPONSIVE — MOBILE (< 576px) */
 @media (max-width: 575px) {
-    .hero { height: auto; padding-bottom: 260px; }
-    .hero-title { font-size: 32px; padding: 0 20px; }
-    .ornament, .circle-left, .circle-right { display: none; }
-    .circle-center { position: absolute; width: 260px; height: 260px; bottom: -80px; font-size: 13px; }
+    .navbar { padding: 15px 20px; }
+
+    .hero { height: auto; padding-top: 100px; padding-bottom: 240px; }
+    .hero-subtitle { margin-top: 40px; }
+    .hero-title { font-size: 34px; padding: 0 20px; }
+    .hero-curve { height: 70px; }
+
+    .hero::before,
+    .hero::after { width: 32%; height: 45%; }
+
+    .circle-left, .circle-right { display: none; }
+    .circle-center { width: 260px; height: 260px; bottom: -90px; font-size: 13px; }
 
     .kategori { padding: 140px 0 60px 0; }
     .kategori-title { font-size: 28px; }
@@ -523,7 +556,8 @@ body {
     .promo-section { padding: 60px 16px; }
     .promo-title { font-size: 28px; }
 
-    .promo-card {
+    .promo-card,
+    .promo-col-right .promo-card {
         flex-direction: column;
         align-items: flex-start;
         padding: 30px;
@@ -1614,4 +1648,83 @@ button.btn-cream {
 .reservasi-actions .btn-cream:focus-visible {
     outline: 3px solid rgba(139, 30, 30, .35);
     outline-offset: 2px;
+}
+
+/* Batik */
+:root { --batik-size: 110vw; }
+
+/* Section maroon(hero sudah punya sendiri di atas) */
+.menu-section,
+.footer-section::before {
+    background-image: url('images/hero/OrnamenBatik.png');
+    background-size: var(--batik-size) auto;
+    background-position: center top;
+    background-repeat: repeat-y;
+}
+
+.kenapa-section {
+    background-image: url('images/hero/OrnamenBatik.png'), radial-gradient(rgba(255,246,233,0.07) 2px, transparent 2px);
+    background-size: var(--batik-size) auto, 32px 32px;
+    background-position: center top, 0 0;
+    background-repeat: repeat-y, repeat;
+}
+
+:root { --pattern-opacity: 1; }
+
+/* Section krem/putih/kuning file yang sama dijadikan mask berwarna maroon */
+.kategori,
+.promo-section,
+.tentang-section,
+.katering-section,
+.reservasi-section {
+    position: relative;
+    isolation: isolate;
+}
+
+.kategori::before,
+.promo-section::before,
+.tentang-section::before,
+.katering-section::before,
+.reservasi-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--maroon);
+    -webkit-mask-image: url('images/hero/OrnamenBatik.png');
+    mask-image: url('images/hero/OrnamenBatik.png');
+    -webkit-mask-size: var(--batik-size) auto;
+    mask-size: var(--batik-size) auto;
+    -webkit-mask-position: center top;
+    mask-position: center top;
+    -webkit-mask-repeat: repeat-y;
+    mask-repeat: repeat-y;
+}
+
+/* Ukuran motif mengecil di tablet dan mobile supaya tetap terbaca sebagai pola */
+@media (max-width: 992px) { :root { --batik-size: max(110vw, 1000px); } }
+@media (max-width: 575px) { :root { --batik-size: max(110vw, 700px); } }
+@media (max-width: 992px) {
+    .hero::before,
+    .hero::after { display: none; }
+}
+
+/* Batik menyambung sampai ke lengkungan hero */
+:root { --curve-h: 220px; }
+@media (max-width: 992px) { :root { --curve-h: 150px; } }
+@media (max-width: 575px) { :root { --curve-h: 70px; } }
+
+.hero-curve { height: var(--curve-h); }
+
+.kategori { isolation: auto; }
+
+.kategori::before {
+    top: calc(-1 * var(--curve-h));
+    z-index: 6;
+}
+
+.kategori > * {
+    position: relative;
+    z-index: 7;
 }
