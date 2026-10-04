@@ -917,7 +917,16 @@ $(function () {
     const name = $('#menu-form-name').val().trim();
     const price = Number($('#menu-form-price').val());
     if (!name || !price) { showToast('Nama menu dan harga wajib diisi.'); return; }
-    const id = $('#menu-form-id').val();
+        const id = $('#menu-form-id').val();
+
+    // Menu Andalan, 3 menu yang tampil pertama di website, jadi dibatasi maksimal 3
+    const MAX_FEATURED = 3;
+    const wantFeatured = $('#menu-form-featured').is(':checked');
+    const otherFeatured = MENU_DATA.filter(function (m) { return m.featured && m.id !== id; });
+    if (wantFeatured && otherFeatured.length >= MAX_FEATURED) {
+      showToast('Menu Andalan maksimal ' + MAX_FEATURED + '. Matikan dulu salah satu: ' + otherFeatured.map(function (m) { return m.name; }).join(', ') + '.');
+      return;
+    }
     const payload = {
       name:name,
       category:$('#menu-form-category').val(),
@@ -2577,3 +2586,324 @@ $(function () {
     }
   });
 })();
+
+// KELOLA KATEGORI LANDING PAGE ("Pilih Lauk Favoritmu")
+$(function () {
+
+  const KATEGORI_KEY = 'lamak-bana-kategori-data';
+  const MENU_KEY     = 'lamak-bana-menu-data';
+  const $root = $('#kategori-manager');
+  if (!$root.length) return;
+
+  const KATEGORI_DEFAULT = [
+    { id:'KAT-001', name:'Rendang',        image:'images/menu/rendang.jpg',       desc:'Daging sapi dimasak perlahan dengan santan dan rempah sampai bumbunya kering dan meresap.', taste:'Gurih, Rempah kuat', spicy:1, menuId:'MN-001', menuName:'Rendang Daging', visible:true },
+    { id:'KAT-002', name:'Dendeng Balado', image:'images/menu/dendengbalado.jpg', desc:'Irisan daging sapi tipis digoreng kering lalu dibalut sambal cabai merah.',                taste:'Pedas, Renyah',      spicy:2, menuId:'',       menuName:'',               visible:true },
+    { id:'KAT-003', name:'Gulai Tunjang',  image:'images/menu/gulaitunjang.jpg',  desc:'Kikil sapi kenyal dalam kuah gulai kuning kental yang kaya rempah.',                        taste:'Gurih, Berkuah',     spicy:1, menuId:'MN-004', menuName:'Gulai Tunjang',  visible:true },
+    { id:'KAT-004', name:'Gulai Ikan',     image:'images/menu/gulaiikan.jpg',     desc:'Ikan segar dimasak dalam kuah santan kuning dengan sedikit asam kandis.',                   taste:'Gurih, Sedikit asam', spicy:1, menuId:'MN-005', menuName:'Gulai Ikan',     visible:true },
+    { id:'KAT-005', name:'Telur Balado',   image:'images/menu/telurbalado.jpg',   desc:'Telur rebus digoreng sebentar lalu disiram sambal balado merah.',                           taste:'Pedas manis',        spicy:2, menuId:'MN-006', menuName:'Telur Balado',   visible:true },
+    { id:'KAT-006', name:'Perkedel',       image:'images/menu/perkedel.jpg',      desc:'Kentang tumbuk berbumbu, dicelup telur, lalu digoreng sampai keemasan.',                    taste:'Gurih, Lembut',      spicy:0, menuId:'MN-007', menuName:'Perkedel',       visible:true },
+    { id:'KAT-007', name:'Ayam Bakar',     image:'images/menu/ayambakar.jpg',     desc:'Ayam berbumbu kuning dibakar di atas arang sampai harum.',                                  taste:'Gurih, Smoky',       spicy:1, menuId:'MN-008', menuName:'Ayam Bakar',     visible:true }
+  ];
+
+  // dipakai kalau admin belum pernah menyimpan menu (MENU_DATA belum ada di localStorage)
+  const MENU_FALLBACK = [
+    { id:'MN-001', name:'Rendang Daging' }, { id:'MN-002', name:'Ayam Pop' }, { id:'MN-003', name:'Dendeng Batokok' },
+    { id:'MN-004', name:'Gulai Tunjang' },  { id:'MN-005', name:'Gulai Ikan' }, { id:'MN-006', name:'Telur Balado' },
+    { id:'MN-007', name:'Perkedel' },       { id:'MN-008', name:'Ayam Bakar' }
+  ];
+
+  const SPICY_LABEL = ['Tidak pedas', 'Sedikit pedas', 'Pedas', 'Sangat pedas'];
+  const MAX_DESC = 140;
+
+  let KATEGORI = load();
+
+  /* helper */
+  function load() {
+    try {
+      const saved = localStorage.getItem(KATEGORI_KEY);
+      const parsed = saved ? JSON.parse(saved) : null;
+      if (Array.isArray(parsed)) return parsed;
+    } catch (e) { /* pakai default */ }
+    return KATEGORI_DEFAULT.map(function (k) { return Object.assign({}, k); });
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(KATEGORI_KEY, JSON.stringify(KATEGORI));
+      return true;
+    } catch (e) {
+      toast('Gagal menyimpan. Penyimpanan browser penuh, coba pakai foto yang lebih kecil.');
+      return false;
+    }
+  }
+
+  function menuList() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(MENU_KEY));
+      if (Array.isArray(saved) && saved.length) return saved;
+    } catch (e) { /* fallback */ }
+    return MENU_FALLBACK;
+  }
+
+  function esc(text) {
+    return String(text == null ? '' : text).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  // gambar default disimpan relatif ke folder landing-page
+  function imgSrc(image) {
+    if (!image) return '';
+    if (/^(data:|https?:|\/)/.test(image)) return image;
+    return '../landing-page/' + image;
+  }
+
+  function toast(message) {
+    $('.demo-toast').remove();
+    const $t = $('<div>', { class:'demo-toast', text:message }).appendTo('body');
+    setTimeout(function () { $t.remove(); }, 2800);
+  }
+
+  function nextId() {
+    const max = KATEGORI.reduce(function (n, k) {
+      return Math.max(n, Number(String(k.id).replace(/\D/g, '')) || 0);
+    }, 0);
+    return 'KAT-' + String(max + 1).padStart(3, '0');
+  }
+
+  function find(id) { return KATEGORI.find(function (k) { return k.id === id; }); }
+
+  /* markup  */
+  $root.addClass('reveal menu-manager-shell kat-shell').html(
+    '<div class="kat-head">' +
+      '<div>' +
+        '<p class="u-text-base fw-semibold u-text-ink">Kategori Landing Page</p>' +
+        '<p class="u-text-sm ink60">Atur kategori di section “Pilih Lauk Favoritmu” dan info singkat yang muncul saat kategori diklik.</p>' +
+      '</div>' +
+      '<button type="button" id="kat-add" class="press d-flex align-items-center u-gap-2 rounded-pill u-bg-maroon u-px-4 u-py-2-5 u-text-sm fw-medium text-white">' +
+        '<i data-lucide="plus" class="u-size-4"></i> Tambah Kategori' +
+      '</button>' +
+    '</div>' +
+    '<div id="kat-list" class="kat-list"></div>'
+  );
+
+  $('body').append(
+    '<div id="kat-editor" class="hidden-page position-fixed u-inset-0 u-z-60 d-flex justify-content-end" style="background:rgba(0,0,0,.28)">' +
+      '<aside id="kat-editor-panel" class="menu-editor-panel bg-white">' +
+        '<div class="order-drawer-head">' +
+          '<div>' +
+            '<p class="u-text-xs fw-medium ink60">KATEGORI LANDING PAGE</p>' +
+            '<p id="kat-editor-title" class="u-text-2xl fw-semibold u-text-ink">Tambah Kategori</p>' +
+          '</div>' +
+          '<button type="button" id="kat-editor-close" aria-label="Tutup editor" class="kat-icon-btn"><i data-lucide="x" class="u-size-4"></i></button>' +
+        '</div>' +
+        '<form id="kat-form" class="menu-editor-body" novalidate>' +
+          '<input id="kat-form-id" type="hidden">' +
+          '<div class="kat-photo">' +
+            '<div id="kat-photo-preview" class="kat-photo-preview"><span><i data-lucide="image" class="u-size-6"></i>Belum ada foto</span></div>' +
+            '<div class="kat-photo-actions">' +
+              '<label class="drawer-btn drawer-btn-secondary kat-upload"><i data-lucide="upload" class="u-size-4"></i> Pilih Foto<input id="kat-form-file" type="file" accept="image/*" hidden></label>' +
+              '<button type="button" id="kat-photo-remove" class="kat-link">Hapus foto</button>' +
+            '</div>' +
+            '<small class="kat-hint">Foto otomatis dikecilkan supaya muat di penyimpanan browser.</small>' +
+          '</div>' +
+          '<label class="menu-field"><span>Nama Kategori *</span><input id="kat-form-name" type="text" maxlength="30" placeholder="Contoh: Sate Padang"></label>' +
+          '<label class="menu-field"><span>Info Singkat *</span><textarea id="kat-form-desc" rows="3" maxlength="' + MAX_DESC + '" placeholder="1–2 kalimat tentang makanan ini"></textarea><small><span id="kat-desc-count">0</span>/' + MAX_DESC + ' karakter</small></label>' +
+          '<div class="menu-form-row">' +
+            '<label class="menu-field"><span>Rasa</span><input id="kat-form-taste" type="text" maxlength="40" placeholder="Contoh: Gurih, Pedas"></label>' +
+            '<label class="menu-field"><span>Level Pedas</span><select id="kat-form-spicy">' +
+              SPICY_LABEL.map(function (l, i) { return '<option value="' + i + '">' + l + '</option>'; }).join('') +
+            '</select></label>' +
+          '</div>' +
+          '<label class="menu-field"><span>Menu Terkait (untuk harga &amp; tombol Pesan)</span><select id="kat-form-menu"></select></label>' +
+          '<div class="menu-editor-switches">' +
+            '<label class="menu-setting-row"><div><strong>Tampil di Website</strong><small>Munculkan kategori ini di landing page.</small></div><input id="kat-form-visible" type="checkbox" class="menu-native-switch"></label>' +
+          '</div>' +
+        '</form>' +
+        '<div class="order-detail-actions">' +
+          '<button type="button" id="kat-delete" class="drawer-btn drawer-btn-secondary">Hapus</button>' +
+          '<button type="button" id="kat-save" class="drawer-btn drawer-btn-primary"><i data-lucide="save" class="u-size-4"></i> Simpan</button>' +
+        '</div>' +
+      '</aside>' +
+    '</div>'
+  );
+
+  let pendingImage = '';
+
+  /* daftar */
+  function render() {
+    const $list = $('#kat-list').empty();
+
+    if (!KATEGORI.length) {
+      $list.html('<div class="kat-empty">Belum ada kategori. Klik “Tambah Kategori” untuk menambahkan.</div>');
+      return;
+    }
+
+    KATEGORI.forEach(function (k, i) {
+      const thumb = k.image
+        ? '<img src="' + esc(imgSrc(k.image)) + '" alt="">'
+        : '<span>' + esc(String(k.name || '?').charAt(0)) + '</span>';
+
+      $('<div>', { class:'kat-row' + (k.visible === false ? ' is-hidden' : ''), 'data-kat-id':k.id }).html(
+        '<div class="kat-thumb">' + thumb + '</div>' +
+        '<div class="kat-info">' +
+          '<p class="kat-name">' + esc(k.name) + (k.visible === false ? ' <em>Disembunyikan</em>' : '') + '</p>' +
+          '<p class="kat-desc">' + esc(k.desc) + '</p>' +
+          '<div class="kat-chips">' +
+            '<span>' + esc(SPICY_LABEL[Number(k.spicy) || 0]) + '</span>' +
+            (k.taste ? '<span>' + esc(k.taste) + '</span>' : '') +
+            '<span class="' + (k.menuId ? '' : 'is-muted') + '">' + (k.menuId ? 'Menu: ' + esc(k.menuName || k.menuId) : 'Tanpa menu terkait') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="kat-actions">' +
+          '<button type="button" class="kat-icon-btn" data-kat-move="-1" aria-label="Naikkan urutan"' + (i === 0 ? ' disabled' : '') + '><i data-lucide="arrow-up" class="u-size-4"></i></button>' +
+          '<button type="button" class="kat-icon-btn" data-kat-move="1" aria-label="Turunkan urutan"' + (i === KATEGORI.length - 1 ? ' disabled' : '') + '><i data-lucide="arrow-down" class="u-size-4"></i></button>' +
+          '<button type="button" class="kat-icon-btn" data-kat-edit aria-label="Edit kategori"><i data-lucide="pencil" class="u-size-4"></i></button>' +
+        '</div>'
+      ).appendTo($list);
+    });
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  /* editor */
+  function setPreview(image) {
+    pendingImage = image || '';
+    $('#kat-photo-preview').html(
+      pendingImage
+        ? '<img src="' + esc(imgSrc(pendingImage)) + '" alt="Preview foto">'
+        : '<span><i data-lucide="image" class="u-size-6"></i>Belum ada foto</span>'
+    );
+    $('#kat-photo-remove').toggle(!!pendingImage);
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function fillMenuSelect(selectedId) {
+    const $sel = $('#kat-form-menu').empty().append('<option value="">— Tidak ada —</option>');
+    menuList().forEach(function (m) {
+      $('<option>', { value:m.id, text:m.name }).prop('selected', m.id === selectedId).appendTo($sel);
+    });
+  }
+
+  function openEditor(id) {
+    const k = id ? find(id) : null;
+    $('#kat-editor-title').text(k ? 'Edit Kategori' : 'Tambah Kategori');
+    $('#kat-form-id').val(k ? k.id : '');
+    $('#kat-form-name').val(k ? k.name : '');
+    $('#kat-form-desc').val(k ? k.desc : '');
+    $('#kat-desc-count').text((k ? k.desc : '').length);
+    $('#kat-form-taste').val(k ? k.taste : '');
+    $('#kat-form-spicy').val(String(k ? Number(k.spicy) || 0 : 0));
+    $('#kat-form-visible').prop('checked', k ? k.visible !== false : true);
+    $('#kat-form-file').val('');
+    $('#kat-delete').toggle(!!k);
+    fillMenuSelect(k ? k.menuId : '');
+    setPreview(k ? k.image : '');
+
+    $('#kat-editor').removeClass('hidden-page');
+    const $panel = $('#kat-editor-panel').removeClass('anim-slide');
+    void $panel[0].offsetWidth;
+    $panel.addClass('anim-slide');
+    $('#kat-form-name').trigger('focus');
+  }
+
+  function closeEditor() { $('#kat-editor').addClass('hidden-page'); }
+
+  function saveEditor() {
+    const name = $('#kat-form-name').val().trim();
+    const desc = $('#kat-form-desc').val().trim();
+    if (!name || !desc) { toast('Nama kategori dan info singkat wajib diisi.'); return; }
+
+    const menuId = $('#kat-form-menu').val();
+    const menu = menuList().find(function (m) { return m.id === menuId; });
+    const payload = {
+      name: name,
+      desc: desc,
+      taste: $('#kat-form-taste').val().trim(),
+      spicy: Number($('#kat-form-spicy').val()) || 0,
+      menuId: menu ? menu.id : '',
+      menuName: menu ? menu.name : '',
+      image: pendingImage,
+      visible: $('#kat-form-visible').is(':checked')
+    };
+
+    const id = $('#kat-form-id').val();
+    const before = JSON.stringify(KATEGORI);
+    if (id) {
+      Object.assign(find(id), payload);
+    } else {
+      KATEGORI.push(Object.assign({ id: nextId() }, payload));
+    }
+
+    if (!save()) { KATEGORI = JSON.parse(before); return; }
+    render();
+    closeEditor();
+    toast(name + (id ? ' berhasil diperbarui.' : ' berhasil ditambahkan.'));
+  }
+
+  function deleteEditor() {
+    const id = $('#kat-form-id').val();
+    const k = find(id);
+    if (!k || !confirm('Hapus kategori "' + k.name + '"?')) return;
+    KATEGORI = KATEGORI.filter(function (x) { return x.id !== id; });
+    save(); render(); closeEditor();
+    toast(k.name + ' dihapus.');
+  }
+
+  // kecilkan foto (maks 480px, JPEG) supaya tidak menghabiskan kuota localStorage (5 MB)
+  function resizeImage(file, done) {
+    const reader = new FileReader();
+    reader.onload = function () {
+      const img = new Image();
+      img.onload = function () {
+        const MAX = 480;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        done(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = function () { toast('File tersebut bukan gambar yang valid.'); };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /* event */
+  $('#kat-add').on('click', function () { openEditor(); });
+
+  $('#kat-list')
+    .on('click', '[data-kat-edit]', function () { openEditor($(this).closest('.kat-row').data('kat-id')); })
+    .on('click', '[data-kat-move]', function () {
+      const id = $(this).closest('.kat-row').data('kat-id');
+      const from = KATEGORI.findIndex(function (k) { return k.id === id; });
+      const to = from + Number($(this).data('kat-move'));
+      if (from < 0 || to < 0 || to >= KATEGORI.length) return;
+      KATEGORI.splice(to, 0, KATEGORI.splice(from, 1)[0]);
+      save(); render();
+    });
+
+  $('#kat-form-file').on('change', function () {
+    const file = this.files && this.files[0];
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { toast('Pilih file gambar (JPG/PNG/WebP).'); return; }
+    resizeImage(file, setPreview);
+  });
+  $('#kat-photo-remove').on('click', function () { setPreview(''); $('#kat-form-file').val(''); });
+  $('#kat-form-desc').on('input', function () { $('#kat-desc-count').text($(this).val().length); });
+  $('#kat-form').on('submit', function (e) { e.preventDefault(); saveEditor(); });
+
+  $('#kat-save').on('click', saveEditor);
+  $('#kat-delete').on('click', deleteEditor);
+  $('#kat-editor-close').on('click', closeEditor);
+  $('#kat-editor').on('click', function (e) { if (e.target.id === 'kat-editor') closeEditor(); });
+  $(document).on('keydown', function (e) {
+    if (e.key === 'Escape' && !$('#kat-editor').hasClass('hidden-page')) closeEditor();
+  });
+
+  // simpan data awal supaya landing page dan admin selalu memakai data yang sama
+  try { if (localStorage.getItem(KATEGORI_KEY) === null) save(); } catch (e) { /* abaikan */ }
+
+  render();
+});

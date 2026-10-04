@@ -2163,3 +2163,126 @@ button.btn-cream {
     animation-timeline: auto;
     animation-range: normal;
 }
+
+/* KATEGORIi tombol + pop up info */
+
+/* item kategori sekarang <button>, hilangkan gaya bawaan tombol */
+button.kategori-item {
+    border: 0;
+    padding: 0;
+    background: none;
+    font-family: inherit;
+    color: inherit;
+}
+
+button.kategori-item:focus-visible { outline: none; }
+button.kategori-item:focus-visible .kategori-box {
+    opacity: 1;
+    outline: 3px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* kategori tanpa foto: tampilkan huruf awal */
+.kategori-box-initial {
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-size: 56px;
+    color: var(--maroon);
+}
+
+.kategori-empty { width: 100%; text-align: center; }
+
+/* ---- pop up ---- */
+.kategori-modal { align-items: center; }
+
+.kategori-modal-panel {
+    width: min(440px, 100%);
+    padding: 0;
+    overflow: hidden;
+}
+
+.kategori-modal-photo {
+    position: relative;
+    height: 220px;
+    background-color: var(--yellow);
+    background-size: cover;
+    background-position: center;
+}
+
+.kategori-modal-photo.no-photo {
+    background-image: radial-gradient(rgba(139, 30, 30, 0.18) 2px, transparent 2px) !important;
+    background-size: 18px 18px;
+}
+
+.kategori-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: var(--cream);
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.kategori-modal-body { padding: 22px 26px 26px; }
+
+.kategori-modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.kategori-tag {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(139, 30, 30, 0.08);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--maroon);
+}
+
+.kategori-tag-spicy {
+    background: var(--maroon);
+    color: var(--cream);
+}
+
+.kategori-modal-desc {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: rgba(26, 26, 26, 0.8);
+}
+
+.kategori-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px dashed rgba(139, 30, 30, 0.25);
+}
+
+.kategori-modal-footer .btn-solid-red { margin-left: auto; }
+
+.kategori-modal-price small {
+    display: block;
+    font-size: 12px;
+    color: rgba(26, 26, 26, 0.6);
+}
+
+.kategori-modal-price strong {
+    font-size: 20px;
+    color: var(--maroon);
+}
+
+@media (max-width: 575px) {
+    .kategori-modal-photo { height: 180px; }
+    .kategori-modal-body { padding: 18px 20px 22px; }
+}
+
+/* MENU: 3 andalan dulu, sisanya klik "Lihat Semua Menu"  */
+.menu-grid .menu-card-extra { display: none; }
+.menu-grid.show-all .menu-card-extra { display: flex; }
+#menuToggleAll[hidden] { display: none; }
