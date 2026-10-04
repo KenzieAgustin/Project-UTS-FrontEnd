@@ -1202,6 +1202,31 @@ revealEls.forEach((el) => revealObserver.observe(el));
         return value ? ['PROMO', value] : ['PROMO'];
     }
 
+        // promo bawaan yang belum punya field "image" dari admin -> pakai foto sesuai nama
+    const PROMO_PHOTO_BY_NAME = {
+        'paket hemat nasi rendang': 'images/hero/rendang.jpg',
+        'hidang keluarga':          'images/hero/nasipadang.jpg',
+        'gratis ongkir':            'images/menu/ayambakar.jpg'
+    };
+
+    function promoImage(promo) {
+        if (typeof promo.image === 'string') return promo.image; // '' = admin pilih "Tanpa foto"
+        return PROMO_PHOTO_BY_NAME[String(promo.name || '').toLowerCase().trim()] || '';
+    }
+
+    // pasang foto ke lingkaran kartu promo; teks "FOTO" disembunyikan kalau fotonya ada
+    function setCirclePhoto(circle, src, alt) {
+        if (!src) return;
+        const img = document.createElement('img');
+        img.className = 'card-circle-img';
+        img.src = src;
+        img.alt = alt;
+        img.loading = 'lazy';
+        img.addEventListener('error', function () { img.remove(); circle.classList.remove('has-photo'); });
+        circle.appendChild(img);
+        circle.classList.add('has-photo');
+    }
+
     function createPromoCard(promo, slot) {
         const card = document.createElement('div');
         card.className = 'promo-card ' + slot.card + ' reveal';
@@ -1240,6 +1265,7 @@ revealEls.forEach((el) => revealObserver.observe(el));
         const span = document.createElement('span');
         span.textContent = 'FOTO';
         circle.appendChild(span);
+        setCirclePhoto(circle, promoImage(promo), promo.name || '');
 
         card.appendChild(content);
         card.appendChild(badge);
@@ -1250,8 +1276,17 @@ revealEls.forEach((el) => revealObserver.observe(el));
     function renderPromoCards() {
         const data = getAdminPromoData();
 
-        // admin belum pernah menyimpan apa pun, pakai kartu HTML asli
-        if (data === null) return;
+        // admin belum pernah menyimpan apa pun, pakai kartu HTML asli (+ foto sesuai nama)
+        if (data === null) {
+            grid.querySelectorAll('.promo-card').forEach(function (card) {
+                const circle = card.querySelector('.card-circle');
+                const title = card.querySelector('.card-title');
+                if (!circle || !title || circle.classList.contains('has-photo')) return;
+                const name = card.dataset.promoName || title.textContent.trim();
+                setCirclePhoto(circle, promoImage({ name: name }), name);
+            });
+            return;
+        }
 
         const today = todayISO();
         let shown = data.filter(function (p) { return isRunning(p, today); }).slice(0, MAX_PROMO);

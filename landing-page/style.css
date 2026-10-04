@@ -2300,3 +2300,14 @@ button.kategori-item:focus-visible .kategori-box {
 .card-img-wrapper.has-photo .foto-placeholder { display: none; }
 .card-img-wrapper .badge-terlaris { z-index: 2; }
 .menu-card:hover .menu-card-img { scale: 1.06; }
+
+/* ============ FOTO LINGKARAN PROMO ============ */
+.card-circle { overflow: hidden; }
+.card-circle-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.card-circle.has-photo span { display: none; }
