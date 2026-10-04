@@ -948,9 +948,26 @@
         </div>
         <form id="menu-editor-form" class="menu-editor-body">
           <input id="menu-form-id" type="hidden" />
-          <div class="menu-photo-upload">
-            <div class="menu-photo-placeholder"><i data-lucide="image" class="u-size-6"></i><span>Foto Menu</span></div>
-            <button type="button" id="btn-menu-photo" class="menu-inline-link">Ganti foto</button>
+          <div class="menu-photo-picker">
+            <div id="menu-photo-preview" class="menu-photo-preview">
+              <div class="menu-photo-placeholder"><i data-lucide="image" class="u-size-6"></i><span>Belum ada foto</span></div>
+            </div>
+            <label class="menu-field"><span>Foto Menu</span><select id="menu-form-image">
+              <option value="">Tanpa foto</option>
+              <option value="upload">Foto dari komputer (upload)</option>
+              <option value="images/menu/rendang.jpg">Rendang</option>
+              <option value="images/hero/rendang.jpg">Rendang (2)</option>
+              <option value="images/hero/ayampop.jpg">Ayam Pop</option>
+              <option value="images/menu/ayambakar.jpg">Ayam Bakar</option>
+              <option value="images/menu/dendengbalado.jpg">Dendeng Balado</option>
+              <option value="images/menu/gulaitunjang.jpg">Gulai Tunjang</option>
+              <option value="images/menu/gulaiikan.jpg">Gulai Ikan</option>
+              <option value="images/menu/telurbalado.jpg">Telur Balado</option>
+              <option value="images/menu/perkedel.jpg">Perkedel</option>
+              <option value="images/hero/nasipadang.jpg">Nasi Padang</option>
+            </select></label>
+            <label class="menu-photo-upload-btn"><i data-lucide="upload" class="u-size-4"></i> Upload dari komputer<input id="menu-form-file" type="file" accept="image/*" hidden></label>
+            <small class="menu-photo-hint">Foto upload otomatis dikecilkan dan disimpan di browser ini. Atau pilih foto bawaan dari daftar di atas.</small>
           </div>
           <label class="menu-field"><span>Nama Menu</span><input id="menu-form-name" required type="text" placeholder="Contoh: Rendang Daging" /></label>
           <div class="menu-form-row">

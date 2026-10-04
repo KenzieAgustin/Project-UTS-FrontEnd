@@ -1316,3 +1316,13 @@ input:focus,select:focus,button:focus{outline:2px solid rgba(139,30,30,.25);outl
   .kat-thumb{width:56px;height:56px}
   .kat-actions{grid-column:1/-1;justify-content:flex-end}
 }
+
+/* Foto menu (pilih dari foto yang ada di landing-page/images) */
+.menu-photo-picker{display:flex;flex-direction:column;gap:12px;padding:12px;border:1px dashed rgba(59,31,20,.17);border-radius:14px;background:#fffaf3}
+.menu-photo-preview{display:grid;height:170px;place-items:center;border-radius:11px;background:#f3ebe0 center/cover no-repeat}
+.menu-photo-hint{font-size:.64rem;line-height:1.5;color:rgba(59,31,20,.5)}
+.menu-photo-hint b{font-weight:600;color:rgba(59,31,20,.7)}
+.menu-admin-photo.has-photo,.website-preview-photo.has-photo{background:var(--menu-photo) center/cover no-repeat #f1efec!important}
+.menu-admin-photo.has-photo::before{background:linear-gradient(180deg,rgba(0,0,0,.18),transparent 45%)}
+.menu-photo-upload-btn{display:inline-flex;align-self:flex-start;align-items:center;gap:.45rem;padding:.5rem .95rem;border:1px solid rgba(139,30,30,.18);border-radius:999px;background:#fff;color:#8b1e1e;font-size:.75rem;font-weight:500;cursor:pointer}
+.menu-photo-upload-btn:hover{background:rgba(139,30,30,.04)}
