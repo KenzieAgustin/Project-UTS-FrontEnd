@@ -2402,3 +2402,8 @@ button.kategori-item:focus-visible .kategori-box {
     font-size: 0.95rem;
     opacity: 0.85;
 }
+
+/* kartu "Segera Hadir" hanya tampil setelah klik Lihat Semua Menu */
+.menu-grid:not(.show-all) .menu-card-soon {
+    display: none;
+}
