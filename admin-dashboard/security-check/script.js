@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Jika sudah login, tidak perlu melewati security check lagi.
   if (localStorage.getItem(AUTH_KEY) === "true") {
-    window.location.replace("../admin-dashboard/index.html");
+    window.location.replace("../index.html");
     return;
   }
 
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (user === DEMO_USERNAME && pass === DEMO_PASSWORD) {
       localStorage.setItem(AUTH_KEY, "true");
-      window.location.href = "../admin-dashboard/index.html";
+      window.location.href = "../index.html";
       return;
     }
 
