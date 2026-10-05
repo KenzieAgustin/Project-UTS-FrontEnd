@@ -235,7 +235,7 @@ $(function () {
   // foto upload dipakai apa adanya foto bawaan dikasi prefix folder landingpage
   function photoUrl(img) {
     if (!img) return '';
-    return /^(data:|https?:)/.test(img) ? img : '../landing-page/' + img;
+    return /^(data:|https?:)/.test(img) ? img : '../' + img;
   }
 
   function menuPhotoStyle(m) {
@@ -3044,7 +3044,7 @@ $(function () {
   function imgSrc(image) {
     if (!image) return '';
     if (/^(data:|https?:|\/)/.test(image)) return image;
-    return '../landing-page/' + image;
+    return '../' + image;
   }
 
   function toast(message) {
